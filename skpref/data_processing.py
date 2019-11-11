@@ -16,7 +16,7 @@ class PosetType(ABC):
         "object": an entity is observed at most once
         "semi": "object" except entities can reoccur
     """
-    def __init__(self, entity_universe_type='list'):
+    def __init__(self, entity_universe_type='label'):
         self.entity_universe_type = entity_universe_type
 
     def get_params(self):
@@ -38,7 +38,7 @@ class OrderPosetType(PosetType):
     size: int, default=None
         If size_const is True then the number of entities being ranked
     """
-    def __init__(self, entity_universe_type='list', size_const=False, size=None):
+    def __init__(self, entity_universe_type='label', size_const=False, size=None):
         super(OrderPosetType, self).__init__(entity_universe_type)
         self.size_const = size_const
         self.size = size
@@ -72,7 +72,7 @@ class SubsetPosetType(PosetType):
     boot_size: int, default=None
         If boot_size_const is True then the number entities usually not chosen
     """
-    def __init__(self, entity_universe_type='list', top_size_const=False,
+    def __init__(self, entity_universe_type='label', top_size_const=False,
                  boot_size_const=False, top_size=None, boot_size=None):
 
         super(SubsetPosetType, self).__init__(entity_universe_type)
