@@ -192,7 +192,7 @@ class ChoiceTask(PrefTask):
 
         annotations = {
             'primary_table_name': prim_name,
-            'primary_tale_alternatives_names':
+            'primary_table_alternatives_names':
                 self.primary_table_alternatives_names,
             'primary_table_target_names': self.primary_table_target_name,
             'secondary_table_name': secondary_table,
