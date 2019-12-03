@@ -165,6 +165,10 @@ class ChoiceTask(PrefTask):
         arguments to tell about the PosetType of the entity slot type
     target_type_kwargs: dict of PosetType args
         arguments to tell about the PosetType of the entity slot type
+    features_to_use: list of strings, default = 'all'
+        Column names of the features to use, by default the task will try to use
+        every column as features. If the user wants to use a model that doesn't
+        use any features then it should be set to None
     """
     def __init__(self, primary_table, primary_table_alternatives_names,
                  primary_table_target_name, primary_table_metadata=None,
@@ -172,7 +176,7 @@ class ChoiceTask(PrefTask):
                  secondary_table_metadata=None,
                  secondary_table_type='csv',
                  secondary_to_primary_link=None, entity_slot_type_kwargs=None,
-                 target_type_kwargs=None):
+                 target_type_kwargs=None, features_to_use='all'):
 
         # Read in primary table
         self.primary_table, self.primary_table_metadata, prim_name, prim_hook =\
@@ -196,7 +200,8 @@ class ChoiceTask(PrefTask):
                 self.primary_table_alternatives_names,
             'primary_table_target_names': self.primary_table_target_name,
             'secondary_table_name': secondary_table,
-            'secondary_to_primary_link': secondary_to_primary_link
+            'secondary_to_primary_link': secondary_to_primary_link,
+            'features_to_use': features_to_use
         }
 
         super(ChoiceTask, self).__init__(
