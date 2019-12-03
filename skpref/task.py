@@ -169,6 +169,13 @@ class ChoiceTask(PrefTask):
         Column names of the features to use, by default the task will try to use
         every column as features. If the user wants to use a model that doesn't
         use any features then it should be set to None
+    target_column_correspondence: str, default=None
+        If the choice is a pairwise comparison and the target is not the name
+        of an entity but a {1,0} variable that corresponds to one of the entities
+        being chosen in one of the columns, then this should be the name of the
+        column for which when the target variable is 1 then that column's entity
+        has been chosen. i.e. there is a column with home team another one with
+        away team and target is 1 when home team wins.
     """
     def __init__(self, primary_table, primary_table_alternatives_names,
                  primary_table_target_name, primary_table_metadata=None,
@@ -176,7 +183,8 @@ class ChoiceTask(PrefTask):
                  secondary_table_metadata=None,
                  secondary_table_type='csv',
                  secondary_to_primary_link=None, entity_slot_type_kwargs=None,
-                 target_type_kwargs=None, features_to_use='all'):
+                 target_type_kwargs=None, features_to_use='all',
+                 target_column_correspondence=None):
 
         # Read in primary table
         self.primary_table, self.primary_table_metadata, prim_name, prim_hook =\
@@ -211,7 +219,16 @@ class ChoiceTask(PrefTask):
             annotations=annotations
         )
 
-        if type(self.primary_table_target_name) is list:
+        if target_column_correspondence is not None:
+            inverse_correspondence_column = \
+                self.primary_table_alternatives_names.copy()
+            inverse_correspondence_column.remove(target_column_correspondence)
+            top = np.where(
+                self.primary_table[self.primary_table_target_name] == 1,
+                self.primary_table[target_column_correspondence],
+                self.primary_table[inverse_correspondence_column[0]]
+            ).reshape(len(self.primary_table), 1)
+        elif type(self.primary_table_target_name) is list:
             top = self.primary_table[self.primary_table_target_name]\
                 .copy().values
         else:
