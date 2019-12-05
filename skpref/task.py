@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.io import arff
 import numpy as np
 import os
-from data_processing import SubsetPosetType, SubsetPosetVec
+from skpref.data_processing import SubsetPosetType, SubsetPosetVec
 
 
 class PrefTaskType(ABC):
