@@ -103,7 +103,7 @@ def _table_reader(table, meta, format):
     elif type(table) is pd.DataFrame:
         _return_table = table.copy()
         _return_metadata = None
-        table_name = [x for x in globals() if globals()[x] is table][0]
+        table_name = 'global_data_frame'
         hook = 'globals'
 
     elif type(table) is np.ndarray:
@@ -113,7 +113,7 @@ def _table_reader(table, meta, format):
         else:
             _return_table = table.copy()
             _return_metadata = meta.copy()
-            table_name = [x for x in globals() if globals()[x] is table][0]
+            table_name = 'gobal_arff_table'
             hook = 'globals'
 
     else:
@@ -201,6 +201,7 @@ class ChoiceTask(PrefTask):
 
         self.primary_table_alternatives_names = primary_table_alternatives_names
         self.primary_table_target_name = primary_table_target_name
+        self.target_column_correspondence = target_column_correspondence
 
         annotations = {
             'primary_table_name': prim_name,
@@ -219,14 +220,14 @@ class ChoiceTask(PrefTask):
             annotations=annotations
         )
 
-        if target_column_correspondence is not None:
-            inverse_correspondence_column = \
+        if self.target_column_correspondence is not None:
+            self.inverse_correspondence_column = \
                 self.primary_table_alternatives_names.copy()
-            inverse_correspondence_column.remove(target_column_correspondence)
+            self.inverse_correspondence_column.remove(self.target_column_correspondence)
             top = np.where(
                 self.primary_table[self.primary_table_target_name] == 1,
-                self.primary_table[target_column_correspondence],
-                self.primary_table[inverse_correspondence_column[0]]
+                self.primary_table[self.target_column_correspondence],
+                self.primary_table[self.inverse_correspondence_column[0]]
             ).reshape(len(self.primary_table), 1)
         elif type(self.primary_table_target_name) is list:
             top = self.primary_table[self.primary_table_target_name]\
