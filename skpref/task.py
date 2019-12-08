@@ -3,7 +3,15 @@ import pandas as pd
 from scipy.io import arff
 import numpy as np
 import os
-from data_processing import SubsetPosetType, SubsetPosetVec
+from skpref.data_processing import SubsetPosetType, SubsetPosetVec
+
+
+class HeterogeneousDataError(Exception):
+    error_msg = "heterogeneous alternative presentation or " +\
+                "heterogeneous choices currently not developed"
+
+    def __init__(self):
+        Exception.__init__(self, self.error_msg)
 
 
 class PrefTaskType(ABC):
@@ -195,7 +203,7 @@ class ChoiceTask(PrefTask):
         if secondary_table is not None:
             self.secondary_table, self.secondary_table_metadata, sec_name,\
             sec_hook = _table_reader(secondary_table, secondary_table_metadata,
-                              secondary_table_type)
+                                     secondary_table_type)
 
             self.secondary_to_primary_link = secondary_to_primary_link
 
@@ -243,15 +251,20 @@ class ChoiceTask(PrefTask):
             alts = self.primary_table[[self.primary_table_alternatives_names]]\
                 .copy().values
 
-        alts_size = alts.shape[1]
-        top_size = top.shape[1]
+        if (type(alts[0][0]) is list) and (type(alts[0]) is np.ndarray):
+            alts = np.array([np.array(x[0]) for x in alts])
+
+        try:
+            alts_size = alts.shape[1]
+            top_size = top.shape[1]
+        except IndexError:
+            raise HeterogeneousDataError()
 
         if alts_size > 1:
             boot = alts[np.where(alts != top)].reshape(top.shape[0],
                                                        alts_size-top_size)
         else:
-            raise Exception("heterogeneous alternative presentation or "
-                            "heterogeneous choices currently not developed")
+            raise HeterogeneousDataError()
 
         self.subset_vec = SubsetPosetVec(
             top,
