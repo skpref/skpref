@@ -195,7 +195,7 @@ class ChoiceTask(PrefTask):
         if secondary_table is not None:
             self.secondary_table, self.secondary_table_metadata, sec_name,\
             sec_hook = _table_reader(secondary_table, secondary_table_metadata,
-                              secondary_table_type)
+                                     secondary_table_type)
 
             self.secondary_to_primary_link = secondary_to_primary_link
 
