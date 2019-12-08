@@ -1,5 +1,5 @@
 import unittest
-from skpref.task import SubsetPosetVec
+from skpref.data_processing import SubsetPosetVec
 import numpy as np
 
 top_choices = np.array([np.array(['a', 'b', 'c']), np.array(['a', 'b', 'd']),
@@ -37,3 +37,13 @@ class TestSubsetPosetVec(unittest.TestCase):
         np.testing.assert_array_equal(
             self.test_spv.efficient_representation[1].A,
             correct_boot_array)
+
+        self.assertEqual(self.test_spv.efficient_representation[0].shape,
+                         (3, 4))
+
+        self.assertEqual(self.test_spv.efficient_representation[1].shape,
+                         (3, 4))
+
+        self.assertEqual(self.test_spv.efficient_representation[0].nnz, 9)
+
+        self.assertEqual(self.test_spv.efficient_representation[1].nnz, 3)
