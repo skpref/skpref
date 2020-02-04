@@ -1,7 +1,10 @@
 import unittest
-from skpref.task import ChoiceTask, HeterogeneousDataError
+from skpref.task import ChoiceTask, HeterogeneousDataError, _table_reader
 import numpy as np
 import pandas as pd
+from scipy.io import arff
+from io import StringIO
+from pandas.testing import assert_frame_equal
 
 DATA_c = pd.DataFrame({'ent1': ['C', 'B', 'C', 'D'],
                        'ent2': ['B', 'A', 'D', 'C'],
@@ -14,6 +17,38 @@ DATA = pd.DataFrame({'alternatives': [['B', 'C'], ['A', 'B'], ['D', 'C'],
 DATA_het = pd.DataFrame({'alternatives': [['B', 'C'], ['A', 'B'], ['D', 'C'],
                                           ['C', 'D', 'A']],
                          'result': ['C', 'A', 'D', 'D']})
+
+
+class Test_table_reader(unittest.TestCase):
+
+    def test_arff_format(self):
+        content = """
+@relation foo
+@attribute width  numeric
+@attribute height numeric
+@attribute colour  {red,green,blue,yellow,black}
+@data
+5.0,3.25,blue
+4.5,3.75,green
+3.0,4.00,red
+        """
+        f = StringIO(content)
+        data, meta = arff.loadarff(f)
+
+        expected_result = pd.DataFrame(
+            [[5.0, 3.25, b'blue'],
+             [4.5, 3.75, b'green'],
+             [3.0, 4.0, b'red']],
+            columns=['width', 'height', 'colour']
+        )
+
+        table, name, hook = _table_reader(data)
+
+        assert_frame_equal(table, expected_result)
+
+    def test_error_is_given_for_random_numpy_array(self):
+        with self.assertRaises(Exception):
+            _table_reader(np.array([1, 2, 3]))
 
 
 class TestChoiceTask(unittest.TestCase):
