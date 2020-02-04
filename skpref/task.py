@@ -80,11 +80,13 @@ class PrefTask(ABC):
         self.annotations = annotations
 
 
-def _table_reader(table, meta, format):
+def _table_reader(table):
     """
     Reads in the table for a ChoiceTask
     """
     if type(table) is str:
+
+        table_format = table.split(".")[-1]
 
         if "\\" in table:
             loc_split = table.split('\\')
@@ -98,37 +100,36 @@ def _table_reader(table, meta, format):
             table_name = table
             hook = os.getcwd()
 
-        if format == 'csv':
+        if table_format == 'csv':
             _return_table = pd.read_csv(table)
-            _return_metadata = None
 
-        elif format == 'arff':
-            _return_table, _return_metadata = arff.loadarff(table)
+        elif table_format == 'arff':
+            _return_table_arff, _ = arff.loadarff(table)
+            _return_table = pd.DataFrame(_return_table_arff)
 
         else:
             raise Exception("Currently only supporting csv and arff formats")
 
     elif type(table) is pd.DataFrame:
         _return_table = table.copy()
-        _return_metadata = None
         table_name = 'global_data_frame'
         hook = 'globals'
 
     elif type(table) is np.ndarray:
-        if meta is None:
-            raise Exception("Please provide metadata alongside the data"
-                            " values")
+        if table.dtype.names is None:
+            raise Exception("Please set the column names of the data in "
+                            "dtype.names for the array")
+
         else:
-            _return_table = table.copy()
-            _return_metadata = meta.copy()
+            _return_table = pd.DataFrame(table)
             table_name = 'gobal_arff_table'
             hook = 'globals'
 
     else:
-        raise Exception("Parameters given don't fit into any of the file read"
-                        "in cases")
+        raise Exception("Currently only supporting csv and structured numpy array"
+                        " formats")
 
-    return _return_table, _return_metadata, table_name, hook
+    return _return_table, table_name, hook
 
 
 class ChoiceTask(PrefTask):
@@ -148,23 +149,12 @@ class ChoiceTask(PrefTask):
         primary table.
     primary_table_target_name: str or list of str
         The column name or attribute which corresponds to the ground truth
-    primary_table_metadata: scipy.arff.metadata, default=None
-        The metadata field in a scipy arff load
-    primary_table_type: str, possible values {'csv', 'arff'}, default='csv'
-        If the primary table is a string then this defines what type of file is
-        being read in. Code will use pandas to read csv and scipy to read arff
     secondary_table: str, DataFrame, scipy.io.arff, default=None
         The secondary table that usually contains information about the
         alternatives in the primary table. For example the cleanliness perception
         of public transportation.
         If str it will be the directory where the primary table sits. Otherwise
         will also read in pandas DataFrames and scipy.io.arff
-    secondary_table_metadata: scipy.arff.metadata, default=None
-        The metadata field in a scipy arff load
-    secondary_table_type: str, possible values {'csv', 'arff'}, default='csv'
-        If the secondary table is a string then this defines what type of file
-        is being read in. Code will use pandas to read csv and scipy to read
-        arff
     secondary_to_primary_link: dict, default:None
         How to link the primary and secondary tables together. The key in the
         dictionary will correspond to the field in the primary table and the
@@ -186,24 +176,19 @@ class ChoiceTask(PrefTask):
         away team and target is 1 when home team wins.
     """
     def __init__(self, primary_table, primary_table_alternatives_names,
-                 primary_table_target_name, primary_table_metadata=None,
-                 primary_table_type='csv', secondary_table=None,
-                 secondary_table_metadata=None,
-                 secondary_table_type='csv',
+                 primary_table_target_name, secondary_table=None,
                  secondary_to_primary_link=None, entity_slot_type_kwargs=None,
                  target_type_kwargs=None, features_to_use='all',
                  target_column_correspondence=None):
 
         # Read in primary table
-        self.primary_table, self.primary_table_metadata, prim_name, prim_hook =\
-            _table_reader(primary_table, primary_table_metadata,
-                          primary_table_type)
+        self.primary_table, prim_name, prim_hook =\
+            _table_reader(primary_table)
 
         # Read in secondary table
         if secondary_table is not None:
-            self.secondary_table, self.secondary_table_metadata, sec_name,\
-            sec_hook = _table_reader(secondary_table, secondary_table_metadata,
-                                     secondary_table_type)
+            self.secondary_table, sec_name, sec_hook = \
+                _table_reader(secondary_table)
 
             self.secondary_to_primary_link = secondary_to_primary_link
 
