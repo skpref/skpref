@@ -1,5 +1,5 @@
 import unittest
-from skpref.task import ChoiceTask, HeterogeneousDataError, _table_reader
+from skpref.task import ChoiceTask, _table_reader
 import numpy as np
 import pandas as pd
 from scipy.io import arff
@@ -16,10 +16,10 @@ DATA = pd.DataFrame({'alternatives': [['B', 'C'], ['A', 'B'], ['D', 'C'],
 
 DATA_het = pd.DataFrame({'alternatives': [['B', 'C'], ['A', 'B'], ['D', 'C'],
                                           ['C', 'D', 'A']],
-                         'result': ['C', 'A', 'D', 'D']})
+                         'result': [['C', 'B'], ['A'], ['D'], ['D']]})
 
 
-class Test_table_reader(unittest.TestCase):
+class TestTableReader(unittest.TestCase):
 
     def test_arff_format(self):
         content = """
@@ -109,9 +109,28 @@ class TestChoiceTask(unittest.TestCase):
             choicetask.subset_vec.boot_input_data,
             correct_boot_array)
 
-    def test_het_error_is_given(self):
-        with self.assertRaises(HeterogeneousDataError):
-            ChoiceTask(
-                primary_table=DATA_het,
-                primary_table_alternatives_names='alternatives',
-                primary_table_target_name='result')
+    def test_wih_heterogenous_data(self):
+        choicetask = ChoiceTask(
+            primary_table=DATA_het,
+            primary_table_alternatives_names='alternatives',
+            primary_table_target_name='result')
+
+        correct_top_array = np.array([np.array(['C', 'B']),
+                                          np.array(['A']),
+                                          np.array(['D']),
+                                          np.array(['D'])])
+
+        correct_boot_array = np.array([np.array([], dtype='<U1'),
+                                       np.array(['B']),
+                                       np.array(['C']),
+                                       np.array(['A', 'C'])])
+
+        for i in range(len(correct_top_array)):
+            np.testing.assert_array_equal(
+                choicetask.subset_vec.top_input_data[i],
+                correct_top_array[i])
+
+        for j in range(len(correct_boot_array)):
+            np.testing.assert_array_equal(
+                choicetask.subset_vec.boot_input_data[j],
+                correct_boot_array[j])
