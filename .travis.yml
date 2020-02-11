@@ -32,6 +32,3 @@ script:
   - mkdir for_test
   - cd for_test
   - pytest -v --cov=skpref --pyargs skpref
-
-after_success:
-  - coveralls
