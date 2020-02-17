@@ -6,12 +6,14 @@ import os
 from skpref.data_processing import SubsetPosetType, SubsetPosetVec
 
 
-class HeterogeneousDataError(Exception):
-    error_msg = "heterogeneous alternative presentation or " +\
-                "heterogeneous choices currently not developed"
-
-    def __init__(self):
-        Exception.__init__(self, self.error_msg)
+# class UnsupportedListError(Exception):
+#     error_msg = ("Currently a list of columns that correspond to either the "
+#                  "target variable or the alternatives is not supported. "
+#                  "Please provide all choices in one column for example: "
+#                  "[Alternative1, Alternative2, Alternative3]")
+#
+#     def __init__(self):
+#         Exception.__init__(self, self.error_msg)
 
 
 class PrefTaskType(ABC):
@@ -132,6 +134,20 @@ def _table_reader(table):
     return _return_table, table_name, hook
 
 
+def _convert_array_of_lists_to_array_of_arrays(ar):
+    """
+    Converts an array of lists into an array of arrays
+    Inputs:
+    -------
+    ar : ndarray,
+        The array to inspect
+    """
+    if (type(ar[0]) is list) and (type(ar) is np.ndarray):
+        return np.array([np.array(x) for x in ar])
+    else:
+        return ar
+
+
 class ChoiceTask(PrefTask):
     """
     Task for choice based models
@@ -144,10 +160,10 @@ class ChoiceTask(PrefTask):
         rained or not at the time of the journey.
         If str it will be the directory where the primary table sits. Otherwise
         will also read in pandas DataFrames and scipy.io.arff
-    primary_table_alternatives_names: str or list of str
+    primary_table_alternatives_names: str
         The column or attribute which corresponds to the alternatives in the
         primary table.
-    primary_table_target_name: str or list of str
+    primary_table_target_name: str
         The column name or attribute which corresponds to the ground truth
     secondary_table: str, DataFrame, scipy.io.arff, default=None
         The secondary table that usually contains information about the
@@ -226,30 +242,27 @@ class ChoiceTask(PrefTask):
             top = self.primary_table[self.primary_table_target_name]\
                 .copy().values
         else:
-            top = self.primary_table[[self.primary_table_target_name]]\
+            top = self.primary_table[self.primary_table_target_name]\
                 .copy().values
+
+            # If the top choice is always 1 then the elements of top under this
+            # condition come as the element not the element inside a list which
+            # is the general format we'd like to follow.
+            if type(top[0]) not in [np.ndarray, list]:
+                top = top.reshape(len(top), 1)
 
         if type(self.primary_table_alternatives_names) is list:
             alts = self.primary_table[self.primary_table_alternatives_names].copy()\
                 .values
         else:
-            alts = self.primary_table[[self.primary_table_alternatives_names]]\
+            alts = self.primary_table[self.primary_table_alternatives_names]\
                 .copy().values
 
-        if (type(alts[0][0]) is list) and (type(alts[0]) is np.ndarray):
-            alts = np.array([np.array(x[0]) for x in alts])
+        alts = _convert_array_of_lists_to_array_of_arrays(alts)
+        top = _convert_array_of_lists_to_array_of_arrays(top)
 
-        try:
-            alts_size = alts.shape[1]
-            top_size = top.shape[1]
-        except IndexError:
-            raise HeterogeneousDataError()
-
-        if alts_size > 1:
-            boot = alts[np.where(alts != top)].reshape(top.shape[0],
-                                                       alts_size-top_size)
-        else:
-            raise HeterogeneousDataError()
+        joint_alts = np.array([[top[i], alts[i]] for i in range(len(alts))])
+        boot = np.array([np.setdiff1d(x[1], x[0]) for x in joint_alts])
 
         self.subset_vec = SubsetPosetVec(
             top,
