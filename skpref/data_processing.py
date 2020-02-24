@@ -1,6 +1,8 @@
 from abc import ABC
 import numpy as np
+import pandas as pd
 from scipy.sparse import csr_matrix
+from collections import defaultdict
 
 # Poset Types
 
@@ -171,6 +173,7 @@ class SubsetPosetVec(PosetVector):
     def __init__(self, top_input_data, boot_input_data, subset_type_vars=None):
         self.top_input_data = top_input_data
         self.boot_input_data = boot_input_data
+        self.pairwise_comparison_reduction_dict = defaultdict()
 
         dat_for_unique = np.array([])
         for in_dat in [top_input_data, boot_input_data]:
@@ -207,4 +210,79 @@ class SubsetPosetVec(PosetVector):
         super(SubsetPosetVec, self).__init__(entity_universe, poset_type, dims,
                                              efficient_representation)
 
+    def pairwise_reducer(self, style="positive", rejection=0):
+        """
+        Breaks a SubsetPosetVec into the most elementary parts of a pairwise
+        comparison.
+        Inputs
+        -------
+        style: "positive" or "reciprocal", default="positive"
+            When positive top=[A], boot=[B,C] will be created as the following
+            comparisons: [A,B], [A,C]
+            When reciprocal the same will be created as [A,B], [A,C], [B,A],
+            [C,A]
 
+        rejection: int or float, default=0
+            The response variable to give for the objects not chosen, sometimes
+            -1 might be used for SVM rather than 0 for linear models.
+
+        Returns
+        --------
+        Pairwise numpy array
+        """
+
+        if style == "positive":
+            divisor = 3
+            columns = ['observation', 'top', 'boot']
+        elif style == "reciprocal":
+            divisor = 4
+            columns = ['observation', 'alt1', 'alt2', 'alt1_top']
+        else:
+            raise NameError("style can only be positive or "
+                            "reciprocal")
+
+        if (style, rejection) in self.pairwise_comparison_reduction_dict.keys():
+            return self.pairwise_comparison_reduction_dict[style,
+                                                           rejection].copy()
+
+        else:
+            alt_type = type(self.top_input_data[0][0])
+            pairwise_comparisons = np.array(
+                [], dtype=alt_type)
+
+            for i, choice in enumerate(self.top_input_data):
+                for j in choice:
+                    for k in self.boot_input_data[i]:
+                        if style == "positive":
+                            observation = np.array([i, j, k])
+                        elif style == "reciprocal":
+                            observation = np.array([i, j, k, 1, i, k, j,
+                                                    rejection])
+                        else:
+                            raise NameError("style can only be positive or "
+                                            "reciprocal")
+
+                        pairwise_comparisons = np.append(pairwise_comparisons,
+                                                         observation)
+            pairwise_comps = len(pairwise_comparisons)
+
+            pairwise_comparison_reduction = pd.DataFrame(
+                pairwise_comparisons.reshape(int(pairwise_comps / divisor),
+                                             divisor), columns=columns
+            )
+
+            if alt_type == np.str_:
+                if style == 'positive':
+                    pairwise_comparison_reduction = \
+                        pairwise_comparison_reduction.astype(
+                            {'observation': int})
+
+                if style == 'reciprocal':
+                    pairwise_comparison_reduction = \
+                        pairwise_comparison_reduction.astype(
+                            {'observation': int, 'alt1_top': int})
+
+            self.pairwise_comparison_reduction_dict[style, rejection] = \
+                pairwise_comparison_reduction
+
+            return pairwise_comparison_reduction
