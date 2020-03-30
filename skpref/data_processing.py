@@ -200,10 +200,10 @@ class SubsetPosetVec(PosetVector):
         # correctly
 
         efficient_top, self.lkp = sparsify_list_of_entities(entity_universe,
-                                                       self.top_input_data)
+                                                            self.top_input_data)
 
         efficient_boot, _ = sparsify_list_of_entities(entity_universe,
-                                                       self.boot_input_data)
+                                                      self.boot_input_data)
 
         efficient_representation = [efficient_top, efficient_boot]
 
