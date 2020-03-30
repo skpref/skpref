@@ -144,7 +144,6 @@ class BradleyTerry(BaseEstimator):
     ... target_column_correspondence='team1', features_to_use=None)
     >>> mybt = BradleyTerry(method='BFGS', alpha=1e-5)
     >>> mybt.fit_task(NBA_results_task_train)
-    >>> print(1+1)
 
     """
     def __init__(self, alpha=1e-6, method="Newton-CG", initial_params=None,
