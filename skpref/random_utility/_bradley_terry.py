@@ -113,6 +113,39 @@ class BradleyTerry(BaseEstimator):
     # >>> bt_model.fit(train, 'result')
     # >>> probabilities = bt_model.predict_proba(test)
 
+    >>> import pickle
+    >>> import sys
+    >>> sys.path.insert(0, "..")
+    >>> from skpref.random_utility import BradleyTerry
+    >>> from task import ChoiceTask
+    >>> import pandas as pd
+    >>> # Using product choice data
+    >>> with open('../examples/data/product_choices.pickle', 'rb') as handle:
+    ...     choice_data = pickle.load(handle)
+    >>> with open('../examples/data/product_info.pickle', 'rb') as handle:
+    ...     product_data = pickle.load(handle)
+    >>> products_bought_train = ChoiceTask(
+    ... choice_data[:100], 'alternatives', 'choice',
+    ... features_to_use=['price_per_size', 'prod_size'],
+    ... secondary_table=product_data,
+    ... secondary_to_primary_link={"PRODUCT_ID": ['alternatives', 'choice']})
+    >>> mybt = BradleyTerry(method='BFGS', alpha=1e-5)
+    >>> mybt.fit_task(products_bought_train)
+
+    >>> # using basketball match data
+    >>> NBA_file_loc = '../examples/data/NBA_matches.csv'
+    >>> NBA_results = pd.read_csv(NBA_file_loc)
+    >>> season_split = 2016
+    >>> train_data = NBA_results[NBA_results.season_start == season_split].copy()
+    >>> NBA_results_task_train = ChoiceTask(
+    ... primary_table=train_data,
+    ... primary_table_alternatives_names=['team1', 'team2'],
+    ... primary_table_target_name ='team1_wins',
+    ... target_column_correspondence='team1', features_to_use=None)
+    >>> mybt = BradleyTerry(method='BFGS', alpha=1e-5)
+    >>> mybt.fit_task(NBA_results_task_train)
+    >>> print(1+1)
+
     """
     def __init__(self, alpha=1e-6, method="Newton-CG", initial_params=None,
                  max_iter=None, tol=1e-5):
@@ -466,8 +499,8 @@ class BradleyTerry(BaseEstimator):
                                            **self.hyperparameters,
                                            print_res=False)
             self.is_fitted_ = True
-            _feat_params = self.bt_with_feats.params.reset_index()
-            self.params_ = _feat_params[~_feat_params['index'].isin(
+            self._feat_params = self.bt_with_feats.params.reset_index()
+            self.params_ = self._feat_params[~self._feat_params['index'].isin(
                 basic_names.keys())]
             self.params_.columns = ['entity', 'learned_strength']
             self.pylogit_fit = True
@@ -484,16 +517,47 @@ class BradleyTerry(BaseEstimator):
         ---------
         The indexed DataFrame
         """
+        input_merge_columns = None
         if task.target_column_correspondence is not None:
             _re_indexed_df = task.primary_table.set_index([
                 task.target_column_correspondence,
                 task.inverse_correspondence_column[0]
             ])
         else:
-            _re_indexed_df = task.primary_table.set_index(
-                task.annotations['primary_tale_alternatives_names'])
+            pairwise_comparisons = task.subset_vec.pairwise_reducer()
+            _re_indexed_df = pairwise_comparisons.set_index(['top', 'boot'])
+            _re_indexed_df[task.annotations['primary_table_target_names']] = 1
 
-        return _re_indexed_df
+        if task.secondary_table is not None:
+            found_correspondence = False
+            for key in task.annotations['secondary_to_primary_link'].keys():
+                value = task.annotations['secondary_to_primary_link'][key]
+                if (value == [task.primary_table_target_name,
+                              task.primary_table_alternatives_names] or
+                        value == [task.primary_table_alternatives_names,
+                                  task.primary_table_target_name] or
+                        value == task.primary_table_alternatives_names or
+                        value == task.primary_table_target_name):
+
+                    secondary_re_indexed = task.secondary_table.set_index(key)
+                    found_correspondence = True
+
+                else:
+                    if input_merge_columns is None:
+                        input_merge_columns = [key]
+                    else:
+                        input_merge_columns += [key]
+
+            if not found_correspondence:
+                raise Exception("key linking to alternatives not provided")
+
+        else:
+            secondary_re_indexed = None
+
+        if input_merge_columns is None:
+            input_merge_columns = []
+
+        return _re_indexed_df, secondary_re_indexed, input_merge_columns
 
     def fit_task(self, task):
         """
@@ -503,20 +567,34 @@ class BradleyTerry(BaseEstimator):
         -----------
         task : ChoiceTask that has been loaded for the data.
         """
-        _re_indexed_df = self.task_indexing(task)
+        _re_indexed_df, secondary_re_indexed, input_merge_columns = \
+            self.task_indexing(task)
 
         if task.annotations['features_to_use'] is None:
+
+            if task.target_column_correspondence is None:
+                _re_indexed_df.drop(['observation'], axis=1, inplace=True)
+
             model_input = _re_indexed_df[
                 [task.annotations['primary_table_target_names']]].copy()
+            secondary_input = None
+
         elif task.annotations['features_to_use'] != 'all':
             model_input = _re_indexed_df[
-                list(task.annotations['primary_table_target_names']) +
-                task.annotations['features_to_use']
+                [task.annotations['primary_table_target_names']] +
+                task.primary_table_features_to_use.tolist() +
+                input_merge_columns
+            ].copy()
+            secondary_input = secondary_re_indexed[
+                task.secondary_table_features_to_use.tolist() +
+                input_merge_columns
             ].copy()
         else:
             model_input = _re_indexed_df.copy()
+            secondary_input = secondary_re_indexed.copy()
 
-        self.fit(model_input, task.annotations['primary_table_target_names'])
+        self.fit(model_input, task.annotations['primary_table_target_names'],
+                 df_i=secondary_input, merge_columns=input_merge_columns)
 
     def rank_entities(self, ascending=True):
         """ Outputs the ranked order of entities.
@@ -690,13 +768,13 @@ class BradleyTerry(BaseEstimator):
         --------
         The DataFrame in the correct formatting for the predict methods
         """
-        _re_indexed_df = self.task_indexing(task)
+        _re_indexed_df, _, input_merge_keys = self.task_indexing(task)
 
         if (task.annotations['features_to_use'] != 'all') and (
                 task.annotations['features_to_use'] is not None):
             model_input = _re_indexed_df[
-                list(task.annotations['primary_table_target_names']) +
-                task.annotations['features_to_use']
+                [task.annotations['primary_table_target_names']] +
+                task.primary_table_features_to_use.tolist() + input_merge_keys
                 ].copy()
         else:
             model_input = _re_indexed_df.copy()
