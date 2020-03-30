@@ -201,12 +201,23 @@ class ChoiceTask(PrefTask):
         self.primary_table, prim_name, prim_hook =\
             _table_reader(primary_table)
 
+        if features_to_use is not None and features_to_use != 'all':
+            self.primary_table_features_to_use = np.intersect1d(
+                features_to_use, self.primary_table.columns)
+
         # Read in secondary table
         if secondary_table is not None:
             self.secondary_table, sec_name, sec_hook = \
                 _table_reader(secondary_table)
 
             self.secondary_to_primary_link = secondary_to_primary_link
+
+            if features_to_use is not None and features_to_use != 'all':
+                self.secondary_table_features_to_use = np.intersect1d(
+                    features_to_use, self.secondary_table.columns)
+
+        else:
+            self.secondary_table = None
 
         self.primary_table_alternatives_names = primary_table_alternatives_names
         self.primary_table_target_name = primary_table_target_name
@@ -262,7 +273,8 @@ class ChoiceTask(PrefTask):
         top = _convert_array_of_lists_to_array_of_arrays(top)
 
         joint_alts = np.array([[top[i], alts[i]] for i in range(len(alts))])
-        boot = np.array([np.setdiff1d(x[1], x[0]) for x in joint_alts])
+        boot = np.array([np.setdiff1d(x[1], x[0], assume_unique=True)
+                         for x in joint_alts])
 
         self.subset_vec = SubsetPosetVec(
             top,

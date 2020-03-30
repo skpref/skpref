@@ -123,7 +123,7 @@ class TestChoiceTask(unittest.TestCase):
         correct_boot_array = np.array([np.array([], dtype='<U1'),
                                        np.array(['B']),
                                        np.array(['C']),
-                                       np.array(['A', 'C'])])
+                                       np.array(['C', 'A'])])
 
         for i in range(len(correct_top_array)):
             np.testing.assert_array_equal(
