@@ -228,7 +228,7 @@ class SubsetPosetVec(PosetVector):
 
         Returns
         --------
-        Pairwise numpy array
+        Pairwise DataFrame
         """
 
         if style == "positive":
