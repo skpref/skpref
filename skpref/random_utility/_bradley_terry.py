@@ -120,9 +120,9 @@ class BradleyTerry(BaseEstimator):
     >>> from skpref.task import ChoiceTask
     >>> import pandas as pd
     >>> # Using product choice data
-    >>> with open('../examples/data/product_choices.pickle', 'rb') as handle:
+    >>> with open('skpref/examples/data/product_choices.pickle', 'rb') as handle:
     ...     choice_data = pickle.load(handle)
-    >>> with open('../examples/data/product_info.pickle', 'rb') as handle:
+    >>> with open('skpref/examples/data/product_info.pickle', 'rb') as handle:
     ...     product_data = pickle.load(handle)
     >>> products_bought_train = ChoiceTask(
     ... choice_data[:100], 'alternatives', 'choice',
@@ -133,7 +133,7 @@ class BradleyTerry(BaseEstimator):
     >>> mybt.fit_task(products_bought_train)
 
     >>> # using basketball match data
-    >>> NBA_file_loc = '../examples/data/NBA_matches.csv'
+    >>> NBA_file_loc = 'skpref/examples/data/NBA_matches.csv'
     >>> NBA_results = pd.read_csv(NBA_file_loc)
     >>> season_split = 2016
     >>> train_data = NBA_results[NBA_results.season_start == season_split].copy()
