@@ -99,6 +99,37 @@ SUBSET_CHOICE_FEATS_TABLE = pd.DataFrame(
      }
 )
 
+SUBSET_CHOICE_TABLE_season = pd.DataFrame(
+    {'choice': [[512709, 529703, 696056], [723354]],
+     'alternatives': [[512709, 529703, 696056, 490972,  685450, 5549502],
+                      [550707, 551375, 591842, 601195, 732624, 778197, 813892,
+                       817040, 576214, 673995, 723354]],
+     'season': [7, 8]}
+)
+
+SUBSET_CHOICE_FEATS_TABLE_season = pd.DataFrame(
+    {'ID': [490972,  512709,  529703,  550707,  551375,  576214,  591842,
+            601195,  673995,  685450,  696056,  723354,  732624,  778197,
+            813892,  817040, 5549502,
+            490972, 512709, 529703, 550707, 551375, 576214, 591842,
+            601195, 673995, 685450, 696056, 723354, 732624, 778197,
+            813892, 817040, 5549502
+            ],
+     'feat1': [6, 6, 6, 8, 8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
+               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+     'season': [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
+                8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
+     }
+)
+
+SUBSET_CHOICE_TABLE_feat = pd.DataFrame(
+    {'choice': [[512709, 529703, 696056], [723354]],
+     'alternatives': [[512709, 529703, 696056, 490972,  685450, 5549502],
+                      [550707, 551375, 591842, 601195, 732624, 778197, 813892,
+                       817040, 576214, 673995, 723354]],
+     'season': [7, 8]}
+)
+
 class TestPairwiseModelFunctions(unittest.TestCase):
 
     def test_check_indexing_of_entities(self):
@@ -478,11 +509,12 @@ class TestBradleyTerryFunctions(unittest.TestCase):
         test_task = ChoiceTask(SUBSET_CHOICE_TABLE, 'alternatives', 'choice',
                                secondary_table=SUBSET_CHOICE_FEATS_TABLE,
                                secondary_to_primary_link={
-                                   'ID': ['choice', 'alternatives']})
+                                   'ID': ['choice', 'alternatives']},
+                               features_to_use='feat1')
 
         mybt = BradleyTerry(method='BFGS', alpha=1e-5)
 
-        d1, d2 = mybt.task_indexing(test_task)
+        d1, d2, _ = mybt.task_indexing(test_task)
 
         correct_d1 = pd.DataFrame(
             [
@@ -511,3 +543,136 @@ class TestBradleyTerryFunctions(unittest.TestCase):
         correct_d2 = SUBSET_CHOICE_FEATS_TABLE.set_index('ID')
         assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
         assert_frame_equal(d2.astype('int32'), correct_d2.astype('int32'))
+
+    def test_task_indexing_id_merge(self):
+        test_task = ChoiceTask(SUBSET_CHOICE_TABLE_season, 'alternatives',
+                               'choice',
+                               secondary_table=SUBSET_CHOICE_FEATS_TABLE_season,
+                               secondary_to_primary_link={
+                                   'ID': ['choice', 'alternatives'],
+                                   'season': 'season'},
+                               features_to_use=['feat1'])
+
+        mybt = BradleyTerry(method='BFGS', alpha=1e-5)
+
+        d1, d2, _id = mybt.task_indexing(test_task)
+
+        correct_d1 = pd.DataFrame(
+            [
+                [0, 512709, 490972, 7, 1],
+                [0, 512709, 685450, 7, 1],
+                [0, 512709, 5549502, 7, 1],
+                [0, 529703, 490972, 7, 1],
+                [0, 529703, 685450, 7, 1],
+                [0, 529703, 5549502, 7, 1],
+                [0, 696056, 490972, 7, 1],
+                [0, 696056, 685450, 7, 1],
+                [0, 696056, 5549502, 7, 1],
+                [1, 723354, 550707, 8, 1],
+                [1, 723354, 551375, 8, 1],
+                [1, 723354, 591842, 8, 1],
+                [1, 723354, 601195, 8, 1],
+                [1, 723354, 732624, 8, 1],
+                [1, 723354, 778197, 8, 1],
+                [1, 723354, 813892, 8, 1],
+                [1, 723354, 817040, 8, 1],
+                [1, 723354, 576214, 8, 1],
+                [1, 723354, 673995, 8, 1]
+            ], columns=['observation', 'top', 'boot', 'season', 'choice']
+        ).set_index(['top', 'boot'])
+
+        correct_d2 = SUBSET_CHOICE_FEATS_TABLE_season.set_index('ID')
+        correct_id = ['season']
+
+        assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
+        assert_frame_equal(d2.astype('int32'), correct_d2.astype('int32'))
+        self.assertListEqual(_id, correct_id)
+
+    def test_task_indexing_primary_feat_merge(self):
+        test_task = ChoiceTask(SUBSET_CHOICE_TABLE_feat, 'alternatives',
+                               'choice',
+                               secondary_table=SUBSET_CHOICE_FEATS_TABLE,
+                               secondary_to_primary_link={
+                                   'ID': ['choice', 'alternatives']},
+                               features_to_use=['feat1', 'season'])
+
+        mybt = BradleyTerry(method='BFGS', alpha=1e-5)
+
+        d1, d2, _id = mybt.task_indexing(test_task)
+
+        correct_d1 = pd.DataFrame(
+            [
+                [0, 512709, 490972, 7, 1],
+                [0, 512709, 685450, 7, 1],
+                [0, 512709, 5549502, 7, 1],
+                [0, 529703, 490972, 7, 1],
+                [0, 529703, 685450, 7, 1],
+                [0, 529703, 5549502, 7, 1],
+                [0, 696056, 490972, 7, 1],
+                [0, 696056, 685450, 7, 1],
+                [0, 696056, 5549502, 7, 1],
+                [1, 723354, 550707, 8, 1],
+                [1, 723354, 551375, 8, 1],
+                [1, 723354, 591842, 8, 1],
+                [1, 723354, 601195, 8, 1],
+                [1, 723354, 732624, 8, 1],
+                [1, 723354, 778197, 8, 1],
+                [1, 723354, 813892, 8, 1],
+                [1, 723354, 817040, 8, 1],
+                [1, 723354, 576214, 8, 1],
+                [1, 723354, 673995, 8, 1]
+            ], columns=['observation', 'top', 'boot', 'season', 'choice']
+        ).set_index(['top', 'boot'])
+
+        correct_d2 = SUBSET_CHOICE_FEATS_TABLE.set_index('ID')
+        correct_id = []
+
+        assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
+        assert_frame_equal(d2.astype('int32'), correct_d2.astype('int32'))
+        self.assertListEqual(_id, correct_id)
+
+    def test_task_indexing_id_also_feat_merge(self):
+
+        test_task = ChoiceTask(SUBSET_CHOICE_TABLE_feat, 'alternatives',
+                               'choice',
+                               secondary_table=SUBSET_CHOICE_FEATS_TABLE_season,
+                               secondary_to_primary_link={
+                                   'ID': ['choice', 'alternatives'],
+                                   'season': 'season'},
+                               features_to_use=['feat1', 'season'])
+
+        mybt = BradleyTerry(method='BFGS', alpha=1e-5)
+
+        d1, d2, _id = mybt.task_indexing(test_task)
+
+        correct_d1 = pd.DataFrame(
+            [
+                [0, 512709, 490972, 7, 1],
+                [0, 512709, 685450, 7, 1],
+                [0, 512709, 5549502, 7, 1],
+                [0, 529703, 490972, 7, 1],
+                [0, 529703, 685450, 7, 1],
+                [0, 529703, 5549502, 7, 1],
+                [0, 696056, 490972, 7, 1],
+                [0, 696056, 685450, 7, 1],
+                [0, 696056, 5549502, 7, 1],
+                [1, 723354, 550707, 8, 1],
+                [1, 723354, 551375, 8, 1],
+                [1, 723354, 591842, 8, 1],
+                [1, 723354, 601195, 8, 1],
+                [1, 723354, 732624, 8, 1],
+                [1, 723354, 778197, 8, 1],
+                [1, 723354, 813892, 8, 1],
+                [1, 723354, 817040, 8, 1],
+                [1, 723354, 576214, 8, 1],
+                [1, 723354, 673995, 8, 1]
+            ], columns=['observation', 'top', 'boot', 'season', 'choice']
+        ).set_index(['top', 'boot'])
+
+        correct_d2 = SUBSET_CHOICE_FEATS_TABLE_season.set_index('ID')
+        correct_id = ['season']
+
+        assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
+        assert_frame_equal(d2.astype('int32'), correct_d2.astype('int32'))
+        self.assertListEqual(_id, correct_id)
+
