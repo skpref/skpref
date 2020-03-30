@@ -117,7 +117,7 @@ class BradleyTerry(BaseEstimator):
     >>> import sys
     >>> sys.path.insert(0, "..")
     >>> from skpref.random_utility import BradleyTerry
-    >>> from task import ChoiceTask
+    >>> from skpref.task import ChoiceTask
     >>> import pandas as pd
     >>> # Using product choice data
     >>> with open('../examples/data/product_choices.pickle', 'rb') as handle:
@@ -518,6 +518,36 @@ class BradleyTerry(BaseEstimator):
         The indexed DataFrame
         """
         input_merge_columns = None
+        secondary_re_indexed = None
+
+        if (task.secondary_table is not None) and (
+                task.annotations['features_to_use'] is not None):
+            if len(np.intersect1d(task.secondary_table.columns,
+                                  task.annotations['features_to_use'])) > 0:
+
+                found_correspondence = False
+
+                for key in task.annotations['secondary_to_primary_link'].keys():
+                    value = task.annotations['secondary_to_primary_link'][key]
+                    if (value == [task.primary_table_target_name,
+                                  task.primary_table_alternatives_names] or
+                            value == [task.primary_table_alternatives_names,
+                                      task.primary_table_target_name] or
+                            value == task.primary_table_alternatives_names or
+                            value == task.primary_table_target_name):
+
+                        secondary_re_indexed = task.secondary_table.set_index(key)
+                        found_correspondence = True
+
+                    else:
+                        if input_merge_columns is None:
+                            input_merge_columns = [key]
+                        else:
+                            input_merge_columns += [key]
+
+                if not found_correspondence:
+                    raise Exception("key linking to alternatives not provided")
+
         if task.target_column_correspondence is not None:
             _re_indexed_df = task.primary_table.set_index([
                 task.target_column_correspondence,
@@ -525,34 +555,28 @@ class BradleyTerry(BaseEstimator):
             ])
         else:
             pairwise_comparisons = task.subset_vec.pairwise_reducer()
+            if task.annotations['features_to_use'] is not None:
+                feats_in_primary = []
+
+                if input_merge_columns is not None:
+                    feats_in_primary += input_merge_columns
+
+                if len(np.intersect1d(task.primary_table.columns,
+                                      task.annotations['features_to_use'])) > 0:
+
+                    feats_in_primary += np.intersect1d(
+                        task.primary_table.columns,
+                        task.annotations['features_to_use']).tolist()
+
+                if len(feats_in_primary) > 0:
+                    feats_in_primary = np.unique(feats_in_primary).tolist()
+                    pairwise_comparisons = pairwise_comparisons.merge(
+                        task.primary_table[feats_in_primary].reset_index()
+                        .rename(columns={'index': 'observation'}),
+                        how='left', on='observation', validate='m:1')
+
             _re_indexed_df = pairwise_comparisons.set_index(['top', 'boot'])
             _re_indexed_df[task.annotations['primary_table_target_names']] = 1
-
-        if task.secondary_table is not None:
-            found_correspondence = False
-            for key in task.annotations['secondary_to_primary_link'].keys():
-                value = task.annotations['secondary_to_primary_link'][key]
-                if (value == [task.primary_table_target_name,
-                              task.primary_table_alternatives_names] or
-                        value == [task.primary_table_alternatives_names,
-                                  task.primary_table_target_name] or
-                        value == task.primary_table_alternatives_names or
-                        value == task.primary_table_target_name):
-
-                    secondary_re_indexed = task.secondary_table.set_index(key)
-                    found_correspondence = True
-
-                else:
-                    if input_merge_columns is None:
-                        input_merge_columns = [key]
-                    else:
-                        input_merge_columns += [key]
-
-            if not found_correspondence:
-                raise Exception("key linking to alternatives not provided")
-
-        else:
-            secondary_re_indexed = None
 
         if input_merge_columns is None:
             input_merge_columns = []
