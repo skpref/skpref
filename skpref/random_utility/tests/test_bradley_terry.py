@@ -516,29 +516,8 @@ class TestBradleyTerryFunctions(unittest.TestCase):
 
         d1, d2, _ = mybt.task_indexing(test_task)
 
-        correct_d1 = pd.DataFrame(
-            [
-                [0, 512709, 490972, 1],
-                [0, 512709, 685450, 1],
-                [0, 512709, 5549502, 1],
-                [0, 529703, 490972, 1],
-                [0, 529703, 685450, 1],
-                [0, 529703, 5549502, 1],
-                [0, 696056, 490972, 1],
-                [0, 696056, 685450, 1],
-                [0, 696056, 5549502, 1],
-                [1, 723354, 550707, 1],
-                [1, 723354, 551375, 1],
-                [1, 723354, 591842, 1],
-                [1, 723354, 601195, 1],
-                [1, 723354, 732624, 1],
-                [1, 723354, 778197, 1],
-                [1, 723354, 813892, 1],
-                [1, 723354, 817040, 1],
-                [1, 723354, 576214, 1],
-                [1, 723354, 673995, 1]
-            ], columns=['observation', 'top', 'boot', 'choice']
-        ).set_index(['top', 'boot'])
+        correct_d1 = test_task.subset_vec.pairwise_reducer()\
+            .set_index(['alt1', 'alt2'])
 
         correct_d2 = SUBSET_CHOICE_FEATS_TABLE.set_index('ID')
         assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
@@ -557,29 +536,11 @@ class TestBradleyTerryFunctions(unittest.TestCase):
 
         d1, d2, _id = mybt.task_indexing(test_task)
 
-        correct_d1 = pd.DataFrame(
-            [
-                [0, 512709, 490972, 7, 1],
-                [0, 512709, 685450, 7, 1],
-                [0, 512709, 5549502, 7, 1],
-                [0, 529703, 490972, 7, 1],
-                [0, 529703, 685450, 7, 1],
-                [0, 529703, 5549502, 7, 1],
-                [0, 696056, 490972, 7, 1],
-                [0, 696056, 685450, 7, 1],
-                [0, 696056, 5549502, 7, 1],
-                [1, 723354, 550707, 8, 1],
-                [1, 723354, 551375, 8, 1],
-                [1, 723354, 591842, 8, 1],
-                [1, 723354, 601195, 8, 1],
-                [1, 723354, 732624, 8, 1],
-                [1, 723354, 778197, 8, 1],
-                [1, 723354, 813892, 8, 1],
-                [1, 723354, 817040, 8, 1],
-                [1, 723354, 576214, 8, 1],
-                [1, 723354, 673995, 8, 1]
-            ], columns=['observation', 'top', 'boot', 'season', 'choice']
-        ).set_index(['top', 'boot'])
+        correct_d1 = test_task.subset_vec.pairwise_reducer()\
+            .set_index(['alt1', 'alt2'])
+
+        correct_d1['season'] = [7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8,
+                                8, 8, 8]
 
         correct_d2 = SUBSET_CHOICE_FEATS_TABLE_season.set_index('ID')
         correct_id = ['season']
@@ -600,29 +561,11 @@ class TestBradleyTerryFunctions(unittest.TestCase):
 
         d1, d2, _id = mybt.task_indexing(test_task)
 
-        correct_d1 = pd.DataFrame(
-            [
-                [0, 512709, 490972, 7, 1],
-                [0, 512709, 685450, 7, 1],
-                [0, 512709, 5549502, 7, 1],
-                [0, 529703, 490972, 7, 1],
-                [0, 529703, 685450, 7, 1],
-                [0, 529703, 5549502, 7, 1],
-                [0, 696056, 490972, 7, 1],
-                [0, 696056, 685450, 7, 1],
-                [0, 696056, 5549502, 7, 1],
-                [1, 723354, 550707, 8, 1],
-                [1, 723354, 551375, 8, 1],
-                [1, 723354, 591842, 8, 1],
-                [1, 723354, 601195, 8, 1],
-                [1, 723354, 732624, 8, 1],
-                [1, 723354, 778197, 8, 1],
-                [1, 723354, 813892, 8, 1],
-                [1, 723354, 817040, 8, 1],
-                [1, 723354, 576214, 8, 1],
-                [1, 723354, 673995, 8, 1]
-            ], columns=['observation', 'top', 'boot', 'season', 'choice']
-        ).set_index(['top', 'boot'])
+        correct_d1 = test_task.subset_vec.pairwise_reducer() \
+            .set_index(['alt1', 'alt2'])
+
+        correct_d1['season'] = [7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8,
+                                8, 8, 8]
 
         correct_d2 = SUBSET_CHOICE_FEATS_TABLE.set_index('ID')
         correct_id = []
@@ -645,29 +588,11 @@ class TestBradleyTerryFunctions(unittest.TestCase):
 
         d1, d2, _id = mybt.task_indexing(test_task)
 
-        correct_d1 = pd.DataFrame(
-            [
-                [0, 512709, 490972, 7, 1],
-                [0, 512709, 685450, 7, 1],
-                [0, 512709, 5549502, 7, 1],
-                [0, 529703, 490972, 7, 1],
-                [0, 529703, 685450, 7, 1],
-                [0, 529703, 5549502, 7, 1],
-                [0, 696056, 490972, 7, 1],
-                [0, 696056, 685450, 7, 1],
-                [0, 696056, 5549502, 7, 1],
-                [1, 723354, 550707, 8, 1],
-                [1, 723354, 551375, 8, 1],
-                [1, 723354, 591842, 8, 1],
-                [1, 723354, 601195, 8, 1],
-                [1, 723354, 732624, 8, 1],
-                [1, 723354, 778197, 8, 1],
-                [1, 723354, 813892, 8, 1],
-                [1, 723354, 817040, 8, 1],
-                [1, 723354, 576214, 8, 1],
-                [1, 723354, 673995, 8, 1]
-            ], columns=['observation', 'top', 'boot', 'season', 'choice']
-        ).set_index(['top', 'boot'])
+        correct_d1 = test_task.subset_vec.pairwise_reducer() \
+            .set_index(['alt1', 'alt2'])
+
+        correct_d1['season'] = [7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8,
+                                8, 8, 8]
 
         correct_d2 = SUBSET_CHOICE_FEATS_TABLE_season.set_index('ID')
         correct_id = ['season']
