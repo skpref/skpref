@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from scipy.sparse import csr_matrix
 from collections import defaultdict
+import random
 
 # Poset Types
 
@@ -210,7 +211,8 @@ class SubsetPosetVec(PosetVector):
         super(SubsetPosetVec, self).__init__(entity_universe, poset_type, dims,
                                              efficient_representation)
 
-    def pairwise_reducer(self, style="positive", rejection=0):
+    def pairwise_reducer(self, style="positive", rejection=0, scramble=True,
+                         random_seed_scramble=None):
         """
         Breaks a SubsetPosetVec into the most elementary parts of a pairwise
         comparison.
@@ -226,24 +228,39 @@ class SubsetPosetVec(PosetVector):
             The response variable to give for the objects not chosen, sometimes
             -1 might be used for SVM rather than 0 for linear models.
 
+        scramble: boolean, default=True
+            In the case of a positive return, this will scramble the entities
+            in the left right column so that the target output isn't a vector
+            of ones, which later on throws errors in scikit-learn gridsearch
+
+        random_seed_scramble: int, default=None
+            The random seed to use for scrambling
+
         Returns
         --------
         Pairwise DataFrame
         """
 
-        if style == "positive":
+        if style == "positive" and not scramble:
             divisor = 3
             columns = ['observation', 'top', 'boot']
-        elif style == "reciprocal":
+
+        elif scramble or style == "reciprocal":
             divisor = 4
             columns = ['observation', 'alt1', 'alt2', 'alt1_top']
-        else:
+
+        if style not in ['positive', 'reciprocal']:
             raise NameError("style can only be positive or "
                             "reciprocal")
 
-        if (style, rejection) in self.pairwise_comparison_reduction_dict.keys():
+        if scramble:
+            random.seed(random_seed_scramble)
+
+        if (style, rejection, scramble) in \
+                self.pairwise_comparison_reduction_dict.keys():
             return self.pairwise_comparison_reduction_dict[style,
-                                                           rejection].copy()
+                                                           rejection,
+                                                           scramble].copy()
 
         else:
             alt_type = type(self.top_input_data[0][0])
@@ -253,8 +270,13 @@ class SubsetPosetVec(PosetVector):
             for i, choice in enumerate(self.top_input_data):
                 for j in choice:
                     for k in self.boot_input_data[i]:
-                        if style == "positive":
+                        if style == "positive" and not scramble:
                             observation = np.array([i, j, k])
+                        elif style == "positive" and scramble:
+                            if random.randint(0, 1) == 0:
+                                observation = np.array([i, j, k, 1])
+                            else:
+                                observation = np.array([i, k, j, rejection])
                         elif style == "reciprocal":
                             observation = np.array([i, j, k, 1, i, k, j,
                                                     rejection])
@@ -272,7 +294,7 @@ class SubsetPosetVec(PosetVector):
             )
 
             if alt_type == np.str_:
-                if style == 'positive':
+                if style == 'positive' and not scramble:
                     pairwise_comparison_reduction = \
                         pairwise_comparison_reduction.astype(
                             {'observation': int})
@@ -282,7 +304,7 @@ class SubsetPosetVec(PosetVector):
                         pairwise_comparison_reduction.astype(
                             {'observation': int, 'alt1_top': int})
 
-            self.pairwise_comparison_reduction_dict[style, rejection] = \
+            self.pairwise_comparison_reduction_dict[style, rejection, scramble] = \
                 pairwise_comparison_reduction
 
             return pairwise_comparison_reduction
