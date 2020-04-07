@@ -552,6 +552,12 @@ class BradleyTerry(BaseEstimator):
                 task.target_column_correspondence,
                 task.inverse_correspondence_column[0]
             ])
+
+            _re_indexed_df.rename(columns={
+                task.annotations['primary_table_target_names']: 'alt1_top'},
+                inplace=True
+            )
+
         else:
             pairwise_comparisons = task.subset_vec.pairwise_reducer()
             if task.annotations['features_to_use'] is not None:
@@ -574,13 +580,43 @@ class BradleyTerry(BaseEstimator):
                         .rename(columns={'index': 'observation'}),
                         how='left', on='observation', validate='m:1')
 
-            _re_indexed_df = pairwise_comparisons.set_index(['top', 'boot'])
-            _re_indexed_df[task.annotations['primary_table_target_names']] = 1
+            _re_indexed_df = pairwise_comparisons.set_index(['alt1', 'alt2'])
 
         if input_merge_columns is None:
             input_merge_columns = []
 
         return _re_indexed_df, secondary_re_indexed, input_merge_columns
+
+    def task_unpacker(self, task):
+        _re_indexed_df, secondary_re_indexed, input_merge_columns = \
+            self.task_indexing(task)
+
+        if task.annotations['features_to_use'] is None:
+
+            if task.target_column_correspondence is None:
+                _re_indexed_df.drop(['observation'], axis=1, inplace=True)
+
+            model_input = _re_indexed_df[['alt1_top']].copy()
+            secondary_input = None
+
+        elif task.annotations['features_to_use'] != 'all':
+            model_input = _re_indexed_df[
+                ['alt1_top'] +
+                task.primary_table_features_to_use.tolist() +
+                input_merge_columns
+                ].copy()
+            secondary_input = secondary_re_indexed[
+                task.secondary_table_features_to_use.tolist() +
+                input_merge_columns
+                ].copy()
+        else:
+            model_input = _re_indexed_df.copy()
+            secondary_input = secondary_re_indexed.copy()
+
+        return {'df_comb': model_input,
+                'target': 'alt1_top',
+                'df_i': secondary_input,
+                'merge_columns': input_merge_columns}
 
     def fit_task(self, task):
         """
@@ -590,34 +626,8 @@ class BradleyTerry(BaseEstimator):
         -----------
         task : ChoiceTask that has been loaded for the data.
         """
-        _re_indexed_df, secondary_re_indexed, input_merge_columns = \
-            self.task_indexing(task)
 
-        if task.annotations['features_to_use'] is None:
-
-            if task.target_column_correspondence is None:
-                _re_indexed_df.drop(['observation'], axis=1, inplace=True)
-
-            model_input = _re_indexed_df[
-                [task.annotations['primary_table_target_names']]].copy()
-            secondary_input = None
-
-        elif task.annotations['features_to_use'] != 'all':
-            model_input = _re_indexed_df[
-                [task.annotations['primary_table_target_names']] +
-                task.primary_table_features_to_use.tolist() +
-                input_merge_columns
-            ].copy()
-            secondary_input = secondary_re_indexed[
-                task.secondary_table_features_to_use.tolist() +
-                input_merge_columns
-            ].copy()
-        else:
-            model_input = _re_indexed_df.copy()
-            secondary_input = secondary_re_indexed.copy()
-
-        self.fit(model_input, task.annotations['primary_table_target_names'],
-                 df_i=secondary_input, merge_columns=input_merge_columns)
+        self.fit(**self.task_unpacker(task))
 
     def rank_entities(self, ascending=True):
         """ Outputs the ranked order of entities.
@@ -796,7 +806,7 @@ class BradleyTerry(BaseEstimator):
         if (task.annotations['features_to_use'] != 'all') and (
                 task.annotations['features_to_use'] is not None):
             model_input = _re_indexed_df[
-                [task.annotations['primary_table_target_names']] +
+                ['alt1_top'] +
                 task.primary_table_features_to_use.tolist() + input_merge_keys
                 ].copy()
         else:
