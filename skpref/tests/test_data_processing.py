@@ -84,7 +84,7 @@ class TestSubsetPosetVec(unittest.TestCase):
             ], columns=['observation', 'top', 'boot']
         )
 
-        output_red = self.test_spv_int.pairwise_reducer()
+        output_red = self.test_spv_int.pairwise_reducer(scramble=False)
         pd.testing.assert_frame_equal(
             output_red.astype('int32'),
             correct_positive_table.astype('int32'))
@@ -199,7 +199,7 @@ class TestSubsetPosetVec(unittest.TestCase):
             [2, 'c', 'a']
         ], columns=['observation', 'top', 'boot'])
 
-        output_red_str = self.test_spv.pairwise_reducer()
+        output_red_str = self.test_spv.pairwise_reducer(scramble=False)
 
         pd.testing.assert_frame_equal(
             correct_string_pairwise_red.astype({'observation': 'int32'}),
@@ -233,6 +233,35 @@ class TestSubsetPosetVec(unittest.TestCase):
                                                     'alt1_top': 'int32'}),
             output_red_str_rec.astype({'observation': 'int32',
                                        'alt1_top': 'int32'}))
+
+        correct_pairwise_scrambled = pd.DataFrame(
+            [[0, 512709, 490972, 1],
+             [0, 512709, 685450, 1],
+             [0, 5549502, 512709, 0],
+             [0, 529703, 490972, 1],
+             [0, 529703, 685450, 1],
+             [0, 529703, 5549502, 1],
+             [0, 696056, 490972, 1],
+             [0, 696056, 685450, 1],
+             [0, 5549502, 696056, 0],
+             [1, 723354, 550707, 1],
+             [1, 723354, 551375, 1],
+             [1, 723354, 591842, 1],
+             [1, 723354, 601195, 1],
+             [1, 723354, 732624, 1],
+             [1, 723354, 778197, 1],
+             [1, 723354, 813892, 1],
+             [1, 817040, 723354, 0],
+             [1, 723354, 576214, 1],
+             [1, 673995, 723354, 0]],
+            columns=['observation', 'alt1', 'alt2', 'alt1_top']
+        )
+        result_pairwise_scrambled = self.test_spv_int.pairwise_reducer(
+            random_seed_scramble=42)
+
+        pd.testing.assert_frame_equal(
+            correct_pairwise_scrambled.astype('int32'),
+            result_pairwise_scrambled.astype('int32'))
 
     def test_if_name_error_raised(self):
         with self.assertRaises(NameError):
