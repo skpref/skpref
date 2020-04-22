@@ -26,7 +26,7 @@ class GridSearchCV(object):
     >>> import sys
     >>> sys.path.insert(0, "..")
     >>> from skpref.random_utility import BradleyTerry
-    >>> from skpref.task import ChoiceTask
+    >>> from skpref.task import ChoiceTask, PairwiseComparisonTask
     >>> import pandas as pd
     >>> # Using product choice data
     >>> with open('skpref/examples/data/product_choices.pickle', 'rb') as handle:
@@ -44,7 +44,7 @@ class GridSearchCV(object):
     ...     + 'team_salary_budgets.csv')
     >>> season_split = 2016
     >>> train_data = NBA_results[NBA_results.season_start == season_split].copy()
-    >>> NBA_results_task_train = ChoiceTask(
+    >>> NBA_results_task_train = PairwiseComparisonTask(
     ...     primary_table=train_data,
     ...     primary_table_alternatives_names=['team1', 'team2'],
     ...     primary_table_target_name ='team1_wins',
