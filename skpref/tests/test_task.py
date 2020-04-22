@@ -1,5 +1,5 @@
 import unittest
-from skpref.task import ChoiceTask, _table_reader
+from skpref.task import ChoiceTask, _table_reader, PairwiseComparisonTask
 import numpy as np
 import pandas as pd
 from scipy.io import arff
@@ -52,45 +52,6 @@ class TestTableReader(unittest.TestCase):
 
 
 class TestChoiceTask(unittest.TestCase):
-
-    def test_pandas_df_correspondence(self):
-        corr_choicetask = ChoiceTask(
-            primary_table=DATA_c,
-            primary_table_alternatives_names=['ent1', 'ent2'],
-            primary_table_target_name='result',
-            target_column_correspondence='ent1')
-
-        correct_top_array = np.array([['C'], ['A'], ['D'], ['D']])
-
-        correct_boot_array = np.array([['B'], ['B'], ['C'], ['C']])
-
-        np.testing.assert_array_equal(
-            corr_choicetask.subset_vec.top_input_data,
-            correct_top_array)
-
-        np.testing.assert_array_equal(
-            corr_choicetask.subset_vec.boot_input_data,
-            correct_boot_array)
-
-    def test_pandas_df_correspondence2(self):
-        corr_choicetask = ChoiceTask(
-            primary_table=DATA_c,
-            primary_table_alternatives_names=['ent1', 'ent2'],
-            primary_table_target_name='result',
-            target_column_correspondence='ent2')
-
-        correct_boot_array = np.array([['C'], ['A'], ['D'], ['D']])
-
-        correct_top_array = np.array([['B'], ['B'], ['C'], ['C']])
-
-        np.testing.assert_array_equal(
-            corr_choicetask.subset_vec.top_input_data,
-            correct_top_array)
-
-        np.testing.assert_array_equal(
-            corr_choicetask.subset_vec.boot_input_data,
-            correct_boot_array)
-
     def test_with_choice_vector_data(self):
         choicetask = ChoiceTask(
             primary_table=DATA,
@@ -134,3 +95,58 @@ class TestChoiceTask(unittest.TestCase):
             np.testing.assert_array_equal(
                 choicetask.subset_vec.boot_input_data[j],
                 correct_boot_array[j])
+
+
+class TestPairwiseComparisonTask(unittest.TestCase):
+
+    def test_pandas_df_correspondence(self):
+        corr_choicetask = PairwiseComparisonTask(
+            primary_table=DATA_c,
+            primary_table_alternatives_names=['ent1', 'ent2'],
+            primary_table_target_name='result',
+            target_column_correspondence='ent1')
+
+        correct_top_array = np.array([['C'], ['A'], ['D'], ['D']])
+
+        correct_boot_array = np.array([['B'], ['B'], ['C'], ['C']])
+
+        np.testing.assert_array_equal(
+            corr_choicetask.subset_vec.top_input_data,
+            correct_top_array)
+
+        np.testing.assert_array_equal(
+            corr_choicetask.subset_vec.boot_input_data,
+            correct_boot_array)
+
+    def test_pandas_df_correspondence2(self):
+        corr_choicetask = PairwiseComparisonTask(
+            primary_table=DATA_c,
+            primary_table_alternatives_names=['ent1', 'ent2'],
+            primary_table_target_name='result',
+            target_column_correspondence='ent2')
+
+        correct_boot_array = np.array([['C'], ['A'], ['D'], ['D']])
+
+        correct_top_array = np.array([['B'], ['B'], ['C'], ['C']])
+
+        np.testing.assert_array_equal(
+            corr_choicetask.subset_vec.top_input_data,
+            correct_top_array)
+
+        np.testing.assert_array_equal(
+            corr_choicetask.subset_vec.boot_input_data,
+            correct_boot_array)
+
+    def test_correct_typing(self):
+        corr_choicetask = PairwiseComparisonTask(
+            primary_table=DATA_c,
+            primary_table_alternatives_names=['ent1', 'ent2'],
+            primary_table_target_name='result',
+            target_column_correspondence='ent2')
+
+        self.assertEqual(corr_choicetask.subset_vec.poset_type.top_size_const,
+                         True)
+        self.assertEqual(corr_choicetask.subset_vec.poset_type.boot_size_const,
+                         True)
+        self.assertEqual(corr_choicetask.subset_vec.poset_type.top_size, 1)
+        self.assertEqual(corr_choicetask.subset_vec.poset_type.boot_size, 1)

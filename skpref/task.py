@@ -183,19 +183,11 @@ class ChoiceTask(PrefTask):
         Column names of the features to use, by default the task will try to use
         every column as features. If the user wants to use a model that doesn't
         use any features then it should be set to None
-    target_column_correspondence: str, default=None
-        If the choice is a pairwise comparison and the target is not the name
-        of an entity but a {1,0} variable that corresponds to one of the entities
-        being chosen in one of the columns, then this should be the name of the
-        column for which when the target variable is 1 then that column's entity
-        has been chosen. i.e. there is a column with home team another one with
-        away team and target is 1 when home team wins.
     """
     def __init__(self, primary_table, primary_table_alternatives_names,
                  primary_table_target_name, secondary_table=None,
                  secondary_to_primary_link=None, entity_slot_type_kwargs=None,
-                 target_type_kwargs=None, features_to_use='all',
-                 target_column_correspondence=None):
+                 target_type_kwargs=None, features_to_use='all'):
 
         # Read in primary table
         self.primary_table, prim_name, prim_hook =\
@@ -221,7 +213,6 @@ class ChoiceTask(PrefTask):
 
         self.primary_table_alternatives_names = primary_table_alternatives_names
         self.primary_table_target_name = primary_table_target_name
-        self.target_column_correspondence = target_column_correspondence
 
         annotations = {
             'primary_table_name': prim_name,
@@ -240,27 +231,19 @@ class ChoiceTask(PrefTask):
             annotations=annotations
         )
 
-        if self.target_column_correspondence is not None:
-            self.inverse_correspondence_column = \
-                self.primary_table_alternatives_names.copy()
-            self.inverse_correspondence_column.remove(self.target_column_correspondence)
-            top = np.where(
-                self.primary_table[self.primary_table_target_name] == 1,
-                self.primary_table[self.target_column_correspondence],
-                self.primary_table[self.inverse_correspondence_column[0]]
-            ).reshape(len(self.primary_table), 1)
-        elif type(self.primary_table_target_name) is list:
-            top = self.primary_table[self.primary_table_target_name]\
-                .copy().values
-        else:
-            top = self.primary_table[self.primary_table_target_name]\
-                .copy().values
+        if not hasattr(self, 'top'):
+            if type(self.primary_table_target_name) is list:
+                self.top = self.primary_table[self.primary_table_target_name]\
+                    .copy().values
+            else:
+                self.top = self.primary_table[self.primary_table_target_name]\
+                    .copy().values
 
-            # If the top choice is always 1 then the elements of top under this
-            # condition come as the element not the element inside a list which
-            # is the general format we'd like to follow.
-            if type(top[0]) not in [np.ndarray, list]:
-                top = top.reshape(len(top), 1)
+                # If the top choice is always 1 then the elements of top under this
+                # condition come as the element not the element inside a list which
+                # is the general format we'd like to follow.
+                if type(self.top[0]) not in [np.ndarray, list]:
+                    self.top = self.top.reshape(len(self.top), 1)
 
         if type(self.primary_table_alternatives_names) is list:
             alts = self.primary_table[self.primary_table_alternatives_names].copy()\
@@ -270,13 +253,92 @@ class ChoiceTask(PrefTask):
                 .copy().values
 
         alts = _convert_array_of_lists_to_array_of_arrays(alts)
-        top = _convert_array_of_lists_to_array_of_arrays(top)
+        self.top = _convert_array_of_lists_to_array_of_arrays(self.top)
 
-        joint_alts = np.array([[top[i], alts[i]] for i in range(len(alts))])
+        joint_alts = np.array([[self.top[i], alts[i]] for i in range(len(alts))])
         boot = np.array([np.setdiff1d(x[1], x[0], assume_unique=True)
                          for x in joint_alts])
 
         self.subset_vec = SubsetPosetVec(
-            top,
+            self.top,
             boot,
+            subset_type_vars=entity_slot_type_kwargs
+        )
+
+        # Temporary Line to be removed once PairwiseModel() gets developed
+        if not hasattr(self, 'target_column_correspondence'):
+            self.target_column_correspondence = None
+
+
+class PairwiseComparisonTask(ChoiceTask):
+    """
+        Task for choice based models
+        Parameters:
+        -----------
+        primary_table: str, DataFrame, scipy.io.arff
+            The primary table is the one that contains the target variable and
+            covariates that vary on the target observation level. For example the
+            available methods of transportation for an individual and weather it
+            rained or not at the time of the journey.
+            If str it will be the directory where the primary table sits. Otherwise
+            will also read in pandas DataFrames and scipy.io.arff
+        primary_table_alternatives_names: str
+            The column or attribute which corresponds to the alternatives in the
+            primary table.
+        primary_table_target_name: str
+            The column name or attribute which corresponds to the ground truth
+        secondary_table: str, DataFrame, scipy.io.arff, default=None
+            The secondary table that usually contains information about the
+            alternatives in the primary table. For example the cleanliness perception
+            of public transportation.
+            If str it will be the directory where the primary table sits. Otherwise
+            will also read in pandas DataFrames and scipy.io.arff
+        secondary_to_primary_link: dict, default:None
+            How to link the primary and secondary tables together. The key in the
+            dictionary will correspond to the field in the primary table and the
+            value for each key will be the field in the secondary table
+        target_type_kwargs: dict of PosetType args
+            arguments to tell about the PosetType of the entity slot type
+        features_to_use: list of strings, default = 'all'
+            Column names of the features to use, by default the task will try to use
+            every column as features. If the user wants to use a model that doesn't
+            use any features then it should be set to None
+        target_column_correspondence: str, default=None
+            If the choice is a pairwise comparison and the target is not the name
+            of an entity but a {1,0} variable that corresponds to one of the entities
+            being chosen in one of the columns, then this should be the name of the
+            column for which when the target variable is 1 then that column's entity
+            has been chosen. i.e. there is a column with home team another one with
+            away team and target is 1 when home team wins.
+        """
+    def __init__(self, primary_table, primary_table_alternatives_names,
+                 primary_table_target_name, target_column_correspondence,
+                 secondary_table=None, secondary_to_primary_link=None,
+                 target_type_kwargs=None, features_to_use='all'):
+
+        self.target_column_correspondence = target_column_correspondence
+
+        if self.target_column_correspondence is not None:
+            self.inverse_correspondence_column = \
+                primary_table_alternatives_names.copy()
+            self.inverse_correspondence_column.remove(
+                self.target_column_correspondence)
+            self.top = np.where(
+                primary_table[primary_table_target_name] == 1,
+                primary_table[target_column_correspondence],
+                primary_table[self.inverse_correspondence_column[0]]
+            ).reshape(len(primary_table), 1)
+
+        entity_slot_type_kwargs = {
+            'top_size_const': True,
+            'top_size': 1,
+            'boot_size_const': True,
+            'boot_size': 1
+        }
+
+        super(PairwiseComparisonTask, self).__init__(
+            primary_table, primary_table_alternatives_names,
+            primary_table_target_name, secondary_table,
+            secondary_to_primary_link, entity_slot_type_kwargs,
+            target_type_kwargs, features_to_use
         )
