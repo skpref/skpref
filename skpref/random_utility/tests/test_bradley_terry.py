@@ -7,7 +7,6 @@ from skpref.random_utility import (check_indexing_of_entities,
                                    get_distinct_entities,
                                    generate_entity_lookup,
                                    BradleyTerry)
-from skpref.task import ChoiceTask
 
 DATA = pd.DataFrame({'ent1': ['C', 'B', 'C', 'D'],
                      'ent2': ['B', 'A', 'D', 'C'],
@@ -129,6 +128,7 @@ SUBSET_CHOICE_TABLE_feat = pd.DataFrame(
                        817040, 576214, 673995, 723354]],
      'season': [7, 8]}
 )
+
 
 class TestPairwiseModelFunctions(unittest.TestCase):
 
@@ -505,99 +505,5 @@ class TestBradleyTerryFunctions(unittest.TestCase):
         # self.assertListEqual(x_comb_entnames_m_1_2, ['ent1', 'ent2'])
         # self.assertFalse(run_choix_m_1_2)
 
-    def test_task_indexing(self):
-        test_task = ChoiceTask(SUBSET_CHOICE_TABLE, 'alternatives', 'choice',
-                               secondary_table=SUBSET_CHOICE_FEATS_TABLE,
-                               secondary_to_primary_link={
-                                   'ID': ['choice', 'alternatives']},
-                               features_to_use='feat1')
 
-        mybt = BradleyTerry(method='BFGS', alpha=1e-5)
-
-        d1, d2, _ = mybt.task_indexing(test_task)
-
-        correct_d1 = test_task.subset_vec.pairwise_reducer()\
-            .set_index(['alt1', 'alt2'])
-
-        correct_d2 = SUBSET_CHOICE_FEATS_TABLE.set_index('ID')
-        assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
-        assert_frame_equal(d2.astype('int32'), correct_d2.astype('int32'))
-
-    def test_task_indexing_id_merge(self):
-        test_task = ChoiceTask(SUBSET_CHOICE_TABLE_season, 'alternatives',
-                               'choice',
-                               secondary_table=SUBSET_CHOICE_FEATS_TABLE_season,
-                               secondary_to_primary_link={
-                                   'ID': ['choice', 'alternatives'],
-                                   'season': 'season'},
-                               features_to_use=['feat1'])
-
-        mybt = BradleyTerry(method='BFGS', alpha=1e-5)
-
-        d1, d2, _id = mybt.task_indexing(test_task)
-
-        correct_d1 = test_task.subset_vec.pairwise_reducer()\
-            .set_index(['alt1', 'alt2'])
-
-        correct_d1['season'] = [7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8,
-                                8, 8, 8]
-
-        correct_d2 = SUBSET_CHOICE_FEATS_TABLE_season.set_index('ID')
-        correct_id = ['season']
-
-        assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
-        assert_frame_equal(d2.astype('int32'), correct_d2.astype('int32'))
-        self.assertListEqual(_id, correct_id)
-
-    def test_task_indexing_primary_feat_merge(self):
-        test_task = ChoiceTask(SUBSET_CHOICE_TABLE_feat, 'alternatives',
-                               'choice',
-                               secondary_table=SUBSET_CHOICE_FEATS_TABLE,
-                               secondary_to_primary_link={
-                                   'ID': ['choice', 'alternatives']},
-                               features_to_use=['feat1', 'season'])
-
-        mybt = BradleyTerry(method='BFGS', alpha=1e-5)
-
-        d1, d2, _id = mybt.task_indexing(test_task)
-
-        correct_d1 = test_task.subset_vec.pairwise_reducer() \
-            .set_index(['alt1', 'alt2'])
-
-        correct_d1['season'] = [7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8,
-                                8, 8, 8]
-
-        correct_d2 = SUBSET_CHOICE_FEATS_TABLE.set_index('ID')
-        correct_id = []
-
-        assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
-        assert_frame_equal(d2.astype('int32'), correct_d2.astype('int32'))
-        self.assertListEqual(_id, correct_id)
-
-    def test_task_indexing_id_also_feat_merge(self):
-
-        test_task = ChoiceTask(SUBSET_CHOICE_TABLE_feat, 'alternatives',
-                               'choice',
-                               secondary_table=SUBSET_CHOICE_FEATS_TABLE_season,
-                               secondary_to_primary_link={
-                                   'ID': ['choice', 'alternatives'],
-                                   'season': 'season'},
-                               features_to_use=['feat1', 'season'])
-
-        mybt = BradleyTerry(method='BFGS', alpha=1e-5)
-
-        d1, d2, _id = mybt.task_indexing(test_task)
-
-        correct_d1 = test_task.subset_vec.pairwise_reducer() \
-            .set_index(['alt1', 'alt2'])
-
-        correct_d1['season'] = [7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8,
-                                8, 8, 8]
-
-        correct_d2 = SUBSET_CHOICE_FEATS_TABLE_season.set_index('ID')
-        correct_id = ['season']
-
-        assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
-        assert_frame_equal(d2.astype('int32'), correct_d2.astype('int32'))
-        self.assertListEqual(_id, correct_id)
 
