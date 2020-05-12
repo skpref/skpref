@@ -639,11 +639,13 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         if self.pylogit_fit:
             self.fit_checks(df)
 
-            if df_i is None:
+            if df_i is None and self.df_i is not None:
                 df_i = self.df_i.copy()
-            if df_j is None:
+
+            if df_j is None and self.df_j is not None:
                 df_j = self.df_j.copy()
-            if merge_columns is None:
+
+            if merge_columns is None and self.merge_columns is not None:
                 merge_columns = self.merge_columns.copy()
 
             reference_df = df.reset_index().copy()

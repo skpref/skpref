@@ -20,7 +20,11 @@ class Model(BaseEstimator):
         pass
 
     def fit_task(self, task: PrefTask) -> None:
-        self.task_fit_features = task.annotations['features_to_use'].copy()
+        if task.annotations['features_to_use'] is not None:
+            self.task_fit_features = task.annotations['features_to_use'].copy()
+        else:
+            self.task_fit_features = None
+
         return self.fit(**self.task_unpacker(task))
 
     def predict(self, df_comb: pd.DataFrame,
