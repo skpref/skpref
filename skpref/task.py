@@ -76,10 +76,49 @@ class PrefTask(ABC):
         }
     """
 
-    def __init__(self, pref_task_type, data_hook, annotations):
+    def __init__(self, pref_task_type, primary_table,
+                 primary_table_alternatives_names, primary_table_target_name,
+                 secondary_table=None, features_to_use='all',
+                 secondary_to_primary_link=None):
+
         self.pref_task_type = pref_task_type
-        self.data_hook = data_hook
-        self.annotations = annotations
+
+        # Read in primary table
+        self.primary_table, prim_name, prim_hook = \
+            _table_reader(primary_table)
+
+        self.data_hook = prim_hook
+
+        if features_to_use is not None and features_to_use != 'all':
+            self.primary_table_features_to_use = np.intersect1d(
+                features_to_use, self.primary_table.columns)
+
+        # Read in secondary table
+        if secondary_table is not None:
+            self.secondary_table, sec_name, sec_hook = \
+                _table_reader(secondary_table)
+
+            self.secondary_to_primary_link = secondary_to_primary_link
+
+            if features_to_use is not None and features_to_use != 'all':
+                self.secondary_table_features_to_use = np.intersect1d(
+                    features_to_use, self.secondary_table.columns)
+
+        else:
+            self.secondary_table = None
+
+        self.primary_table_alternatives_names = primary_table_alternatives_names
+        self.primary_table_target_name = primary_table_target_name
+
+        self.annotations = {
+            'primary_table_name': prim_name,
+            'primary_table_alternatives_names':
+                self.primary_table_alternatives_names,
+            'primary_table_target_names': self.primary_table_target_name,
+            'secondary_table_name': secondary_table,
+            'secondary_to_primary_link': secondary_to_primary_link,
+            'features_to_use': features_to_use
+        }
 
 
 def _table_reader(table):
@@ -189,46 +228,15 @@ class ChoiceTask(PrefTask):
                  secondary_to_primary_link=None, entity_slot_type_kwargs=None,
                  target_type_kwargs=None, features_to_use='all'):
 
-        # Read in primary table
-        self.primary_table, prim_name, prim_hook =\
-            _table_reader(primary_table)
-
-        if features_to_use is not None and features_to_use != 'all':
-            self.primary_table_features_to_use = np.intersect1d(
-                features_to_use, self.primary_table.columns)
-
-        # Read in secondary table
-        if secondary_table is not None:
-            self.secondary_table, sec_name, sec_hook = \
-                _table_reader(secondary_table)
-
-            self.secondary_to_primary_link = secondary_to_primary_link
-
-            if features_to_use is not None and features_to_use != 'all':
-                self.secondary_table_features_to_use = np.intersect1d(
-                    features_to_use, self.secondary_table.columns)
-
-        else:
-            self.secondary_table = None
-
-        self.primary_table_alternatives_names = primary_table_alternatives_names
-        self.primary_table_target_name = primary_table_target_name
-
-        annotations = {
-            'primary_table_name': prim_name,
-            'primary_table_alternatives_names':
-                self.primary_table_alternatives_names,
-            'primary_table_target_names': self.primary_table_target_name,
-            'secondary_table_name': secondary_table,
-            'secondary_to_primary_link': secondary_to_primary_link,
-            'features_to_use': features_to_use
-        }
-
         super(ChoiceTask, self).__init__(
             pref_task_type=ChoiceTaskType(entity_slot_type_kwargs,
                                           target_type_kwargs),
-            data_hook=prim_hook,
-            annotations=annotations
+            primary_table=primary_table,
+            primary_table_alternatives_names=primary_table_alternatives_names,
+            primary_table_target_name=primary_table_target_name,
+            secondary_table=secondary_table,
+            secondary_to_primary_link=secondary_to_primary_link,
+            features_to_use=features_to_use
         )
 
         if not hasattr(self, 'top'):
