@@ -196,7 +196,7 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
 
         mybt = PairwiseComparisonModel()
 
-        ret_dict = mybt.fit_task_unpacker(test_task)
+        ret_dict = mybt.task_unpacker(test_task)
         correct_d1 = DATA.set_index(['ent1', 'ent2']) \
             .rename(columns={'result': 'alt1_top'})
         correct_d2 = ENT1_ATTRIBUTES.set_index('ent1')
@@ -215,10 +215,9 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
         self.assertEqual(correct_ret_dict['merge_columns'], None)
 
 
-
 class TestSVMPairwiseComparisonModel(unittest.TestCase):
 
-    def test_correct_indexing(self):
+    def test_correct_indexing_choice(self):
         test_task = ChoiceTask(SUBSET_CHOICE_TABLE, 'alternatives', 'choice')
 
         mybt = SVMPairwiseComparisonModel()
@@ -269,3 +268,19 @@ class TestSVMPairwiseComparisonModel(unittest.TestCase):
         ).set_index(['alt1', 'alt2'])
 
         assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
+
+    def test_correct_indexing_pariwsie(self):
+        test_task = PairwiseComparisonTask(
+            DATA, ['ent1', 'ent2'], 'result', 'ent1')
+
+        mybt = SVMPairwiseComparisonModel()
+        d1, _, _ = mybt.task_indexing(test_task)
+
+        correct_d1 = pd.DataFrame(
+            {'observation': [0, 0, 1, 1, 2, 2, 3, 3],
+             'alt1': ['C', 'B', 'A', 'B', 'D', 'C', 'D', 'C'],
+             'alt2': ['B', 'C', 'B', 'A', 'C', 'D', 'C', 'D'],
+             'alt1_top': [1, 0, 1, 0, 1, 0, 1, 0]}
+        ).set_index(['alt1', 'alt2'])
+        assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
+

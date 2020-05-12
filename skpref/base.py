@@ -1,16 +1,17 @@
 from sklearn.base import BaseEstimator
 from skpref.task import PrefTask, PairwiseComparisonTask, ChoiceTask
 import pandas as pd
-from typing import List
+from typing import List, Type
 import numpy as np
 
 
 class Model(BaseEstimator):
     """Base Class for all models"""
-    def fit_task_unpacker(self, task: PrefTask) -> dict:
+    def task_unpacker(self, task: PrefTask) -> dict:
         pass
 
-    def predict_task_unpacker(self, task: PrefTask) -> dict:
+    def task_packer(self, predictions: np.array,
+                    task: Type[PrefTask]) -> np.array:
         pass
 
     def fit(self, df_comb: pd.DataFrame, target: str,
@@ -19,13 +20,19 @@ class Model(BaseEstimator):
         pass
 
     def fit_task(self, task: PrefTask) -> None:
-        return self.fit(**self.fit_task_unpacker(task))
+        self.task_fit_features = task.annotations['features_to_use'].copy()
+        return self.fit(**self.task_unpacker(task))
 
-    def predict(self, df: pd.DataFrame) -> List:
+    def predict(self, df_comb: pd.DataFrame,
+                df_i: pd.DataFrame = None, df_j: pd.DataFrame = None,
+                merge_columns: List[str] = None) -> np.array:
         pass
 
-    def predict_task(self, task: PrefTask) -> List:
-        return self.predict(**self.predict_task_unpacker(task))
+    def predict_task(self, task: PrefTask) -> np.array:
+        if self.task_fit_features != task.annotations['features_to_use']:
+            raise Exception("The task has been fitted with different features")
+        predictions = self.predict(**self.task_unpacker(task))
+        return self.task_packer(predictions, type(task))
 
 
 class PairwiseComparisonModel(Model):
@@ -86,7 +93,9 @@ class PairwiseComparisonModel(Model):
                 if not found_correspondence:
                     raise Exception("key linking to alternatives not provided")
 
-        if type(task) is PairwiseComparisonTask:
+        if isinstance(task, PairwiseComparisonTask) and (
+                self.pairwise_red_args == {}):
+
             _re_indexed_df = task.primary_table.set_index([
                 task.target_column_correspondence,
                 task.inverse_correspondence_column[0]
@@ -97,7 +106,10 @@ class PairwiseComparisonModel(Model):
                 inplace=True
             )
 
-        elif type(task) is ChoiceTask:
+        elif (type(task) is ChoiceTask) or (
+                (type(task) is PairwiseComparisonTask) and
+                (self.pairwise_red_args['style'] == 'reciprocal')
+        ):
             pairwise_comparisons = task.subset_vec.pairwise_reducer(
                 **self.pairwise_red_args)
             if task.annotations['features_to_use'] is not None:
@@ -131,7 +143,7 @@ class PairwiseComparisonModel(Model):
 
         return _re_indexed_df, secondary_re_indexed, input_merge_columns
 
-    def fit_task_unpacker(self, task: PrefTask) -> dict:
+    def task_unpacker(self, task: PrefTask) -> dict:
 
         _re_indexed_df, secondary_re_indexed, input_merge_columns = \
             self.task_indexing(task)
@@ -162,6 +174,9 @@ class PairwiseComparisonModel(Model):
                 'target': 'alt1_top',
                 'df_i': secondary_input,
                 'merge_columns': input_merge_columns}
+
+    # def predict_task_packer(self):
+    #     pass
 
 
 class GLMPairwiseComparisonModel(PairwiseComparisonModel):

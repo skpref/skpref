@@ -115,7 +115,7 @@ class GridSearchCV(object):
         self.refit_time_ = self.gs.refit_time_
 
     def fit_task(self, task):
-        self.fit(**self.estimator.fit_task_unpacker(task))
+        self.fit(**self.estimator.task_unpacker(task))
 
         # make sure all the GridSearchCV attributes are callable as expected
         self.cv_results_ = self.gs.cv_results_

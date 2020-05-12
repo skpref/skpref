@@ -621,7 +621,7 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         j_st = self._params[_df[df.index.names[1]].values]
         return i_st - j_st
 
-    def predict_proba(self, df):
+    def predict_proba(self, df, df_i=None, df_j=None, merge_columns=None):
         """ Predicts the probability of the result = 1 in the match up.
 
         Parameters
@@ -639,6 +639,13 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         if self.pylogit_fit:
             self.fit_checks(df)
 
+            if df_i is None:
+                df_i = self.df_i.copy()
+            if df_j is None:
+                df_j = self.df_j.copy()
+            if merge_columns is None:
+                merge_columns = self.merge_columns.copy()
+
             reference_df = df.reset_index().copy()
 
             reference_df['observation'] = [
@@ -649,8 +656,8 @@ class BradleyTerry(GLMPairwiseComparisonModel):
 
             _df_long = self.unpack_data_for_pylogit(df, self.x_comb_entnames)
 
-            _df_merged = self.join_up_dataframes(_df_long, self.df_i, self.df_j,
-                                                 self.merge_columns)
+            _df_merged = self.join_up_dataframes(_df_long, df_i, df_j,
+                                                 merge_columns)
 
             _df_long['preds'] = self.bt_with_feats.predict(_df_merged)
 
@@ -745,15 +752,15 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         model_input = self.unpack_task_for_predict(task)
         return self.predict_choice(model_input)
 
-    def predict(self, df):
+    def predict(self, df_comb, df_i=None, df_j=None, merge_columns=None):
         """ Predicts the result (1,0) of comparison where the leftmost indexed
         entity being chosen is labelled as 1.
 
         Parameters
         ----------
-        df : DataFrame
-             DataFrame with multi-index where each index is an entity and object
-             of comparison made.
+        df_comb : DataFrame
+                 DataFrame with multi-index where each index is an entity and object
+                 of comparison made.
 
         Returns
         -------
@@ -761,12 +768,12 @@ class BradleyTerry(GLMPairwiseComparisonModel):
             The entity which is expected to be chosen.
         """
         if self.pylogit_fit:
-            self.fit_checks(df)
-            probs = self.predict_proba(df)
+            self.fit_checks(df_comb)
+            probs = self.predict_proba(df_comb, df_i, df_j, merge_columns)
             diff = probs - 0.5
 
         else:
-            diff = self.find_strength_diff(df)
+            diff = self.find_strength_diff(df_comb)
 
         return np.where(diff >= 0, 1, 0)
 
