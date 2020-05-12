@@ -269,7 +269,7 @@ class TestSVMPairwiseComparisonModel(unittest.TestCase):
 
         assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
 
-    def test_correct_indexing_pariwsie(self):
+    def test_correct_indexing_pairwise(self):
         test_task = PairwiseComparisonTask(
             DATA, ['ent1', 'ent2'], 'result', 'ent1')
 
