@@ -266,3 +266,29 @@ class TestSubsetPosetVec(unittest.TestCase):
     def test_if_name_error_raised(self):
         with self.assertRaises(NameError):
             self.test_spv.pairwise_reducer(style='somethingelse')
+
+    def test_classifier_reducer(self):
+        correct_int_classifier_output = pd.DataFrame([
+            [0, 512709, 1],
+            [0, 529703, 1],
+            [0, 696056, 1],
+            [0, 490972, 0],
+            [0, 685450, 0],
+            [0, 5549502, 0],
+            [1, 723354, 1],
+            [1, 550707, 0],
+            [1, 551375, 0],
+            [1, 591842, 0],
+            [1, 601195, 0],
+            [1, 732624, 0],
+            [1, 778197, 0],
+            [1, 813892, 0],
+            [1, 817040, 0],
+            [1, 576214, 0],
+            [1, 673995, 0]
+        ], columns=['observation', 'alternative', 'chosen'])
+
+        result_int_class_red = self.test_spv_int.classifier_reducer()
+        pd.testing.assert_frame_equal(
+            correct_int_classifier_output.astype('int32'),
+            result_int_class_red.astype('int32'))
