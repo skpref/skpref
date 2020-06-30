@@ -6,7 +6,50 @@ import numpy as np
 
 
 class Model(BaseEstimator):
-    """Base Class for all models"""
+    """
+    Base Class for all models
+    Every model will have a fit and predict method. This is defined on the level
+    in the model object e.g. BradleyTerry.
+    Sometimes models will be fit on different tasks than their original design,
+    for example a pairwise comparison model might be fit on a choice data that
+    isn't pairwise comparison. Pairwise comparison models will assume a
+    different data structure to choice models. For example a pairwise comparison
+    dataset might have the following format:
+
+    Table 1: pairwise comparison table
+
+    |option1|option2|choice|
+    |-------|-------|------|
+    |Alt A  | Alt B |Alt B |
+
+    A choice dataset might have this format:
+
+    Table 2: choice table
+
+    |options_presented| options_chosen|
+    |-----------------|---------------|
+    |[A,B,C]          |[A,C]          |
+
+    So pairwise comparison models and choice models would deal with different
+    input data. But the user might want to run the choice task as if it were a
+    pairwise comparison task which would have to look like table 1.
+
+    The task_unpackers will be methods whose job it would be to translate any
+    dataset type into the format that is required by the model, for example all
+    pairwise comparison models will have a task_unpacker that leaves the data
+    as is if it looks like table 1 and changes the data into something like
+    table 1 when it looks like table 2.
+
+    The task_packers will be used to predict the data on the right level. For
+    example if a pairwise comparison model is used to predict a choice then the
+    task_packer will be what aggregates the data up to something like table 2.
+
+    The fit_task function will be simply a wrapper that returns
+    model.fit(task_unpacker(data)) and the predict_task function will be one that
+    returns task_packer(model.preidct(data)) for every model.
+
+    This architecture is defined at the highest level and is fixed.
+    """
     def task_unpacker(self, task: PrefTask) -> dict:
         pass
 
@@ -193,3 +236,18 @@ class SVMPairwiseComparisonModel(PairwiseComparisonModel):
         super(SVMPairwiseComparisonModel, self).__init__(
             {'style': 'reciprocal'}
         )
+
+
+class ClassificationReducer(Model):
+    """
+    This will be an object that allows users to model tasks using models that
+    follow the scikit-learn structure of objects that have fit and predict
+    methods.
+    """
+    def __init__(self, model):
+        self.model = model
+
+    def task_unpacker(self, task: PrefTask) -> dict:
+        # Unpack pairwise comparison data
+        #
+        pass
