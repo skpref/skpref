@@ -308,3 +308,48 @@ class SubsetPosetVec(PosetVector):
                 pairwise_comparison_reduction
 
             return pairwise_comparison_reduction
+
+    def classifier_reducer(self, rejection: int = 0) -> pd.DataFrame:
+        """
+        Reduces observations to classifiers for example when the data looks like
+        this top = [A], boot = [B, C] it will return the following:
+        pd.DataFrame({
+        option: [A, B, C],
+        chosen: [1, 0, 0]
+        })
+        Inputs:
+        --------
+        rejection: int, default=0
+            controls what value gets assigned to rejections, -1 might be
+            preferred for SVM
+        Outputs:
+        --------
+        DataFrame
+        """
+
+        obs = []
+        choice = []
+
+        for top_observation, item in enumerate(self.top_input_data):
+            obs.append(np.ones(len(item) +
+                               len(self.boot_input_data[top_observation]),
+                               dtype=int) *
+                       top_observation
+                       )
+            choice.append(np.append(
+                np.ones(len(item), dtype=int),
+                np.ones(len(self.boot_input_data[top_observation]), dtype=int) *
+                rejection
+            ))
+
+        obs_in = np.hstack(obs)
+        alts_in = np.hstack(np.hstack(np.hstack(
+            np.dstack((self.top_input_data, self.boot_input_data))
+        )))
+        choice_in = np.hstack(choice)
+
+        return pd.DataFrame({
+            'observation': obs_in,
+            'alternative': alts_in,
+            'chosen': choice_in
+        })
