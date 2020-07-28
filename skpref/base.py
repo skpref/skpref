@@ -3,6 +3,7 @@ from skpref.task import PrefTask, PairwiseComparisonTask, ChoiceTask
 import pandas as pd
 from typing import List, Type
 import numpy as np
+from skpref.utils import UnderDevError
 
 
 class Model(BaseEstimator):
@@ -108,37 +109,8 @@ class PairwiseComparisonModel(Model):
         ---------
         The indexed DataFrame
         """
-        input_merge_columns = None
-        secondary_re_indexed = None
-
-        if (task.secondary_table is not None) and (
-                task.annotations['features_to_use'] is not None):
-            if (len(np.intersect1d(task.secondary_table.columns,
-                                   task.annotations['features_to_use'])) > 0)\
-                    or (task.annotations['features_to_use'] == 'all'):
-
-                found_correspondence = False
-
-                for key in task.annotations['secondary_to_primary_link'].keys():
-                    value = task.annotations['secondary_to_primary_link'][key]
-                    if (value == [task.primary_table_target_name,
-                                  task.primary_table_alternatives_names] or
-                            value == [task.primary_table_alternatives_names,
-                                      task.primary_table_target_name] or
-                            value == task.primary_table_alternatives_names or
-                            value == task.primary_table_target_name):
-
-                        secondary_re_indexed = task.secondary_table.set_index(key)
-                        found_correspondence = True
-
-                    else:
-                        if input_merge_columns is None:
-                            input_merge_columns = [key]
-                        else:
-                            input_merge_columns += [key]
-
-                if not found_correspondence:
-                    raise Exception("key linking to alternatives not provided")
+        secondary_re_indexed, input_merge_columns, _, _ =\
+            task.find_merge_columns()
 
         if isinstance(task, PairwiseComparisonTask) and (
                 self.pairwise_red_args == {}):
@@ -247,7 +219,179 @@ class ClassificationReducer(Model):
     def __init__(self, model):
         self.model = model
 
-    def task_unpacker(self, task: PrefTask) -> dict:
-        # Unpack pairwise comparison data
-        #
-        pass
+    def task_unpacker(self, task: PrefTask, keep_pairwise_format: bool = True,
+                      take_feautre_diff: bool = False) -> dict:
+        """
+        If we have a pairwise comparison task there are two options:
+        * If we allow for the data to be kept as is, in the format of
+            | alternative 1 | alternative 2 | alt1_chosen |
+            |---------------|---------------|-------------|
+
+          Assume a secondary table of the form:
+            | alternative | feature  |
+            |-------------|----------|
+
+          I would like to allow for two options, one is to create a final table
+          as:
+
+            Option 1
+
+            | feauture alt 1| feature alt 2 | alt1_chosen |
+            |---------------|---------------|-------------|
+
+            Option 2
+
+            | feauture alt 1 - feature alt 2 | alt1_chosen |
+            |--------------------------------|-------------|
+
+            For aggregation these features are recreated and then prediction is
+            given
+
+        * We can break down the table into individual observations like so in
+          long format:
+
+            | alternative | feature | chosen | observation |
+            |-------------|---------|--------|-------------|
+
+          And then aggregate up by predicting probability on an observation
+          level and the alternative inside the observation that has the highest
+          probability gets chosen. this would be the same approach with subset
+          selection.
+
+        Parameters
+        ----------
+        task: PrefTask
+            The task that has been initialised for the preference learning
+
+        keep_pairwise_format: bool default is True
+            This will control whether to keep pairwise format for a pairwise task
+            it is only relevant for a PairwiseComparisonTask.
+
+        take_feautre_diff: bool default is False
+            This will take the difference in features like described in Option 2
+            above
+
+        Returns
+        -------
+        dict
+            {'df_comb': contains the dataset with the dependent variable and
+                features to predict
+             'target': str of the column name of the target variable}
+
+        """
+
+        # Create aggregation for pairwise task
+        if isinstance(task, PairwiseComparisonTask) and keep_pairwise_format:
+
+            # Create the table like it is in Option 1
+            if len(task.secondary_table_features_to_use) > 0:
+
+                _, _, left_on, right_on, = task.find_merge_columns()
+
+                first_alternative_on = left_on[np.where(
+                    left_on != task.primary_table_alternatives_names[1])]
+
+                second_alternative_on = left_on[np.where(
+                    left_on != task.primary_table_alternatives_names[0]
+                )]
+
+                # Hacky solution to make sure suffixes work as we'd like them to
+                initialise_cols = list(task.secondary_table.columns)
+                initialise_cols.remove(right_on)
+
+                model_input = task.primary_table.copy()
+                for i in initialise_cols:
+                    model_input[i] = None
+
+                # prepare to drop alternative keys merged on
+                drop_cols = [i + '_' + task.primary_table_alternatives_names[0]
+                             for i in right_on]
+
+                drop_cols += [i + '_' + task.primary_table_alternatives_names[1]
+                              for i in right_on]
+
+                drop_cols += initialise_cols
+
+                model_input = model_input.merge(
+                    task.secondary_table, how='left',
+                    left_on=list(first_alternative_on),
+                    right_on=list(right_on),
+                    validate='m:1',
+                    suffixes=['', '_' + task.primary_table_alternatives_names[0]]
+                ).merge(
+                    task.secondary_table, how='left',
+                    left_on=list(second_alternative_on),
+                    right_on=list(right_on),
+                    validate='m:1',
+                    suffixes=['', '_' + task.primary_table_alternatives_names[1]]
+                ).drop(drop_cols, axis=1, errors='ignore')
+
+                # Create the table like it is in Option 2
+                if take_feautre_diff:
+                    for root_col in initialise_cols:
+                        model_input[root_col + '_diff'] = model_input[
+                            root_col + '_' +
+                            task.primary_table_alternatives_names[0]
+                                                          ] - model_input[
+                            root_col + '_' +
+                            task.primary_table_alternatives_names[1]
+                        ]
+
+                        model_input.drop([
+                            root_col + '_' +
+                            task.primary_table_alternatives_names[0],
+                            root_col + '_' +
+                            task.primary_table_alternatives_names[1]
+                        ], inplace=True, axis=1)
+
+            else:
+                model_input = task.primary_table.copy()
+
+            model_input.rename(columns={task.primary_table_target_name:
+                                        'chosen'}, inplace=True)
+
+        # Create aggregation for choice task
+        elif isinstance(task, ChoiceTask):
+            model_input = task.subset_vec.classifier_reducer()
+
+            if len(task.primary_table_features_to_use) > 0:
+                model_input = model_input.merge(
+                    task.primary_table[task.primary_table_features_to_use],
+                    how='inner', left_on='observation', right_index=True,
+                    validate='m:1'
+                )
+
+            if len(task.secondary_table_features_to_use) > 0:
+                _, _, left_on, right_on = task.find_merge_columns(
+                    original_naming=False)
+
+                model_input = model_input.merge(
+                    task.secondary_table, how='left', left_on=list(left_on),
+                    right_on=list(right_on), validate='m:1')
+
+                model_input = model_input[['alternative', 'chosen'] +
+                    list(np.setdiff1d(task.secondary_table_features_to_use,
+                                      right_on))
+                ]
+
+        else:
+            raise UnderDevError(
+                "This method has not yet been developed for this type of task")
+
+        return {'df_comb': model_input,
+                'target': 'chosen',
+                'df_i': None,
+                'merge_columns': None}
+
+    def fit(self, df_comb: pd.DataFrame, target: str,
+            df_i: pd.DataFrame = None, df_j: pd.DataFrame = None,
+            merge_columns: List[str] = None):
+
+        self.model.fit(df_comb.drop('chosen', axis=1),
+                       df_comb['chosen'])
+
+    def predict(self, df_comb: pd.DataFrame,
+                df_i: pd.DataFrame = None, df_j: pd.DataFrame = None,
+                merge_columns: List[str] = None) -> np.array:
+
+        self.model.predict(df_comb.drop('chosen', axis=1, errors='ignore'))

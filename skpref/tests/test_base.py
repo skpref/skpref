@@ -1,63 +1,10 @@
 import unittest
 from skpref.task import ChoiceTask, PairwiseComparisonTask
-import pandas as pd
-from skpref.base import PairwiseComparisonModel, SVMPairwiseComparisonModel
+from skpref.base import (PairwiseComparisonModel, SVMPairwiseComparisonModel,
+                         ClassificationReducer)
 from pandas.testing import assert_frame_equal
-
-SUBSET_CHOICE_TABLE = pd.DataFrame(
-    {'choice': [[512709, 529703, 696056], [723354]],
-     'alternatives': [[512709, 529703, 696056, 490972,  685450, 5549502],
-                      [550707, 551375, 591842, 601195, 732624, 778197, 813892,
-                       817040, 576214, 673995, 723354]]}
-)
-
-SUBSET_CHOICE_FEATS_TABLE = pd.DataFrame(
-    {'ID': [490972,  512709,  529703,  550707,  551375,  576214,  591842,
-            601195,  673995,  685450,  696056,  723354,  732624,  778197,
-            813892,  817040, 5549502],
-     'feat1': [6, 6, 6, 8, 8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
-     }
-)
-
-SUBSET_CHOICE_TABLE_season = pd.DataFrame(
-    {'choice': [[512709, 529703, 696056], [723354]],
-     'alternatives': [[512709, 529703, 696056, 490972,  685450, 5549502],
-                      [550707, 551375, 591842, 601195, 732624, 778197, 813892,
-                       817040, 576214, 673995, 723354]],
-     'season': [7, 8]}
-)
-
-SUBSET_CHOICE_FEATS_TABLE_season = pd.DataFrame(
-    {'ID': [490972,  512709,  529703,  550707,  551375,  576214,  591842,
-            601195,  673995,  685450,  696056,  723354,  732624,  778197,
-            813892,  817040, 5549502,
-            490972, 512709, 529703, 550707, 551375, 576214, 591842,
-            601195, 673995, 685450, 696056, 723354, 732624, 778197,
-            813892, 817040, 5549502
-            ],
-     'feat1': [6, 6, 6, 8, 8, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6,
-               0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-     'season': [7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
-                8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
-     }
-)
-
-SUBSET_CHOICE_TABLE_feat = pd.DataFrame(
-    {'choice': [[512709, 529703, 696056], [723354]],
-     'alternatives': [[512709, 529703, 696056, 490972,  685450, 5549502],
-                      [550707, 551375, 591842, 601195, 732624, 778197, 813892,
-                       817040, 576214, 673995, 723354]],
-     'season': [7, 8]}
-)
-
-DATA = pd.DataFrame({'ent1': ['C', 'B', 'C', 'D'],
-                     'ent2': ['B', 'A', 'D', 'C'],
-                     'result': [1, 0, 0, 1]})
-
-ENT1_ATTRIBUTES = pd.DataFrame(
-    {'ent1': ['A', 'B', 'C', 'D'],
-     'feat1': [1, 11, 12, 15]}
-)
+from sklearn.dummy import DummyClassifier
+from skpref.tests.shared_test_dataframes import *
 
 
 class TestPairwiseComparisonModelFunctions(unittest.TestCase):
@@ -107,7 +54,7 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
         self.assertListEqual(_id, correct_id)
 
     def test_task_indexing_primary_feat_merge(self):
-        test_task = ChoiceTask(SUBSET_CHOICE_TABLE_feat, 'alternatives',
+        test_task = ChoiceTask(SUBSET_CHOICE_TABLE_season, 'alternatives',
                                'choice',
                                secondary_table=SUBSET_CHOICE_FEATS_TABLE,
                                secondary_to_primary_link={
@@ -132,7 +79,7 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
         self.assertListEqual(_id, correct_id)
 
     def test_task_indexing_id_also_feat_merge(self):
-        test_task = ChoiceTask(SUBSET_CHOICE_TABLE_feat, 'alternatives',
+        test_task = ChoiceTask(SUBSET_CHOICE_TABLE_season, 'alternatives',
                                'choice',
                                secondary_table=SUBSET_CHOICE_FEATS_TABLE_season,
                                secondary_to_primary_link={
@@ -284,3 +231,104 @@ class TestSVMPairwiseComparisonModel(unittest.TestCase):
         ).set_index(['alt1', 'alt2'])
         assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
 
+
+class TestClassificationReducer(unittest.TestCase):
+
+    def test_task_unpacker_pairwise(self):
+        test_task = PairwiseComparisonTask(
+            DATA, ['ent1', 'ent2'], 'result', 'ent1',
+            secondary_table=ENT1_ATTRIBUTES,
+            secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
+
+        my_model = ClassificationReducer(
+            DummyClassifier('constant', constant=1))
+
+        unpacker_dict = my_model.task_unpacker(test_task)
+
+        correct_output_data = pd.DataFrame({
+            'ent1': ['C', 'B', 'C', 'D'],
+            'ent2': ['B', 'A', 'D', 'C'],
+            'chosen': [1, 0, 0, 1],
+            'feat1_ent1': [12, 11, 12, 15],
+            'feat1_ent2': [11, 1, 15, 12]
+        })
+
+        assert_frame_equal(unpacker_dict['df_comb'], correct_output_data)
+
+    def test_task_unpacker_diff_pairwise(self):
+        test_task = PairwiseComparisonTask(
+            DATA, ['ent1', 'ent2'], 'result', 'ent1',
+            secondary_table=ENT1_ATTRIBUTES,
+            secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
+
+        my_model = ClassificationReducer(
+            DummyClassifier('constant', constant=1))
+
+        unpacker_dict = my_model.task_unpacker(test_task,
+                                               take_feautre_diff=True)
+
+        correct_output_data = pd.DataFrame({
+            'ent1': ['C', 'B', 'C', 'D'],
+            'ent2': ['B', 'A', 'D', 'C'],
+            'chosen': [1, 0, 0, 1],
+            'feat1_diff': [1, 10, -3, 3]
+        })
+
+        assert_frame_equal(unpacker_dict['df_comb'], correct_output_data)
+
+    def test_task_unpacker_choice_task(self):
+        test_task = ChoiceTask(
+            SUBSET_CHOICE_TABLE, 'alternatives', 'choice',
+            SUBSET_CHOICE_FEATS_TABLE,
+            {'ID': ['choice', 'alternatives']}
+        )
+
+        my_model = ClassificationReducer(
+            DummyClassifier('constant', constant=1))
+
+        unpacker_dict = my_model.task_unpacker(test_task)
+
+        correct_output_data = pd.DataFrame([
+            [512709, 1, 6],
+            [529703, 1, 6],
+            [696056, 1, 6],
+            [490972, 0, 6],
+            [685450, 0, 6],
+            [5549502, 0, 6],
+            [723354, 1, 6],
+            [550707, 0, 8],
+            [551375, 0, 8],
+            [591842, 0, 6],
+            [601195, 0, 6],
+            [732624, 0, 6],
+            [778197, 0, 6],
+            [813892, 0, 6],
+            [817040, 0, 6],
+            [576214, 0, 6],
+            [673995, 0, 6]
+        ], columns=['alternative', 'chosen', 'feat1'])
+
+        assert_frame_equal(unpacker_dict['df_comb'].astype('int32'),
+                           correct_output_data.astype('int32'))
+
+    # def test_task_unpacker_diff_pairwise_no_result(self):
+    #     test_task = PairwiseComparisonTask(
+    #         DATA.drop('result', axis=1), ['ent1', 'ent2'], 'result', 'ent1',
+    #         secondary_table=ENT1_ATTRIBUTES,
+    #         secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
+    #
+    #     my_model = ClassificationReducer(
+    #         DummyClassifier('constant', constant=1))
+    #primary_table_alternatives_names
+    #     unpacker_dict = my_model.task_unpacker(test_task,
+    #                                            take_feautre_diff=True)
+    #
+    #     correct_output_data = pd.DataFrame({
+    #         'ent1': ['C', 'B', 'C', 'D'],
+    #         'ent2': ['B', 'A', 'D', 'C'],
+    #         'feat1_diff': [1, 10, -3, 3]
+    #     })
+    #
+    #     print(unpacker_dict['df_comb'])
+    #
+    #     assert_frame_equal(unpacker_dict['df_comb'], correct_output_data)
