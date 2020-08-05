@@ -54,8 +54,8 @@ class Model(BaseEstimator):
     def task_unpacker(self, task: PrefTask) -> dict:
         pass
 
-    def task_packer(self, predictions: np.array,
-                    task: Type[PrefTask]) -> np.array:
+    def task_packer(self, predictions: np.array, task: Type[PrefTask]
+                    ) -> np.array:
         pass
 
     def fit(self, df_comb: pd.DataFrame, target: str,
@@ -218,6 +218,9 @@ class ClassificationReducer(Model):
     """
     def __init__(self, model):
         self.model = model
+        self.obs_col = None
+        self.keep_pairwise_format = True
+        self.alternative = None
 
     def task_unpacker(self, task: PrefTask, keep_pairwise_format: bool = True,
                       take_feautre_diff: bool = False) -> dict:
@@ -280,6 +283,7 @@ class ClassificationReducer(Model):
 
         """
 
+        self.keep_pairwise_format = keep_pairwise_format
         # Create aggregation for pairwise task
         if isinstance(task, PairwiseComparisonTask) and keep_pairwise_format:
 
@@ -311,6 +315,8 @@ class ClassificationReducer(Model):
                               for i in right_on]
 
                 drop_cols += initialise_cols
+
+                drop_cols += task.primary_table_alternatives_names
 
                 model_input = model_input.merge(
                     task.secondary_table, how='left',
@@ -345,7 +351,8 @@ class ClassificationReducer(Model):
                         ], inplace=True, axis=1)
 
             else:
-                model_input = task.primary_table.copy()
+                model_input = task.primary_table.drop(
+                    task.primary_table_alternatives_names, aixs=1).copy()
 
             model_input.rename(columns={task.primary_table_target_name:
                                         'chosen'}, inplace=True)
@@ -369,7 +376,11 @@ class ClassificationReducer(Model):
                     task.secondary_table, how='left', left_on=list(left_on),
                     right_on=list(right_on), validate='m:1')
 
-                model_input = model_input[['alternative', 'chosen'] +
+                self.obs_col = model_input.observation.values
+                self.alternative = model_input.alternative.values
+
+                model_input = model_input[
+                    ['chosen'] +
                     list(np.setdiff1d(task.secondary_table_features_to_use,
                                       right_on))
                 ]
@@ -395,3 +406,12 @@ class ClassificationReducer(Model):
                 merge_columns: List[str] = None) -> np.array:
 
         self.model.predict(df_comb.drop('chosen', axis=1, errors='ignore'))
+
+    def task_packer(self, predictions, task_type):
+        if task_type is PairwiseComparisonTask and self.keep_pairwise_format:
+            return predictions
+        else:
+            return pd.DataFrame({
+                'prediction': np.where(predictions == 1, self.alternative, None),
+                'obs': self.obs_col}).dropna().groupby('obs')\
+                ['prediction'].unique().values
