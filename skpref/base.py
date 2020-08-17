@@ -360,6 +360,8 @@ class ClassificationReducer(Model):
         # Create aggregation for choice task
         elif isinstance(task, ChoiceTask):
             model_input = task.subset_vec.classifier_reducer()
+            if task.primary_table_target_name is None:
+                model_input.drop(column='chosen', inplace=True)
 
             if len(task.primary_table_features_to_use) > 0:
                 model_input = model_input.merge(
@@ -412,6 +414,7 @@ class ClassificationReducer(Model):
             return predictions
         else:
             return pd.DataFrame({
-                'prediction': np.where(predictions == 1, self.alternative, None),
-                'obs': self.obs_col}).dropna().groupby('obs')\
+                'prediction': np.where(predictions == 1, self.alternative,
+                                       None),
+                'obs': self.obs_col}).dropna().groupby('obs') \
                 ['prediction'].unique().values

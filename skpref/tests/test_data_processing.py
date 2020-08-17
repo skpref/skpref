@@ -263,6 +263,22 @@ class TestSubsetPosetVec(unittest.TestCase):
             correct_pairwise_scrambled.astype('int32'),
             result_pairwise_scrambled.astype('int32'))
 
+    def test_pairwise_reducer_for_scoring(self):
+        # Create a subset poset vector with no depvar
+        alts = np.array([np.array([111, 222]), np.array([111, 222, 333])])
+        test_scoring_vec = SubsetPosetVec(alts, alts)
+
+        pairwise_reduction = test_scoring_vec.pairwise_reducer(scramble=False)
+
+        expected_outcome = pd.DataFrame({
+            'observation': [0, 0, 1, 1, 1, 1, 1, 1],
+            'top': [111, 222, 111, 111, 222, 222, 333, 333],
+            'boot': [222, 111, 222, 333, 111, 333, 111, 222]
+        })
+
+        pd.testing.assert_frame_equal(pairwise_reduction.astype('int32'),
+                                      expected_outcome.astype('int32'))
+
     def test_if_name_error_raised(self):
         with self.assertRaises(NameError):
             self.test_spv.pairwise_reducer(style='somethingelse')
@@ -289,6 +305,23 @@ class TestSubsetPosetVec(unittest.TestCase):
         ], columns=['observation', 'alternative', 'chosen'])
 
         result_int_class_red = self.test_spv_int.classifier_reducer()
+
         pd.testing.assert_frame_equal(
             correct_int_classifier_output.astype('int32'),
             result_int_class_red.astype('int32'))
+
+    def test_classifier_reducer_for_scoring(self):
+        # Create a subset poset vector with no depvar
+        alts = np.array([np.array([111, 222]), np.array([111, 222, 333])])
+        test_scoring_vec = SubsetPosetVec(alts, alts)
+
+        pairwise_reduction = test_scoring_vec.classifier_reducer()
+
+        expected_outcome = pd.DataFrame({
+            'observation': [0, 0, 1, 1, 1],
+            'alternative': [111, 222, 111, 222, 333],
+            'chosen': [1, 1, 1, 1, 1]
+        })
+
+        pd.testing.assert_frame_equal(pairwise_reduction.astype('int32'),
+                                      expected_outcome.astype('int32'))

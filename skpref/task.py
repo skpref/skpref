@@ -79,7 +79,7 @@ class PrefTask(ABC):
 
     def __init__(self, pref_task_type: PrefTaskType, primary_table: pd.DataFrame,
                  primary_table_alternatives_names: Union[List[str], str],
-                 primary_table_target_name: str,
+                 primary_table_target_name: str = None,
                  secondary_table: pd.DataFrame = None,
                  features_to_use: List[str] = 'all',
                  secondary_to_primary_link: dict = None):
@@ -98,16 +98,20 @@ class PrefTask(ABC):
 
         elif features_to_use == 'all':
             if isinstance(primary_table_alternatives_names, list):
-                self.primary_table_features_to_use = np.setdiff1d(
-                    primary_table_alternatives_names + [primary_table_target_name],
-                    self.primary_table.columns
-                )
+                if primary_table_target_name is None:
+                    first_comp_element = primary_table_alternatives_names
+
+                else:
+                    first_comp_element = primary_table_alternatives_names + \
+                                         [primary_table_target_name]
+            elif primary_table_target_name is None:
+                first_comp_element = [primary_table_alternatives_names]
             else:
-                self.primary_table_features_to_use = np.setdiff1d(
-                    [primary_table_alternatives_names,
-                     primary_table_target_name],
-                    self.primary_table.columns
-                )
+                first_comp_element = [primary_table_alternatives_names,
+                                      primary_table_target_name]
+
+            self.primary_table_features_to_use = np.setdiff1d(
+                first_comp_element, self.primary_table.columns)
 
         else:
             self.primary_table_features_to_use = []
@@ -279,7 +283,7 @@ class ChoiceTask(PrefTask):
     primary_table_alternatives_names: str
         The column or attribute which corresponds to the alternatives in the
         primary table.
-    primary_table_target_name: str
+    primary_table_target_name: str, default=None
         The column name or attribute which corresponds to the ground truth
     secondary_table: DataFrame, default=None
         The secondary table that usually contains information about the
@@ -298,10 +302,14 @@ class ChoiceTask(PrefTask):
         every column as features. If the user wants to use a model that doesn't
         use any features then it should be set to None
     """
-    def __init__(self, primary_table, primary_table_alternatives_names,
-                 primary_table_target_name, secondary_table=None,
-                 secondary_to_primary_link=None, entity_slot_type_kwargs=None,
-                 target_type_kwargs=None, features_to_use='all'):
+    def __init__(self, primary_table: pd.DataFrame,
+                 primary_table_alternatives_names: Union[List[str], str],
+                 primary_table_target_name: str = None,
+                 secondary_table: pd.DataFrame = None,
+                 secondary_to_primary_link: dict = None,
+                 entity_slot_type_kwargs: dict = None,
+                 target_type_kwargs: dict = None,
+                 features_to_use: Union[List[str], str] = 'all') -> None:
 
         super(ChoiceTask, self).__init__(
             pref_task_type=ChoiceTaskType(entity_slot_type_kwargs,
@@ -314,7 +322,7 @@ class ChoiceTask(PrefTask):
             features_to_use=features_to_use
         )
 
-        if not hasattr(self, 'top'):
+        if not hasattr(self, 'top') and self.primary_table_target_name is not None:
             if type(self.primary_table_target_name) is list:
                 self.top = self.primary_table[self.primary_table_target_name]\
                     .copy().values
@@ -328,6 +336,8 @@ class ChoiceTask(PrefTask):
                 if type(self.top[0]) not in [np.ndarray, list]:
                     self.top = self.top.reshape(len(self.top), 1)
 
+            self.top = _convert_array_of_lists_to_array_of_arrays(self.top)
+
         if type(self.primary_table_alternatives_names) is list:
             alts = self.primary_table[self.primary_table_alternatives_names].copy()\
                 .values
@@ -336,11 +346,15 @@ class ChoiceTask(PrefTask):
                 .copy().values
 
         alts = _convert_array_of_lists_to_array_of_arrays(alts)
-        self.top = _convert_array_of_lists_to_array_of_arrays(self.top)
 
-        joint_alts = np.array([[self.top[i], alts[i]] for i in range(len(alts))])
-        boot = np.array([np.setdiff1d(x[1], x[0], assume_unique=True)
-                         for x in joint_alts])
+        if self.top is not None:
+            joint_alts = np.array([[self.top[i], alts[i]]
+                                   for i in range(len(alts))])
+            boot = np.array([np.setdiff1d(x[1], x[0], assume_unique=True)
+                             for x in joint_alts])
+        else:
+            boot = alts
+            self.top = boot
 
         self.subset_vec = SubsetPosetVec(
             self.top,
@@ -394,10 +408,14 @@ class PairwiseComparisonTask(ChoiceTask):
             has been chosen. i.e. there is a column with home team another one with
             away team and target is 1 when home team wins.
         """
-    def __init__(self, primary_table, primary_table_alternatives_names,
-                 primary_table_target_name, target_column_correspondence,
-                 secondary_table=None, secondary_to_primary_link=None,
-                 target_type_kwargs=None, features_to_use='all'):
+    def __init__(self, primary_table: pd.DataFrame,
+                 primary_table_alternatives_names: List[str],
+                 primary_table_target_name: str = None,
+                 target_column_correspondence: str = None,
+                 secondary_table: pd.DataFrame = None,
+                 secondary_to_primary_link: dict = None,
+                 target_type_kwargs: dict = None,
+                 features_to_use: Union[str, List[str]] = 'all') -> None:
 
         self.target_column_correspondence = target_column_correspondence
 
@@ -411,6 +429,9 @@ class PairwiseComparisonTask(ChoiceTask):
                 primary_table[target_column_correspondence],
                 primary_table[self.inverse_correspondence_column[0]]
             ).reshape(len(primary_table), 1)
+
+        else:
+            self.top = None
 
         entity_slot_type_kwargs = {
             'top_size_const': True,

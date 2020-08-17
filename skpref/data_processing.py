@@ -4,6 +4,7 @@ import pandas as pd
 from scipy.sparse import csr_matrix
 from collections import defaultdict
 import random
+from typing import Union
 
 # Poset Types
 
@@ -171,7 +172,8 @@ class SubsetPosetVec(PosetVector):
         An option for the user to specify variables which are related to the
         PosetType such as {'boot_size_const': True, 'boot_size_length': 5}
     """
-    def __init__(self, top_input_data, boot_input_data, subset_type_vars=None):
+    def __init__(self, top_input_data: np.array, boot_input_data: np.array,
+                 subset_type_vars: dict = None):
         self.top_input_data = top_input_data
         self.boot_input_data = boot_input_data
         self.pairwise_comparison_reduction_dict = defaultdict()
@@ -211,8 +213,9 @@ class SubsetPosetVec(PosetVector):
         super(SubsetPosetVec, self).__init__(entity_universe, poset_type, dims,
                                              efficient_representation)
 
-    def pairwise_reducer(self, style="positive", rejection=0, scramble=True,
-                         random_seed_scramble=None):
+    def pairwise_reducer(self, style: str = "positive",
+                         rejection: Union[int, float] = 0, scramble: bool = True,
+                         random_seed_scramble: int = None) -> pd.DataFrame:
         """
         Breaks a SubsetPosetVec into the most elementary parts of a pairwise
         comparison.
@@ -249,7 +252,7 @@ class SubsetPosetVec(PosetVector):
             divisor = 4
             columns = ['observation', 'alt1', 'alt2', 'alt1_top']
 
-        if style not in ['positive', 'reciprocal']:
+        else:
             raise NameError("style can only be positive or "
                             "reciprocal")
 
@@ -270,6 +273,8 @@ class SubsetPosetVec(PosetVector):
             for i, choice in enumerate(self.top_input_data):
                 for j in choice:
                     for k in self.boot_input_data[i]:
+                        if j == k:
+                            continue
                         if style == "positive" and not scramble:
                             observation = np.array([i, j, k])
                         elif style == "positive" and scramble:
@@ -352,4 +357,5 @@ class SubsetPosetVec(PosetVector):
             'observation': obs_in,
             'alternative': alts_in,
             'chosen': choice_in
-        })
+        }).drop_duplicates(subset=['observation', 'alternative'])\
+            .reset_index(drop=True)

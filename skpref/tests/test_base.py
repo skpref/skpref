@@ -327,63 +327,58 @@ class TestClassificationReducer(unittest.TestCase):
         # [576214, 0, 6],
         # [673995, 0, 6]
 
-    # def test_task_unpacker_diff_pairwise_no_result(self):
-    #     test_task = PairwiseComparisonTask(
-    #         DATA.drop('result', axis=1), ['ent1', 'ent2'], 'result', 'ent1',
-    #         secondary_table=ENT1_ATTRIBUTES,
-    #         secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
-    #
-    #     my_model = ClassificationReducer(
-    #         DummyClassifier('constant', constant=1))
-    #primary_table_alternatives_names
-    #     unpacker_dict = my_model.task_unpacker(test_task,
-    #                                            take_feautre_diff=True)
-    #
-    #     correct_output_data = pd.DataFrame({
-    #         'ent1': ['C', 'B', 'C', 'D'],
-    #         'ent2': ['B', 'A', 'D', 'C'],
-    #         'feat1_diff': [1, 10, -3, 3]
-    #     })
-    #
-    #     print(unpacker_dict['df_comb'])
-    #
-    #     assert_frame_equal(unpacker_dict['df_comb'], correct_output_data)
+    def test_task_unpacker_diff_pairwise_no_result(self):
+        test_task = PairwiseComparisonTask(
+            DATA.drop('result', axis=1), ['ent1', 'ent2'],
+            secondary_table=ENT1_ATTRIBUTES,
+            secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
 
-    # def test_task_packer_pairwise_comparison(self):
-    #     test_task = PairwiseComparisonTask(
-    #         DATA, ['ent1', 'ent2'], 'result', 'ent1',
-    #         secondary_table=ENT1_ATTRIBUTES,
-    #         secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
-    #
-    #     my_model = ClassificationReducer(
-    #         DummyClassifier('constant', constant=1))
-    #
-    #     task_packer_results = my_model.task_packer(np.array([1, 1, 0, 1]),
-    #                                                PairwiseComparisonTask)
-    #
-    #     expected_results = np.array([1, 1, 0, 1])
-    #     assert_array_equal(expected_results, task_packer_results)
+        my_model = ClassificationReducer(
+            DummyClassifier('constant', constant=1))
 
-    # def test_task_packer_choice(self):
-    #     test_task = ChoiceTask(
-    #         SUBSET_CHOICE_TABLE, 'alternatives', 'choice',
-    #         SUBSET_CHOICE_FEATS_TABLE,
-    #         {'ID': ['choice', 'alternatives']}
-    #     )
-    #
-    #     my_model = ClassificationReducer(
-    #         DummyClassifier('constant', constant=1))
-    #
-    #     # Need to run unpacking before running packing
-    #     _ = my_model.task_unpacker(test_task)
-    #
-    #     task_packer_results = my_model.task_packer(
-    #         np.array([1, 0, 1, 0, 1, 0,
-    #                   1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0]),
-    #         ChoiceTask)
-    #
-    #     expected_results = np.array(
-    #         [np.array([512709, 696056, 685450], dtype=object),
-    #          np.array([550707, 551375, 591842, 601195, 576214], dtype=object)])
-    #
-    #     assert_array_equal(expected_results, task_packer_results)
+        unpacker_dict = my_model.task_unpacker(test_task,
+                                               take_feautre_diff=True)
+
+        correct_output_data = pd.DataFrame({
+            'feat1_diff': [1, 10, -3, 3]
+        })
+
+        assert_frame_equal(unpacker_dict['df_comb'], correct_output_data)
+
+    def test_task_packer_pairwise_comparison(self):
+
+        my_model = ClassificationReducer(
+            DummyClassifier('constant', constant=1))
+
+        task_packer_results = my_model.task_packer(np.array([1, 1, 0, 1]),
+                                                   PairwiseComparisonTask)
+
+        expected_results = np.array([1, 1, 0, 1])
+        assert_array_equal(expected_results, task_packer_results)
+
+    def test_task_packer_choice(self):
+        test_task = ChoiceTask(
+            SUBSET_CHOICE_TABLE, 'alternatives', 'choice',
+            SUBSET_CHOICE_FEATS_TABLE,
+            {'ID': ['choice', 'alternatives']}
+        )
+
+        my_model = ClassificationReducer(
+            DummyClassifier('constant', constant=1))
+
+        # Need to run unpacking before running packing
+        _ = my_model.task_unpacker(test_task)
+
+        task_packer_results = my_model.task_packer(
+            np.array([1, 0, 1, 0, 1, 0,
+                      1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0]),
+            ChoiceTask)
+
+        expected_results = np.array(
+            [np.array([512709, 696056, 685450], dtype=object),
+             np.array([723354, 550707, 551375, 591842, 817040], dtype=object)])
+
+        assert_array_equal(len(expected_results), len(task_packer_results))
+
+        for i in range(len(expected_results)):
+            assert_array_equal(expected_results[i], task_packer_results[i])
