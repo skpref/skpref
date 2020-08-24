@@ -81,7 +81,7 @@ class TestSubsetPosetVec(unittest.TestCase):
                 [1, 723354, 817040],
                 [1, 723354, 576214],
                 [1, 723354, 673995]
-            ], columns=['observation', 'top', 'boot']
+            ], columns=['observation', 'alt1', 'alt2']
         )
 
         output_red = self.test_spv_int.pairwise_reducer(scramble=False)
@@ -197,7 +197,7 @@ class TestSubsetPosetVec(unittest.TestCase):
             [2, 'd', 'a'],
             [2, 'b', 'a'],
             [2, 'c', 'a']
-        ], columns=['observation', 'top', 'boot'])
+        ], columns=['observation', 'alt1', 'alt2'])
 
         output_red_str = self.test_spv.pairwise_reducer(scramble=False)
 
@@ -272,8 +272,8 @@ class TestSubsetPosetVec(unittest.TestCase):
 
         expected_outcome = pd.DataFrame({
             'observation': [0, 0, 1, 1, 1, 1, 1, 1],
-            'top': [111, 222, 111, 111, 222, 222, 333, 333],
-            'boot': [222, 111, 222, 333, 111, 333, 111, 222]
+            'alt1': [111, 222, 111, 111, 222, 222, 333, 333],
+            'alt2': [222, 111, 222, 333, 111, 333, 111, 222]
         })
 
         pd.testing.assert_frame_equal(pairwise_reduction.astype('int32'),

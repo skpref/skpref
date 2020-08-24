@@ -338,6 +338,9 @@ class ChoiceTask(PrefTask):
 
             self.top = _convert_array_of_lists_to_array_of_arrays(self.top)
 
+        elif not hasattr(self, 'top') and self.primary_table_target_name is None:
+            self.top = None
+
         if type(self.primary_table_alternatives_names) is list:
             alts = self.primary_table[self.primary_table_alternatives_names].copy()\
                 .values

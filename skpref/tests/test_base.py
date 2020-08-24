@@ -163,6 +163,40 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
         assert_frame_equal(ret_dict['df_i'], correct_d2)
         self.assertEqual(correct_ret_dict['merge_columns'], None)
 
+    def test_task_unpacker_pairwise_no_result(self):
+        test_task = PairwiseComparisonTask(
+            DATA.drop('result', axis=1), ['ent1', 'ent2'],
+            secondary_table=ENT1_ATTRIBUTES,
+            secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
+
+        my_model = PairwiseComparisonModel()
+
+        unpacker_dict = my_model.task_unpacker(test_task)
+
+        assert_frame_equal(unpacker_dict['df_comb'],
+                           DATA.drop('result', axis=1).set_index(
+                               ['ent1', 'ent2']))
+
+    def test_task_unpacer_subset_choice_no_result(self):
+        small_example_table = pd.DataFrame({
+            'alternatives': [[1, 2], [1, 2, 3]]
+        })
+
+        test_task = ChoiceTask(small_example_table, 'alternatives')
+
+        mybt = PairwiseComparisonModel()
+
+        unpacker_dict = mybt.task_unpacker(test_task)
+
+        correct_table = pd.DataFrame({
+            'alt1': [1, 2, 1, 1, 2, 2, 3, 3],
+            'alt2': [2, 1, 2, 3, 1, 3, 1, 2],
+            'observation': [0, 0, 1, 1, 1, 1, 1, 1]
+        }).set_index(['alt1', 'alt2'])
+
+        assert_frame_equal(unpacker_dict['df_comb'],
+                           correct_table.astype('int32'))
+
 
 class TestSVMPairwiseComparisonModel(unittest.TestCase):
 

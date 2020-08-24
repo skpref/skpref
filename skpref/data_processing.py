@@ -246,7 +246,7 @@ class SubsetPosetVec(PosetVector):
 
         if style == "positive" and not scramble:
             divisor = 3
-            columns = ['observation', 'top', 'boot']
+            columns = ['observation', 'alt1', 'alt2']
 
         elif scramble or style == "reciprocal":
             divisor = 4

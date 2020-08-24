@@ -79,7 +79,14 @@ class Model(BaseEstimator):
     def predict_task(self, task: PrefTask) -> np.array:
         if self.task_fit_features != task.annotations['features_to_use']:
             raise Exception("The task has been fitted with different features")
-        predictions = self.predict(**self.task_unpacker(task))
+
+        # remove the target column if it exists and drop it from the dict
+        task_unpack_dict = self.task_unpacker(task)
+        task_unpack_dict['df_comb'] = task_unpack_dict['df_comb']\
+            .drop(task_unpack_dict['target'], errors='ignore')
+        del task_unpack_dict['target']
+        predictions = self.predict(**task_unpack_dict)
+
         return self.task_packer(predictions, type(task))
 
 
@@ -112,18 +119,21 @@ class PairwiseComparisonModel(Model):
         secondary_re_indexed, input_merge_columns, _, _ =\
             task.find_merge_columns()
 
+        if type(task) is ChoiceTask and task.primary_table_target_name is None:
+            self.pairwise_red_args['scramble'] = False
+            self.pairwise_red_args['style'] = 'positive'
+
         if isinstance(task, PairwiseComparisonTask) and (
                 self.pairwise_red_args == {}):
 
-            _re_indexed_df = task.primary_table.set_index([
-                task.target_column_correspondence,
-                task.inverse_correspondence_column[0]
-            ])
+            _re_indexed_df = task.primary_table.set_index(
+                task.primary_table_alternatives_names)
 
-            _re_indexed_df.rename(columns={
-                task.annotations['primary_table_target_names']: 'alt1_top'},
-                inplace=True
-            )
+            if task.annotations['primary_table_target_names'] is not None:
+                _re_indexed_df.rename(columns={
+                    task.annotations['primary_table_target_names']: 'alt1_top'},
+                    inplace=True
+                )
 
         elif (type(task) is ChoiceTask) or (
                 (type(task) is PairwiseComparisonTask) and
@@ -193,9 +203,6 @@ class PairwiseComparisonModel(Model):
                 'target': 'alt1_top',
                 'df_i': secondary_input,
                 'merge_columns': input_merge_columns}
-
-    # def predict_task_packer(self):
-    #     pass
 
 
 class GLMPairwiseComparisonModel(PairwiseComparisonModel):

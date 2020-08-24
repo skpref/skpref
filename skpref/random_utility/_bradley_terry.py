@@ -250,7 +250,8 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         all_unique_indices = get_distinct_entities(df)
         x_comb = df.reset_index()
 
-        ind_variables = df.drop([self.target_col_name], axis=1).columns.tolist()
+        ind_variables = df.drop([self.target_col_name], axis=1,
+                                errors='ignore').columns.tolist()
 
         for name in entnames:
             x_comb[name] = x_comb[name].map(self.rplc_lkp)
@@ -690,7 +691,6 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         if (task.annotations['features_to_use'] != 'all') and (
                 task.annotations['features_to_use'] is not None):
             model_input = _re_indexed_df[
-                ['alt1_top'] +
                 task.primary_table_features_to_use.tolist() + input_merge_keys
                 ].copy()
         else:
