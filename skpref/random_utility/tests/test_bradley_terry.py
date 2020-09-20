@@ -254,6 +254,28 @@ class TestBradleyTerryFunctions(unittest.TestCase):
         assert_frame_equal(long_format_pylogit.astype('int32'),
                            correct_lf_output.astype('int32'))
 
+    def test_unpack_data_for_pylogit_no_ground_truth(self):
+        bt = BradleyTerry()
+
+        bt.rplc_lkp, bt.lkp = generate_entity_lookup(
+            get_distinct_entities(INDEXED_EVERYONE_WINS_ONCE_DATA))
+
+        bt.target_col_name = 'something_that_doesnt_exist'
+
+        long_format_pylogit = bt.unpack_data_for_pylogit(
+            INDEXED_EVERYONE_WINS_ONCE_DATA.drop(
+                'result', axis=1), ['ent1', 'ent2'])
+
+        # mapping 1: B, 2:C, 0: A, 3: D
+        correct_lf_output = pd.DataFrame(
+            {'observation': [1, 1, 2, 2, 3, 3, 4, 4, 5, 5],
+             'entity': [1, 2, 0, 1, 2, 3, 2, 3, 1, 3],
+             'CHOICE': [1, 0, 1, 0, 0, 1, 1, 0, 0, 1]}
+        )
+
+        assert_frame_equal(long_format_pylogit.astype('int32'),
+                           correct_lf_output.astype('int32'))
+
     def test_join_up_dataframes(self):
         bt = BradleyTerry()
 
