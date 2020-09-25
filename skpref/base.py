@@ -76,7 +76,7 @@ class Model(BaseEstimator):
                 merge_columns: List[str] = None) -> np.array:
         pass
 
-    def predict_task(self, task: PrefTask) -> np.array:
+    def _prepare_data_for_prediction(self, task: PrefTask) -> dict:
         if self.task_fit_features != task.annotations['features_to_use']:
             raise Exception("The task has been fitted with different features")
 
@@ -85,8 +85,23 @@ class Model(BaseEstimator):
         task_unpack_dict['df_comb'] = task_unpack_dict['df_comb']\
             .drop(task_unpack_dict['target'], errors='ignore')
         del task_unpack_dict['target']
-        predictions = self.predict(**task_unpack_dict)
+        return task_unpack_dict
 
+    def predict_task(self, task: PrefTask) -> np.array:
+        predictions = self.predict(**self._prepare_data_for_prediction(task))
+        return self.task_packer(predictions, type(task))
+
+
+class ProbabilisticModel(Model):
+
+    def predict_proba(self, df_comb: pd.DataFrame, df_i: pd.DataFrame = None,
+                      df_j: pd.DataFrame = None, merge_columns: List[str] = None
+                      ) -> np.array:
+        pass
+
+    def predict_proba_task(self, task: PrefTask) -> np.array:
+        predictions = self.predict_proba(
+            **self._prepare_data_for_prediction(task))
         return self.task_packer(predictions, type(task))
 
 
@@ -205,7 +220,7 @@ class PairwiseComparisonModel(Model):
                 'merge_columns': input_merge_columns}
 
 
-class GLMPairwiseComparisonModel(PairwiseComparisonModel):
+class GLMPairwiseComparisonModel(PairwiseComparisonModel, ProbabilisticModel):
     def __init__(self):
         super(GLMPairwiseComparisonModel, self).__init__()
 
@@ -217,7 +232,7 @@ class SVMPairwiseComparisonModel(PairwiseComparisonModel):
         )
 
 
-class ClassificationReducer(Model):
+class ClassificationReducer(ProbabilisticModel):
     """
     This will be an object that allows users to model tasks using models that
     follow the scikit-learn structure of objects that have fit and predict
@@ -308,7 +323,8 @@ class ClassificationReducer(Model):
 
                 # Hacky solution to make sure suffixes work as we'd like them to
                 initialise_cols = list(task.secondary_table.columns)
-                initialise_cols.remove(right_on)
+                initialise_cols = [ele for ele in initialise_cols
+                                   if ele not in right_on]
 
                 model_input = task.primary_table.copy()
                 for i in initialise_cols:
@@ -324,6 +340,21 @@ class ClassificationReducer(Model):
                 drop_cols += initialise_cols
 
                 drop_cols += task.primary_table_alternatives_names
+
+                # When column names to merge on are different between primary
+                # and secondary tables, make sure to remove these also
+                for _key in (task.secondary_to_primary_link.keys()):
+                    _val = task.secondary_to_primary_link[_key]
+                    if len(_val) < 2:
+                        if _key != _val:
+                            drop_cols.append(_key)
+                    else:
+                        _strikes = 0
+                        for _part_val in _val:
+                            if _part_val != _key:
+                                _strikes += 1
+                        if _strikes == len(_val):
+                            drop_cols.append(_key)
 
                 model_input = model_input.merge(
                     task.secondary_table, how='left',
@@ -359,7 +390,7 @@ class ClassificationReducer(Model):
 
             else:
                 model_input = task.primary_table.drop(
-                    task.primary_table_alternatives_names, aixs=1).copy()
+                    task.primary_table_alternatives_names, axis=1).copy()
 
             model_input.rename(columns={task.primary_table_target_name:
                                         'chosen'}, inplace=True)
@@ -414,7 +445,15 @@ class ClassificationReducer(Model):
                 df_i: pd.DataFrame = None, df_j: pd.DataFrame = None,
                 merge_columns: List[str] = None) -> np.array:
 
-        self.model.predict(df_comb.drop('chosen', axis=1, errors='ignore'))
+        return self.model.predict(df_comb.drop(
+            'chosen', axis=1, errors='ignore'))
+
+    def predict_proba(self, df_comb: pd.DataFrame,
+                      df_i: pd.DataFrame = None, df_j: pd.DataFrame = None,
+                      merge_columns: List[str] = None) -> np.array:
+
+        return self.model.predict_proba(df_comb.drop(
+            'chosen', axis=1, errors='ignore'))
 
     def task_packer(self, predictions, task_type):
         if task_type is PairwiseComparisonTask and self.keep_pairwise_format:

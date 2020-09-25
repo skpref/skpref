@@ -289,6 +289,25 @@ class TestClassificationReducer(unittest.TestCase):
 
         assert_frame_equal(unpacker_dict['df_comb'], correct_output_data)
 
+    def test_task_unpacker_pairwise_diff_name_in_sec_table(self):
+        test_task = PairwiseComparisonTask(
+            DATA, ['ent1', 'ent2'], 'result', 'ent1',
+            secondary_table=ENT1_ATTRIBUTES.rename(columns={'ent1': 'ent'}),
+            secondary_to_primary_link={'ent': ['ent1', 'ent2']})
+
+        my_model = ClassificationReducer(
+            DummyClassifier('constant', constant=1))
+
+        unpacker_dict = my_model.task_unpacker(test_task)
+
+        correct_output_data = pd.DataFrame({
+            'chosen': [1, 0, 0, 1],
+            'feat1_ent1': [12, 11, 12, 15],
+            'feat1_ent2': [11, 1, 15, 12]
+        })
+
+        assert_frame_equal(unpacker_dict['df_comb'], correct_output_data)
+
     def test_task_unpacker_diff_pairwise(self):
         test_task = PairwiseComparisonTask(
             DATA, ['ent1', 'ent2'], 'result', 'ent1',
