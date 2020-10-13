@@ -1,10 +1,8 @@
 from sklearn.model_selection import GridSearchCV as skGS
-from sklearn.metrics.scorer import SCORERS
 import pandas as pd
 from skpref.base import ClassificationReducer
 from skpref.task import PrefTask
 from sklearn.metrics import log_loss
-from sklearn.metrics.scorer import make_scorer
 
 LOSS_FUNCTIONS = {
     'neg_log_loss': [log_loss, -1]
@@ -133,7 +131,7 @@ class GridSearchCV(object):
         self.refit_time_ = self.gs.refit_time_
 
     def fit_task(self, task: PrefTask):
-        if isinstance(self.scoring, str):
+        if isinstance(self.scoring, str) or callable(self.scoring):
 
             def task_scorer(function: callable, table: pd.DataFrame,
                             depvar=task.primary_table_target_name):
@@ -150,21 +148,31 @@ class GridSearchCV(object):
 
                 """
                 X = table.drop([depvar], axis=1).copy()
-                y = table[depvar].copy()
-                proba_preds = function.predict_proba(X)
-                if len(proba_preds.shape) == 2:
-                    if proba_preds.shape[1] == 2:
-                        pred = [pred[1] for pred in proba_preds]
-                    else:
-                        raise Exception("too many predictions")
+                if isinstance(self.scoring, str):
+                    lf = LOSS_FUNCTIONS[self.scoring][0]
                 else:
-                    pred = proba_preds.copy()
+                    lf = self.scoring
+                try:
+                    lf([1, 0], [0.5, 0.5])
+                    _preds = function.predict_proba(X)
+                    if len(_preds.shape) == 2:
+                        if _preds.shape[1] == 2:
+                            pred = [pred[1] for pred in _preds]
+                        else:
+                            raise Exception("too many predictions")
+                    else:
+                        pred = _preds.copy()
+                except ValueError:
+                    pred = function.predict(X)
 
-                return LOSS_FUNCTIONS[self.scoring][0](
-                    y, pred) * \
-                    LOSS_FUNCTIONS[self.scoring][1]
+                y = table[depvar].copy()
+                if isinstance(self.scoring, str):
+                    return lf(y, pred) * LOSS_FUNCTIONS[self.scoring][1]
+                else:
+                    return lf(y, pred)
 
             self.gs.scoring = task_scorer
+
 
         self.fit(**self.estimator.task_unpacker(task))
 
