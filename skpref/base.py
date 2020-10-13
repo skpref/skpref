@@ -4,6 +4,7 @@ import pandas as pd
 from typing import List, Type
 import numpy as np
 from skpref.utils import UnderDevError
+from sklearn.metrics import log_loss
 
 
 class Model(BaseEstimator):
@@ -83,7 +84,7 @@ class Model(BaseEstimator):
         # remove the target column if it exists and drop it from the dict
         task_unpack_dict = self.task_unpacker(task)
         task_unpack_dict['df_comb'] = task_unpack_dict['df_comb']\
-            .drop(task_unpack_dict['target'], errors='ignore')
+            .drop(task_unpack_dict['target'], axis=1, errors='ignore')
         del task_unpack_dict['target']
         return task_unpack_dict
 
@@ -146,7 +147,8 @@ class PairwiseComparisonModel(Model):
 
             if task.annotations['primary_table_target_names'] is not None:
                 _re_indexed_df.rename(columns={
-                    task.annotations['primary_table_target_names']: 'alt1_top'},
+                    task.annotations['primary_table_target_names']:
+                        task.primary_table_target_name},
                     inplace=True
                 )
 
@@ -155,6 +157,7 @@ class PairwiseComparisonModel(Model):
                 (self.pairwise_red_args['style'] == 'reciprocal')
         ):
             pairwise_comparisons = task.subset_vec.pairwise_reducer(
+                target_colname=task.primary_table_target_name,
                 **self.pairwise_red_args)
             if task.annotations['features_to_use'] is not None:
                 feats_in_primary = []
@@ -197,12 +200,12 @@ class PairwiseComparisonModel(Model):
             if type(task) is not PairwiseComparisonTask:
                 _re_indexed_df.drop(['observation'], axis=1, inplace=True)
 
-            model_input = _re_indexed_df[['alt1_top']].copy()
+            model_input = _re_indexed_df[[task.primary_table_target_name]].copy()
             secondary_input = None
 
         elif task.annotations['features_to_use'] != 'all':
             model_input = _re_indexed_df[
-                ['alt1_top'] +
+                [task.primary_table_target_name] +
                 task.primary_table_features_to_use.tolist() +
                 input_merge_columns
                 ].copy()
@@ -215,7 +218,7 @@ class PairwiseComparisonModel(Model):
             secondary_input = secondary_re_indexed.copy()
 
         return {'df_comb': model_input,
-                'target': 'alt1_top',
+                'target': task.primary_table_target_name,
                 'df_i': secondary_input,
                 'merge_columns': input_merge_columns}
 
@@ -392,14 +395,13 @@ class ClassificationReducer(ProbabilisticModel):
                 model_input = task.primary_table.drop(
                     task.primary_table_alternatives_names, axis=1).copy()
 
-            model_input.rename(columns={task.primary_table_target_name:
-                                        'chosen'}, inplace=True)
-
         # Create aggregation for choice task
         elif isinstance(task, ChoiceTask):
-            model_input = task.subset_vec.classifier_reducer()
+            model_input = task.subset_vec.classifier_reducer(
+                chosen_name=task.primary_table_target_name)
             if task.primary_table_target_name is None:
-                model_input.drop(column='chosen', inplace=True)
+                model_input.drop(column=task.primary_table_target_name,
+                                 inplace=True)
 
             if len(task.primary_table_features_to_use) > 0:
                 model_input = model_input.merge(
@@ -420,7 +422,7 @@ class ClassificationReducer(ProbabilisticModel):
                 self.alternative = model_input.alternative.values
 
                 model_input = model_input[
-                    ['chosen'] +
+                    [task.primary_table_target_name] +
                     list(np.setdiff1d(task.secondary_table_features_to_use,
                                       right_on))
                 ]
@@ -430,7 +432,7 @@ class ClassificationReducer(ProbabilisticModel):
                 "This method has not yet been developed for this type of task")
 
         return {'df_comb': model_input,
-                'target': 'chosen',
+                'target': task.primary_table_target_name,
                 'df_i': None,
                 'merge_columns': None}
 
@@ -438,22 +440,20 @@ class ClassificationReducer(ProbabilisticModel):
             df_i: pd.DataFrame = None, df_j: pd.DataFrame = None,
             merge_columns: List[str] = None):
 
-        self.model.fit(df_comb.drop('chosen', axis=1),
-                       df_comb['chosen'])
+        self.model.fit(df_comb.drop(target, axis=1),
+                       df_comb[target])
 
     def predict(self, df_comb: pd.DataFrame,
                 df_i: pd.DataFrame = None, df_j: pd.DataFrame = None,
                 merge_columns: List[str] = None) -> np.array:
 
-        return self.model.predict(df_comb.drop(
-            'chosen', axis=1, errors='ignore'))
+        return self.model.predict(df_comb)
 
     def predict_proba(self, df_comb: pd.DataFrame,
                       df_i: pd.DataFrame = None, df_j: pd.DataFrame = None,
                       merge_columns: List[str] = None) -> np.array:
 
-        return self.model.predict_proba(df_comb.drop(
-            'chosen', axis=1, errors='ignore'))
+        return self.model.predict_proba(df_comb)
 
     def task_packer(self, predictions, task_type):
         if task_type is PairwiseComparisonTask and self.keep_pairwise_format:
@@ -464,3 +464,8 @@ class ClassificationReducer(ProbabilisticModel):
                                        None),
                 'obs': self.obs_col}).dropna().groupby('obs') \
                 ['prediction'].unique().values
+
+    def score(self, X, *args, **kwargs):
+        y = X.chosen.values
+        _X = X.drop('chosen', axis=1)
+        return self.model.score(_X, y, *args, **kwargs)

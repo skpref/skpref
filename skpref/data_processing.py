@@ -215,7 +215,8 @@ class SubsetPosetVec(PosetVector):
 
     def pairwise_reducer(self, style: str = "positive",
                          rejection: Union[int, float] = 0, scramble: bool = True,
-                         random_seed_scramble: int = None) -> pd.DataFrame:
+                         random_seed_scramble: int = None,
+                         target_colname='alt1_top') -> pd.DataFrame:
         """
         Breaks a SubsetPosetVec into the most elementary parts of a pairwise
         comparison.
@@ -250,7 +251,7 @@ class SubsetPosetVec(PosetVector):
 
         elif scramble or style == "reciprocal":
             divisor = 4
-            columns = ['observation', 'alt1', 'alt2', 'alt1_top']
+            columns = ['observation', 'alt1', 'alt2', target_colname]
 
         else:
             raise NameError("style can only be positive or "
@@ -307,14 +308,15 @@ class SubsetPosetVec(PosetVector):
                 if style == 'reciprocal':
                     pairwise_comparison_reduction = \
                         pairwise_comparison_reduction.astype(
-                            {'observation': int, 'alt1_top': int})
+                            {'observation': int, target_colname: int})
 
             self.pairwise_comparison_reduction_dict[style, rejection, scramble] = \
                 pairwise_comparison_reduction
 
             return pairwise_comparison_reduction
 
-    def classifier_reducer(self, rejection: int = 0) -> pd.DataFrame:
+    def classifier_reducer(self, rejection: int = 0, chosen_name: str = 'chosen'
+                           ) -> pd.DataFrame:
         """
         Reduces observations to classifiers for example when the data looks like
         this top = [A], boot = [B, C] it will return the following:
@@ -327,6 +329,9 @@ class SubsetPosetVec(PosetVector):
         rejection: int, default=0
             controls what value gets assigned to rejections, -1 might be
             preferred for SVM
+        chosen_name: str, default='chosen'
+            creates the name for the column that corresponds with 1/0 to whether
+            the product was chosen or not.
         Outputs:
         --------
         DataFrame
@@ -356,6 +361,6 @@ class SubsetPosetVec(PosetVector):
         return pd.DataFrame({
             'observation': obs_in,
             'alternative': alts_in,
-            'chosen': choice_in
+            chosen_name: choice_in
         }).drop_duplicates(subset=['observation', 'alternative'])\
             .reset_index(drop=True)

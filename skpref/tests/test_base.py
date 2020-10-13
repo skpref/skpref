@@ -115,7 +115,7 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
         d1, _, _ = mybt.task_indexing(test_task)
 
         correct_d1 = DATA.set_index(['ent1', 'ent2'])\
-            .rename(columns={'result': 'alt1_top'})
+            .rename(columns={'result': 'result'})
 
         assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
 
@@ -130,7 +130,7 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
         d1, d2, _ = mybt.task_indexing(test_task)
 
         correct_d1 = DATA.set_index(['ent1', 'ent2']) \
-            .rename(columns={'result': 'alt1_top'})
+            .rename(columns={'result': 'result'})
 
         correct_d2 = ENT1_ATTRIBUTES.set_index('ent1')
 
@@ -146,12 +146,11 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
         mybt = PairwiseComparisonModel()
 
         ret_dict = mybt.task_unpacker(test_task)
-        correct_d1 = DATA.set_index(['ent1', 'ent2']) \
-            .rename(columns={'result': 'alt1_top'})
+        correct_d1 = DATA.set_index(['ent1', 'ent2'])
         correct_d2 = ENT1_ATTRIBUTES.set_index('ent1')
         correct_ret_dict = {
             'df_comb': correct_d1,
-            'target': 'alt1_top',
+            'target': 'result',
             'df_i': correct_d2,
             'merge_columns': None
         }
@@ -159,7 +158,7 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
         self.assertListEqual(list(ret_dict.keys()),
                              list(correct_ret_dict.keys()))
         assert_frame_equal(ret_dict['df_comb'], correct_d1)
-        self.assertEqual(correct_ret_dict['target'], 'alt1_top')
+        self.assertEqual(correct_ret_dict['target'], 'result')
         assert_frame_equal(ret_dict['df_i'], correct_d2)
         self.assertEqual(correct_ret_dict['merge_columns'], None)
 
@@ -247,7 +246,7 @@ class TestSVMPairwiseComparisonModel(unittest.TestCase):
                 [1, 576214, 723354, 0],
                 [1, 723354, 673995, 1],
                 [1, 673995, 723354, 0]
-            ], columns=['observation', 'alt1', 'alt2', 'alt1_top']
+            ], columns=['observation', 'alt1', 'alt2', 'choice']
         ).set_index(['alt1', 'alt2'])
 
         assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
@@ -263,7 +262,7 @@ class TestSVMPairwiseComparisonModel(unittest.TestCase):
             {'observation': [0, 0, 1, 1, 2, 2, 3, 3],
              'alt1': ['C', 'B', 'A', 'B', 'D', 'C', 'D', 'C'],
              'alt2': ['B', 'C', 'B', 'A', 'C', 'D', 'C', 'D'],
-             'alt1_top': [1, 0, 1, 0, 1, 0, 1, 0]}
+             'result': [1, 0, 1, 0, 1, 0, 1, 0]}
         ).set_index(['alt1', 'alt2'])
         assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
 
@@ -282,7 +281,7 @@ class TestClassificationReducer(unittest.TestCase):
         unpacker_dict = my_model.task_unpacker(test_task)
 
         correct_output_data = pd.DataFrame({
-            'chosen': [1, 0, 0, 1],
+            'result': [1, 0, 0, 1],
             'feat1_ent1': [12, 11, 12, 15],
             'feat1_ent2': [11, 1, 15, 12]
         })
@@ -301,7 +300,7 @@ class TestClassificationReducer(unittest.TestCase):
         unpacker_dict = my_model.task_unpacker(test_task)
 
         correct_output_data = pd.DataFrame({
-            'chosen': [1, 0, 0, 1],
+            'result': [1, 0, 0, 1],
             'feat1_ent1': [12, 11, 12, 15],
             'feat1_ent2': [11, 1, 15, 12]
         })
@@ -321,7 +320,7 @@ class TestClassificationReducer(unittest.TestCase):
                                                take_feautre_diff=True)
 
         correct_output_data = pd.DataFrame({
-            'chosen': [1, 0, 0, 1],
+            'result': [1, 0, 0, 1],
             'feat1_diff': [1, 10, -3, 3]
         })
 
@@ -357,7 +356,7 @@ class TestClassificationReducer(unittest.TestCase):
             [0, 6],
             [0, 6],
             [0, 6]
-        ], columns=['chosen', 'feat1'])
+        ], columns=['choice', 'feat1'])
 
         assert_frame_equal(unpacker_dict['df_comb'].astype('int32'),
                            correct_output_data.astype('int32'))

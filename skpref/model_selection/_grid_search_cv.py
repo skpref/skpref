@@ -1,5 +1,14 @@
 from sklearn.model_selection import GridSearchCV as skGS
+from sklearn.metrics.scorer import SCORERS
 import pandas as pd
+from skpref.base import ClassificationReducer
+from skpref.task import PrefTask
+from sklearn.metrics import log_loss
+from sklearn.metrics.scorer import make_scorer
+
+LOSS_FUNCTIONS = {
+    'neg_log_loss': [log_loss, -1]
+}
 
 
 class GridSearchCV(object):
@@ -58,10 +67,19 @@ class GridSearchCV(object):
     >>> gs_bt.fit_task(NBA_results_task_train)
     """
 
-    def __init__(self, estimator, param_grid, **kwargs):
+    def __init__(self, estimator, param_grid, scoring=None, **kwargs):
         self.estimator = estimator
-        self.param_grid = param_grid
         self.kwargs = kwargs
+        if isinstance(estimator, ClassificationReducer):
+            self.param_grid = {}
+            for _key in param_grid.keys():
+                self.param_grid['model__'+_key] = param_grid[_key]
+
+        else:
+            self.param_grid = param_grid
+
+        self.scoring = scoring
+
         self.gs = skGS(self.estimator, self.param_grid, return_train_score=True,
                        **self.kwargs)
 
@@ -114,7 +132,40 @@ class GridSearchCV(object):
         self.n_splits_ = self.gs.n_splits_
         self.refit_time_ = self.gs.refit_time_
 
-    def fit_task(self, task):
+    def fit_task(self, task: PrefTask):
+        if isinstance(self.scoring, str):
+
+            def task_scorer(function: callable, table: pd.DataFrame,
+                            depvar=task.primary_table_target_name):
+                """
+                Making special scorer
+                Parameters
+                ----------
+                function
+                table
+                depvar
+
+                Returns
+                -------
+
+                """
+                X = table.drop([depvar], axis=1).copy()
+                y = table[depvar].copy()
+                proba_preds = function.predict_proba(X)
+                if len(proba_preds.shape) == 2:
+                    if proba_preds.shape[1] == 2:
+                        pred = [pred[1] for pred in proba_preds]
+                    else:
+                        raise Exception("too many predictions")
+                else:
+                    pred = proba_preds.copy()
+
+                return LOSS_FUNCTIONS[self.scoring][0](
+                    y, pred) * \
+                    LOSS_FUNCTIONS[self.scoring][1]
+
+            self.gs.scoring = task_scorer
+
         self.fit(**self.estimator.task_unpacker(task))
 
         # make sure all the GridSearchCV attributes are callable as expected
@@ -127,6 +178,12 @@ class GridSearchCV(object):
         self.scorer_ = self.gs.scorer_
         self.n_splits_ = self.gs.n_splits_
         self.refit_time_ = self.gs.refit_time_
+
+        if task.annotations['features_to_use'] is not None:
+            self.best_estimator_.task_fit_features = task.annotations[
+                'features_to_use'].copy()
+        else:
+            self.best_estimator_.task_fit_features = None
 
     def inspect_results(self):
         """
