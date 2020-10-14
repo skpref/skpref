@@ -1,9 +1,10 @@
 from abc import ABC
 import pandas as pd
 from scipy.io import arff
+from typing import List, Tuple, Union
 import numpy as np
 import os
-from skpref.data_processing import SubsetPosetType, SubsetPosetVec
+from skpref.data_processing import SubsetPosetType, SubsetPosetVec, PosetType
 
 
 # class UnsupportedListError(Exception):
@@ -32,8 +33,8 @@ class PrefTaskType(ABC):
     proba: Boolean, default=False
         True  is probabilistic output is required
     """
-    def __init__(self, entity_slot_type, entity_universe_type, target_type,
-                 proba):
+    def __init__(self, entity_slot_type: PosetType, entity_universe_type: str,
+                 target_type: PosetType, proba: bool):
         self.entity_slot_type = entity_slot_type
         self.entity_universe_type = entity_universe_type
         self.target_type = target_type
@@ -76,10 +77,12 @@ class PrefTask(ABC):
         }
     """
 
-    def __init__(self, pref_task_type, primary_table,
-                 primary_table_alternatives_names, primary_table_target_name,
-                 secondary_table=None, features_to_use='all',
-                 secondary_to_primary_link=None):
+    def __init__(self, pref_task_type: PrefTaskType, primary_table: pd.DataFrame,
+                 primary_table_alternatives_names: Union[List[str], str],
+                 primary_table_target_name: str = None,
+                 secondary_table: pd.DataFrame = None,
+                 features_to_use: List[str] = 'all',
+                 secondary_to_primary_link: dict = None):
 
         self.pref_task_type = pref_task_type
 
@@ -93,6 +96,26 @@ class PrefTask(ABC):
             self.primary_table_features_to_use = np.intersect1d(
                 features_to_use, self.primary_table.columns)
 
+        elif features_to_use == 'all':
+            if isinstance(primary_table_alternatives_names, list):
+                if primary_table_target_name is None:
+                    first_comp_element = primary_table_alternatives_names
+
+                else:
+                    first_comp_element = primary_table_alternatives_names + \
+                                         [primary_table_target_name]
+            elif primary_table_target_name is None:
+                first_comp_element = [primary_table_alternatives_names]
+            else:
+                first_comp_element = [primary_table_alternatives_names,
+                                      primary_table_target_name]
+
+            self.primary_table_features_to_use = np.setdiff1d(
+                first_comp_element, self.primary_table.columns)
+
+        else:
+            self.primary_table_features_to_use = []
+
         # Read in secondary table
         if secondary_table is not None:
             self.secondary_table, sec_name, sec_hook = \
@@ -104,8 +127,15 @@ class PrefTask(ABC):
                 self.secondary_table_features_to_use = np.intersect1d(
                     features_to_use, self.secondary_table.columns)
 
+            elif features_to_use == 'all':
+                self.secondary_table_features_to_use = np.setdiff1d(
+                    self.secondary_table.columns,
+                    [primary_table_alternatives_names]
+                )
+
         else:
             self.secondary_table = None
+            self.secondary_table_features_to_use = []
 
         self.primary_table_alternatives_names = primary_table_alternatives_names
         self.primary_table_target_name = primary_table_target_name
@@ -119,6 +149,59 @@ class PrefTask(ABC):
             'secondary_to_primary_link': secondary_to_primary_link,
             'features_to_use': features_to_use
         }
+
+    def find_merge_columns(self, original_naming: bool = True
+                           ) -> Tuple[pd.DataFrame, List[str], np.array,
+                                      np.array]:
+        """
+        Given some annotations expresses the column names on which data should
+        be merged in a pandas merge, it also indexes the secondary table by the
+        name of the alternatives
+
+        Returns
+        -------
+        DataFrame:
+            Re-indexed secondary table
+        List[str]:
+            Column names on which to do inner join
+        List[str]
+        """
+        input_merge_columns = []
+        secondary_re_indexed = pd.DataFrame()
+        left_on = []
+        right_on = []
+
+        if len(self.secondary_table_features_to_use) > 0:
+            found_correspondence = False
+
+            for key in self.annotations['secondary_to_primary_link'].keys():
+                value = self.annotations['secondary_to_primary_link'][key]
+                if (value == [self.primary_table_target_name,
+                              self.primary_table_alternatives_names] or
+                        value == [self.primary_table_alternatives_names,
+                                  self.primary_table_target_name] or
+                        value == self.primary_table_alternatives_names or
+                        value == self.primary_table_target_name):
+
+                    secondary_re_indexed = self.secondary_table.set_index(key)
+                    found_correspondence = True
+                    if original_naming:
+                        left_on += value
+                    else:
+                        left_on.append('alternative')
+                    right_on.append(key)
+
+                else:
+
+                    left_on.append(value)
+                    right_on.append(key)
+                    input_merge_columns.append(key)
+
+            if not found_correspondence:
+                raise Exception("key linking to alternatives not provided")
+
+        return secondary_re_indexed, input_merge_columns, \
+               np.array(left_on).flatten(), np.array(right_on).flatten()
 
 
 def _table_reader(table):
@@ -192,24 +275,20 @@ class ChoiceTask(PrefTask):
     Task for choice based models
     Parameters:
     -----------
-    primary_table: str, DataFrame, scipy.io.arff
+    primary_table: DataFrame
         The primary table is the one that contains the target variable and
         covariates that vary on the target observation level. For example the
         available methods of transportation for an individual and weather it
         rained or not at the time of the journey.
-        If str it will be the directory where the primary table sits. Otherwise
-        will also read in pandas DataFrames and scipy.io.arff
     primary_table_alternatives_names: str
         The column or attribute which corresponds to the alternatives in the
         primary table.
-    primary_table_target_name: str
+    primary_table_target_name: str, default=None
         The column name or attribute which corresponds to the ground truth
-    secondary_table: str, DataFrame, scipy.io.arff, default=None
+    secondary_table: DataFrame, default=None
         The secondary table that usually contains information about the
         alternatives in the primary table. For example the cleanliness perception
         of public transportation.
-        If str it will be the directory where the primary table sits. Otherwise
-        will also read in pandas DataFrames and scipy.io.arff
     secondary_to_primary_link: dict, default:None
         How to link the primary and secondary tables together. The key in the
         dictionary will correspond to the field in the primary table and the
@@ -223,10 +302,14 @@ class ChoiceTask(PrefTask):
         every column as features. If the user wants to use a model that doesn't
         use any features then it should be set to None
     """
-    def __init__(self, primary_table, primary_table_alternatives_names,
-                 primary_table_target_name, secondary_table=None,
-                 secondary_to_primary_link=None, entity_slot_type_kwargs=None,
-                 target_type_kwargs=None, features_to_use='all'):
+    def __init__(self, primary_table: pd.DataFrame,
+                 primary_table_alternatives_names: Union[List[str], str],
+                 primary_table_target_name: str = None,
+                 secondary_table: pd.DataFrame = None,
+                 secondary_to_primary_link: dict = None,
+                 entity_slot_type_kwargs: dict = None,
+                 target_type_kwargs: dict = None,
+                 features_to_use: Union[List[str], str] = 'all') -> None:
 
         super(ChoiceTask, self).__init__(
             pref_task_type=ChoiceTaskType(entity_slot_type_kwargs,
@@ -239,7 +322,7 @@ class ChoiceTask(PrefTask):
             features_to_use=features_to_use
         )
 
-        if not hasattr(self, 'top'):
+        if not hasattr(self, 'top') and self.primary_table_target_name is not None:
             if type(self.primary_table_target_name) is list:
                 self.top = self.primary_table[self.primary_table_target_name]\
                     .copy().values
@@ -253,6 +336,11 @@ class ChoiceTask(PrefTask):
                 if type(self.top[0]) not in [np.ndarray, list]:
                     self.top = self.top.reshape(len(self.top), 1)
 
+            self.top = _convert_array_of_lists_to_array_of_arrays(self.top)
+
+        elif not hasattr(self, 'top') and self.primary_table_target_name is None:
+            self.top = None
+
         if type(self.primary_table_alternatives_names) is list:
             alts = self.primary_table[self.primary_table_alternatives_names].copy()\
                 .values
@@ -261,11 +349,15 @@ class ChoiceTask(PrefTask):
                 .copy().values
 
         alts = _convert_array_of_lists_to_array_of_arrays(alts)
-        self.top = _convert_array_of_lists_to_array_of_arrays(self.top)
 
-        joint_alts = np.array([[self.top[i], alts[i]] for i in range(len(alts))])
-        boot = np.array([np.setdiff1d(x[1], x[0], assume_unique=True)
-                         for x in joint_alts])
+        if self.top is not None:
+            joint_alts = np.array([[self.top[i], alts[i]]
+                                   for i in range(len(alts))])
+            boot = np.array([np.setdiff1d(x[1], x[0], assume_unique=True)
+                             for x in joint_alts])
+        else:
+            boot = alts
+            self.top = boot
 
         self.subset_vec = SubsetPosetVec(
             self.top,
@@ -319,10 +411,14 @@ class PairwiseComparisonTask(ChoiceTask):
             has been chosen. i.e. there is a column with home team another one with
             away team and target is 1 when home team wins.
         """
-    def __init__(self, primary_table, primary_table_alternatives_names,
-                 primary_table_target_name, target_column_correspondence,
-                 secondary_table=None, secondary_to_primary_link=None,
-                 target_type_kwargs=None, features_to_use='all'):
+    def __init__(self, primary_table: pd.DataFrame,
+                 primary_table_alternatives_names: List[str],
+                 primary_table_target_name: str = None,
+                 target_column_correspondence: str = None,
+                 secondary_table: pd.DataFrame = None,
+                 secondary_to_primary_link: dict = None,
+                 target_type_kwargs: dict = None,
+                 features_to_use: Union[str, List[str]] = 'all') -> None:
 
         self.target_column_correspondence = target_column_correspondence
 
@@ -336,6 +432,9 @@ class PairwiseComparisonTask(ChoiceTask):
                 primary_table[target_column_correspondence],
                 primary_table[self.inverse_correspondence_column[0]]
             ).reshape(len(primary_table), 1)
+
+        else:
+            self.top = None
 
         entity_slot_type_kwargs = {
             'top_size_const': True,

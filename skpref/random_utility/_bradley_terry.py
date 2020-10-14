@@ -207,7 +207,7 @@ class BradleyTerry(GLMPairwiseComparisonModel):
 
         # Format the data the way its required in choix
         data = defaultdict(list)
-        for counter, _res in enumerate(df[self.target_col_name].values):
+        for counter, _res in enumerate(_df[self.target_col_name].values):
             if _res == 1:
                 data['winner'].append(
                     (_df[entnames[0]].iloc[counter],
@@ -250,7 +250,8 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         all_unique_indices = get_distinct_entities(df)
         x_comb = df.reset_index()
 
-        ind_variables = df.drop([self.target_col_name], axis=1).columns.tolist()
+        ind_variables = df.drop([self.target_col_name], axis=1,
+                                errors='ignore').columns.tolist()
 
         for name in entnames:
             x_comb[name] = x_comb[name].map(self.rplc_lkp)
@@ -262,11 +263,28 @@ class BradleyTerry(GLMPairwiseComparisonModel):
                 (x_comb[entnames[1]] == self.rplc_lkp[i]), 1, 0)
             availability_vars[self.rplc_lkp[i]] = colname
 
-        x_comb['CHOICE'] = np.where(x_comb[self.target_col_name] == 1,
-                                    x_comb[entnames[0]],
-                                    x_comb[entnames[1]])
+        if self.target_col_name in x_comb.columns:
+            x_comb['CHOICE'] = np.where(x_comb[self.target_col_name] == 1,
+                                        x_comb[entnames[0]],
+                                        x_comb[entnames[1]])
 
-        x_comb.drop(self.target_col_name, axis=1, inplace=True)
+            x_comb.drop(self.target_col_name, axis=1, inplace=True)
+
+        # Else create some dummy choices that pylogit will take in
+        else:
+            # For pylogit we have to make sure that everything gets selected
+            if np.max(np.sort(x_comb[entnames[0]].unique()) != np.sort(
+                    x_comb[entnames[1]].unique())):
+                dummy_choices = []
+                for _counter, first_ent in enumerate(x_comb[entnames[1]]):
+                    if first_ent in dummy_choices:
+                        dummy_choices.append(x_comb[entnames[0]][_counter])
+                    else:
+                        dummy_choices.append(first_ent)
+
+                x_comb['CHOICE'] = dummy_choices
+            else:
+                x_comb['CHOICE'] = x_comb[entnames[0]].copy()
 
         custom_alt_id = 'entity'
         obs_id_column = 'observation'
@@ -690,7 +708,6 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         if (task.annotations['features_to_use'] != 'all') and (
                 task.annotations['features_to_use'] is not None):
             model_input = _re_indexed_df[
-                ['alt1_top'] +
                 task.primary_table_features_to_use.tolist() + input_merge_keys
                 ].copy()
         else:

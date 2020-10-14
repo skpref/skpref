@@ -81,7 +81,7 @@ class TestSubsetPosetVec(unittest.TestCase):
                 [1, 723354, 817040],
                 [1, 723354, 576214],
                 [1, 723354, 673995]
-            ], columns=['observation', 'top', 'boot']
+            ], columns=['observation', 'alt1', 'alt2']
         )
 
         output_red = self.test_spv_int.pairwise_reducer(scramble=False)
@@ -197,7 +197,7 @@ class TestSubsetPosetVec(unittest.TestCase):
             [2, 'd', 'a'],
             [2, 'b', 'a'],
             [2, 'c', 'a']
-        ], columns=['observation', 'top', 'boot'])
+        ], columns=['observation', 'alt1', 'alt2'])
 
         output_red_str = self.test_spv.pairwise_reducer(scramble=False)
 
@@ -263,6 +263,65 @@ class TestSubsetPosetVec(unittest.TestCase):
             correct_pairwise_scrambled.astype('int32'),
             result_pairwise_scrambled.astype('int32'))
 
+    def test_pairwise_reducer_for_scoring(self):
+        # Create a subset poset vector with no depvar
+        alts = np.array([np.array([111, 222]), np.array([111, 222, 333])])
+        test_scoring_vec = SubsetPosetVec(alts, alts)
+
+        pairwise_reduction = test_scoring_vec.pairwise_reducer(scramble=False)
+
+        expected_outcome = pd.DataFrame({
+            'observation': [0, 0, 1, 1, 1, 1, 1, 1],
+            'alt1': [111, 222, 111, 111, 222, 222, 333, 333],
+            'alt2': [222, 111, 222, 333, 111, 333, 111, 222]
+        })
+
+        pd.testing.assert_frame_equal(pairwise_reduction.astype('int32'),
+                                      expected_outcome.astype('int32'))
+
     def test_if_name_error_raised(self):
         with self.assertRaises(NameError):
             self.test_spv.pairwise_reducer(style='somethingelse')
+
+    def test_classifier_reducer(self):
+        correct_int_classifier_output = pd.DataFrame([
+            [0, 512709, 1],
+            [0, 529703, 1],
+            [0, 696056, 1],
+            [0, 490972, 0],
+            [0, 685450, 0],
+            [0, 5549502, 0],
+            [1, 723354, 1],
+            [1, 550707, 0],
+            [1, 551375, 0],
+            [1, 591842, 0],
+            [1, 601195, 0],
+            [1, 732624, 0],
+            [1, 778197, 0],
+            [1, 813892, 0],
+            [1, 817040, 0],
+            [1, 576214, 0],
+            [1, 673995, 0]
+        ], columns=['observation', 'alternative', 'chosen'])
+
+        result_int_class_red = self.test_spv_int.classifier_reducer()
+
+        pd.testing.assert_frame_equal(
+            correct_int_classifier_output.astype('int32'),
+            result_int_class_red.astype('int32'))
+
+    def test_classifier_reducer_for_scoring(self):
+        # Create a subset poset vector with no depvar
+        alts = np.array([np.array([111, 222]), np.array([111, 222, 333])])
+        test_scoring_vec = SubsetPosetVec(alts, alts)
+
+        pairwise_reduction = test_scoring_vec.classifier_reducer()
+
+        expected_outcome = pd.DataFrame({
+            'observation': [0, 0, 1, 1, 1],
+            'alternative': [111, 222, 111, 222, 333],
+            'chosen': [1, 1, 1, 1, 1]
+        })
+
+        pd.testing.assert_frame_equal(pairwise_reduction.astype('int32'),
+                                      expected_outcome.astype('int32'))
