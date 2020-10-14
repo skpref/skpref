@@ -193,7 +193,7 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
             'observation': [0, 0, 1, 1, 1, 1, 1, 1]
         }).set_index(['alt1', 'alt2'])
 
-        assert_frame_equal(unpacker_dict['df_comb'],
+        assert_frame_equal(unpacker_dict['df_comb'].astype('int32'),
                            correct_table.astype('int32'))
 
 
