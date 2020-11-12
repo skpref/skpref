@@ -422,7 +422,8 @@ class PairwiseComparisonTask(ChoiceTask):
 
         self.target_column_correspondence = target_column_correspondence
 
-        if self.target_column_correspondence is not None:
+        if self.target_column_correspondence is not None \
+                and primary_table_target_name is not None:
             self.inverse_correspondence_column = \
                 primary_table_alternatives_names.copy()
             self.inverse_correspondence_column.remove(

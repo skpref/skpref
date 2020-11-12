@@ -12,7 +12,10 @@ from scipy.special import expit
 from numpy import unique
 from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics import log_loss
-from ..base import GLMPairwiseComparisonModel
+from ..base import (GLMPairwiseComparisonModel,
+                    pairwise_comparison_pack_predictions)
+from skpref.task import PairwiseComparisonTask
+from skpref.data_processing import SubsetPosetVec
 
 
 def check_indexing_of_entities(df):
@@ -809,7 +812,8 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         predict
         """
         model_input = self.unpack_task_for_predict(task)
-        return self.predict(model_input)
+        predictions = self.predict(model_input)
+        return pairwise_comparison_pack_predictions(predictions, task)
 
     def score(self, X):
         """

@@ -7,6 +7,7 @@ from skpref.base import (PairwiseComparisonModel, SVMPairwiseComparisonModel,
 from pandas.testing import assert_frame_equal
 from sklearn.dummy import DummyClassifier
 from skpref.tests.shared_test_dataframes import *
+from skpref.data_processing import SubsetPosetVec
 
 
 class TestPairwiseComparisonModelFunctions(unittest.TestCase):
@@ -402,11 +403,25 @@ class TestClassificationReducer(unittest.TestCase):
         my_model = ClassificationReducer(
             DummyClassifier('constant', constant=1))
 
-        task_packer_results = my_model.task_packer(np.array([1, 1, 0, 1]),
-                                                   PairwiseComparisonTask)
+        my_task = PairwiseComparisonTask(
+            primary_table=DATA,
+            primary_table_alternatives_names=['ent1', 'ent2'],
+            target_column_correspondence='ent1'
+        )
 
-        expected_results = np.array([1, 1, 0, 1])
-        assert_array_equal(expected_results, task_packer_results)
+        task_packer_results = my_model.task_packer(np.array([1, 1, 0, 1]),
+                                                   my_task)
+
+        expected_results = SubsetPosetVec(
+            top_input_data=np.array(['C', 'B', 'D', 'D']),
+            boot_input_data=np.array(['B', 'A', 'C', 'C'])
+        )
+
+        assert_array_equal(expected_results.top_input_data,
+                           task_packer_results.top_input_data)
+
+        assert_array_equal(expected_results.boot_input_data,
+                           task_packer_results.boot_input_data)
 
     def test_task_packer_choice(self):
         test_task = ChoiceTask(
@@ -426,11 +441,21 @@ class TestClassificationReducer(unittest.TestCase):
                       1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0]),
             ChoiceTask)
 
-        expected_results = np.array(
-            [np.array([512709, 696056, 685450], dtype=object),
-             np.array([723354, 550707, 551375, 591842, 817040], dtype=object)])
+        expected_results = SubsetPosetVec(
+            top_input_data=np.array(
+             [np.array([512709, 696056, 685450], dtype=object),
+              np.array([723354, 550707, 551375, 591842, 817040], dtype=object)]),
+            boot_input_data=np.array(
+             [np.array([529703, 490972, 5549502], dtype=object),
+              np.array([601195, 732624, 778197, 813892, 576214, 673995], dtype=object)])
+        )
 
-        assert_array_equal(len(expected_results), len(task_packer_results))
+        assert_array_equal(len(expected_results.top_input_data),
+                           len(task_packer_results.top_input_data))
 
-        for i in range(len(expected_results)):
-            assert_array_equal(expected_results[i], task_packer_results[i])
+        for i in range(len(expected_results.top_input_data)):
+            assert_array_equal(expected_results.top_input_data[i],
+                               task_packer_results.top_input_data[i])
+
+            assert_array_equal(expected_results.boot_input_data[i],
+                               task_packer_results.boot_input_data[i])

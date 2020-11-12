@@ -1,10 +1,59 @@
 from sklearn.base import BaseEstimator
 from skpref.task import PrefTask, PairwiseComparisonTask, ChoiceTask
 import pandas as pd
-from typing import List, Type
+from typing import List, Type, Union
 import numpy as np
 from skpref.utils import UnderDevError
-from sklearn.metrics import log_loss
+from skpref.data_processing import PosetVector, SubsetPosetVec
+
+
+def pairwise_comparison_pack_predictions(
+        predictions: np.array, task: PairwiseComparisonTask) -> SubsetPosetVec:
+    """
+    When a task is set up as a pairwise comparison, the format will be
+    option1, option 2, 1/0 var that corresponds to on of the options being
+    successful. This function takes 1/0 predictions and maps them to the
+    alternatives to pack a SubsetPosetVector with the top and boot results.
+    For example if the data is
+    Option 1: [A, B, C]
+    Option 2: [B, A, A]
+    predictions: [1, 1, 0]
+    Then we'd return
+    SubsetPosetVector.top_input_data = np.array([A,B,A])
+    SubsetPosetVector.boot_input_data = np.array([B,A,C])
+
+    Parameters
+    ----------
+    predictions: numpy arrays
+                 The 1/0 predictions for pairwise comparisons
+    task: PairwiseComparisonTask
+          The task for which predictions have been made
+
+    Returns
+    -------
+    A SubsetPosetVector with the results
+    """
+    target_col = task.target_column_correspondence
+    other_col = np.setdiff1d(task.primary_table_alternatives_names,
+                             target_col)
+    top = np.array([])
+    boot = np.array([])
+
+    for _i, pred in enumerate(predictions):
+        if pred == 1:
+            top = np.append(top,
+                      task.primary_table[target_col].iloc[_i])
+            boot = np.append(boot,
+                      task.primary_table[other_col].iloc[_i])
+
+        else:
+            top = np.append(top,
+                      task.primary_table[other_col].iloc[_i])
+            boot = np.append(boot,
+                      task.primary_table[target_col].iloc[_i])
+
+    return SubsetPosetVec(top_input_data=np.array(top),
+                          boot_input_data=np.array(boot))
 
 
 class Model(BaseEstimator):
@@ -55,8 +104,9 @@ class Model(BaseEstimator):
     def task_unpacker(self, task: PrefTask) -> dict:
         pass
 
-    def task_packer(self, predictions: np.array, task: Type[PrefTask]
-                    ) -> np.array:
+    def task_packer(self, predictions: Union[PosetVector, np.array],
+                    task: PrefTask
+                    ) -> PosetVector:
         pass
 
     def fit(self, df_comb: pd.DataFrame, target: str,
@@ -74,7 +124,7 @@ class Model(BaseEstimator):
 
     def predict(self, df_comb: pd.DataFrame,
                 df_i: pd.DataFrame = None, df_j: pd.DataFrame = None,
-                merge_columns: List[str] = None) -> np.array:
+                merge_columns: List[str] = None) -> PosetVector:
         pass
 
     def _prepare_data_for_prediction(self, task: PrefTask) -> dict:
@@ -90,7 +140,7 @@ class Model(BaseEstimator):
 
     def predict_task(self, task: PrefTask) -> np.array:
         predictions = self.predict(**self._prepare_data_for_prediction(task))
-        return self.task_packer(predictions, type(task))
+        return self.task_packer(predictions, task)
 
 
 class ProbabilisticModel(Model):
@@ -455,15 +505,24 @@ class ClassificationReducer(ProbabilisticModel):
 
         return self.model.predict_proba(df_comb)
 
-    def task_packer(self, predictions, task_type):
-        if task_type is PairwiseComparisonTask and self.keep_pairwise_format:
-            return predictions
+    def task_packer(self, predictions, task):
+        if type(task) is PairwiseComparisonTask and self.keep_pairwise_format:
+            return pairwise_comparison_pack_predictions(predictions, task)
         else:
-            return pd.DataFrame({
+
+            preds_df_acc = pd.DataFrame({
                 'prediction': np.where(predictions == 1, self.alternative,
                                        None),
-                'obs': self.obs_col}).dropna().groupby('obs') \
-                ['prediction'].unique().values
+                'obs': self.obs_col}).dropna().groupby('obs')
+
+            preds_df_rej = pd.DataFrame({
+                'rejection': np.where(predictions == 0, self.alternative,
+                                      None),
+                'obs': self.obs_col}).dropna().groupby('obs')
+
+            return SubsetPosetVec(
+                top_input_data=preds_df_acc['prediction'].unique().values,
+                boot_input_data=preds_df_rej['rejection'].unique().values)
 
     def score(self, X, *args, **kwargs):
         y = X.chosen.values
