@@ -511,7 +511,7 @@ class ClassificationReducer(ProbabilisticModel):
     def predict_proba_task(
             self, task: PrefTask,
             outcome: Union[str, PosetVector, List[str], List[PosetVector]] = None,
-            column: str = None, obs: Union[int, List[int]] = None
+            column: Union[str, List[str]] = None, obs: Union[int, List[int]] = None,
     ) -> dict:
 
         predictions = self.predict_proba(
@@ -546,7 +546,18 @@ class ClassificationReducer(ProbabilisticModel):
                             target_col_loses, 0))
                 }
 
-            if column is not None:
+            elif isinstance(outcome, list):
+                pred_probs = {}
+                for i in outcome:
+                    pred_probs[i] = np.where(
+                        task.primary_table[target_col].values == i,
+                        target_col_wins, np.where(
+                            task.primary_table[other_col[0]].values == i,
+                            target_col_loses, 0))
+
+                return pred_probs
+
+            elif isinstance(column, str):
                 return {
                     column + ' is preferred': np.where(
                         task.primary_table[column].values == task.primary_table[target_col].values,
@@ -554,6 +565,17 @@ class ClassificationReducer(ProbabilisticModel):
                             task.primary_table[column].values == task.primary_table[other_col[0]].values,
                             target_col_loses, 0))
                 }
+
+            elif isinstance(column, list):
+                pred_probs = {}
+                for i in column:
+                    pred_probs[i + ' is preferred'] = np.where(
+                        task.primary_table[i].values == task.primary_table[target_col].values,
+                        target_col_wins, np.where(
+                            task.primary_table[i].values == task.primary_table[other_col[0]].values,
+                            target_col_loses, 0))
+
+                return pred_probs
 
     def task_packer(self, predictions, task):
         if type(task) is PairwiseComparisonTask and self.keep_pairwise_format:
