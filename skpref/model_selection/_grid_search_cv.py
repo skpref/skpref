@@ -38,13 +38,13 @@ class GridSearchCV(object):
     >>> from skpref.task import ChoiceTask, PairwiseComparisonTask
     >>> import pandas as pd
     >>> # Using product choice data
-    >>> with open('skpref/examples/data/product_choices.pickle', 'rb') as handle:
-    ...     choice_data = pickle.load(handle)
-    >>> products_bought_train = ChoiceTask(
-    ... choice_data[:100], 'alternatives', 'choice', features_to_use=None)
-    >>> to_tune = {'alpha': [0.1, 0.5, 1], 'method': ['BFGS', 'Newton-CG']}
-    >>> gs_bt = GridSearchCV(BradleyTerry(), to_tune,  cv=3)
-    >>> gs_bt.fit_task(products_bought_train)
+    # >>> with open('skpref/examples/data/product_choices.pickle', 'rb') as handle:
+    # ...     choice_data = pickle.load(handle)
+    # >>> products_bought_train = ChoiceTask(
+    # ... choice_data[:100], 'alternatives', 'choice', features_to_use=None)
+    # >>> to_tune = {'alpha': [0.1, 0.5, 1], 'method': ['BFGS', 'Newton-CG']}
+    # >>> gs_bt = GridSearchCV(BradleyTerry(), to_tune,  cv=3)
+    # >>> gs_bt.fit_task(products_bought_train)
 
     >>> # using basketball match data
     >>> NBA_file_loc = 'skpref/examples/data/'

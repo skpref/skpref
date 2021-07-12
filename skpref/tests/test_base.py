@@ -474,6 +474,9 @@ class TestProbabilisticModel(unittest.TestCase):
         example_predictions = np.array([[0.4, 0.6], [0.2, 0.8], [0.5, 0.5], [0, 1]])
         outcome = my_prob_model.prediction_wrapper(
             predictions=example_predictions, task=test_task, outcome=['A', 'B'])
-        expected_outcome = {'A': [0.0, 0.8, 0.0, 0.0],
-                            'B': [0.6, 0.2, 0.0, 0.0]}
-        self.assertDictEqual(outcome, expected_outcome)
+        expected_outcome = {'A': np.array([0.0, 0.2, 0.0, 0.0]),
+                            'B': np.array([0.4, 0.8, 0.0, 0.0])}
+
+        self.assertListEqual(list(expected_outcome.keys()), list(outcome.keys()))
+        for key in expected_outcome.keys():
+            assert_array_equal(expected_outcome[key], outcome[key])

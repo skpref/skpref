@@ -122,17 +122,17 @@ class BradleyTerry(GLMPairwiseComparisonModel):
     >>> from skpref.task import ChoiceTask, PairwiseComparisonTask
     >>> import pandas as pd
     >>> # Using product choice data
-    >>> with open('skpref/examples/data/product_choices.pickle', 'rb') as handle:
-    ...     choice_data = pickle.load(handle)
-    >>> with open('skpref/examples/data/product_info.pickle', 'rb') as handle:
-    ...     product_data = pickle.load(handle)
-    >>> products_bought_train = ChoiceTask(
-    ... choice_data[:100], 'alternatives', 'choice',
-    ... features_to_use=['price_per_size', 'prod_size'],
-    ... secondary_table=product_data,
-    ... secondary_to_primary_link={"PRODUCT_ID": ['alternatives', 'choice']})
-    >>> mybt = BradleyTerry(method='BFGS', alpha=1e-5)
-    >>> mybt.fit_task(products_bought_train)
+    # >>> with open('skpref/examples/data/product_choices.pickle', 'rb') as handle:
+    # ...     choice_data = pickle.load(handle)
+    # >>> with open('skpref/examples/data/product_info.pickle', 'rb') as handle:
+    # ...     product_data = pickle.load(handle)
+    # >>> products_bought_train = ChoiceTask(
+    # ... choice_data[:100], 'alternatives', 'choice',
+    # ... features_to_use=['price_per_size', 'prod_size'],
+    # ... secondary_table=product_data,
+    # ... secondary_to_primary_link={"PRODUCT_ID": ['alternatives', 'choice']})
+    # >>> mybt = BradleyTerry(method='BFGS', alpha=1e-5)
+    # >>> mybt.fit_task(products_bought_train)
 
     >>> # using basketball match data
     >>> NBA_file_loc = 'skpref/examples/data/NBA_matches.csv'
