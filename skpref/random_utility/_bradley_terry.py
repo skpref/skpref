@@ -9,13 +9,12 @@ import pandas as pd
 import numpy as np
 import pylogit as pl
 from scipy.special import expit
+from skpref.task import PrefTask, PairwiseComparisonTask, ChoiceTask
 from numpy import unique
 from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics import log_loss
 from ..base import (GLMPairwiseComparisonModel,
                     pairwise_comparison_pack_predictions)
-from skpref.task import PairwiseComparisonTask
-from skpref.data_processing import SubsetPosetVec
 
 
 def check_indexing_of_entities(df):
@@ -156,6 +155,7 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         self.initial_params = initial_params
         self.max_iter = max_iter
         self.tol = tol
+        self.keep_pairwise_format = True
         super(BradleyTerry, self).__init__()
     @staticmethod
     def replace_entities_with_lkp(df, lkp):
@@ -695,7 +695,7 @@ class BradleyTerry(GLMPairwiseComparisonModel):
             diff = self.find_strength_diff(df)
             return expit(diff)
 
-    def unpack_task_for_predict(self, task):
+    def _prepare_data_for_prediction(self, task):
         """
         Unpacks tasks for the consumption of the existing predict methods
         Parameters:
@@ -716,22 +716,7 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         else:
             model_input = _re_indexed_df.copy()
 
-        return model_input
-
-    def predict_proba_task(self, task):
-        """
-        Predicts the probability that the corresponding entity will win in the
-        task.
-        Parameters:
-        -----------
-        task: ChoiceTask type
-
-        Returns:
-        --------
-        predict_proba
-        """
-        model_input = self.unpack_task_for_predict(task)
-        return self.predict_proba(model_input)
+        return {'df': model_input}
 
     def predict_choice(self, df):
         """ Predicts the entity that will be selected.
@@ -771,7 +756,7 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         --------
         predict_choice
         """
-        model_input = self.unpack_task_for_predict(task)
+        model_input = self._prepare_data_for_prediction(task)['df']
         return self.predict_choice(model_input)
 
     def predict(self, df_comb, df_i=None, df_j=None, merge_columns=None):
@@ -811,7 +796,7 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         --------
         predict
         """
-        model_input = self.unpack_task_for_predict(task)
+        model_input = self._prepare_data_for_prediction(task)['df']
         predictions = self.predict(model_input)
         return pairwise_comparison_pack_predictions(predictions, task)
 

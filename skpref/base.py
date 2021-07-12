@@ -150,13 +150,102 @@ class ProbabilisticModel(Model):
                       ) -> np.array:
         pass
 
+    def prediction_wrapper(self, task: PrefTask, predictions: np.array,
+                           outcome: Union[str, PosetVector, List[str], List[PosetVector]] = None,
+                           column: Union[str, PosetVector, List[str], List[PosetVector]] = None) -> dict:
+
+        """
+        Wraps predictions given by models into the format of a dictionary of SubsetPoset vectors
+        Parameters
+        ----------
+        task: The preference task
+        predictions: The predictions of the model
+        outcome: The specific outcome that the user wants to query, this can be a string in the form of the "name" of
+            the alternative, or a list of strings. It can be also be a SubsetPosetVector or a list of these.
+        column: If the alternatives are in a column then it can be the column that the SubsetPosetVector contains.
+
+        Returns
+        -------
+        Dictionary of results as keys and the probabilities that they will be selected in each observation, or the name
+        of the column and the probability that the alternative or alternatives in the column are selected in each
+        observation
+        """
+
+        if type(task) is PairwiseComparisonTask and self.keep_pairwise_format:
+
+            target_col = task.target_column_correspondence
+            other_col = np.setdiff1d(task.primary_table_alternatives_names,
+                                     target_col)
+            if len(predictions.shape) == 2:
+                target_col_wins = np.array([l[1] for l in predictions])
+                target_col_loses = np.array([l[0] for l in predictions])
+
+            else:
+                target_col_wins = predictions
+                target_col_loses = np.ones(len(target_col_wins)) - target_col_wins
+
+            if isinstance(outcome, str):
+                return {
+                    outcome: np.where(
+
+                        task.primary_table[target_col].values == outcome,
+                        target_col_wins, np.where(
+                            task.primary_table[other_col[0]].values == outcome,
+                            target_col_loses, 0))
+                }
+
+            elif isinstance(outcome, list):
+                pred_probs = {}
+                for i in outcome:
+                    pred_probs[i] = np.where(
+                        task.primary_table[target_col].values == i,
+                        target_col_wins, np.where(
+                            task.primary_table[other_col[0]].values == i,
+                            target_col_loses, 0))
+
+                return pred_probs
+
+            elif isinstance(column, str):
+                return {
+                    column + ' is preferred': np.where(
+                        task.primary_table[column].values == task.primary_table[target_col].values,
+                        target_col_wins, np.where(
+                            task.primary_table[column].values == task.primary_table[other_col[0]].values,
+                            target_col_loses, 0))
+                }
+
+            elif isinstance(column, list):
+                pred_probs = {}
+                for i in column:
+                    pred_probs[i + ' is preferred'] = np.where(
+                        task.primary_table[i].values == task.primary_table[target_col].values,
+                        target_col_wins, np.where(
+                            task.primary_table[i].values == task.primary_table[other_col[0]].values,
+                            target_col_loses, 0))
+
+                return pred_probs
+
     def predict_proba_task(
             self, task: PrefTask,
             outcome: Union[str, PosetVector, List[str], List[PosetVector]] = None,
-            column: str = None, obs: Union[int, List[int]] = None
+            column: str = None
     ) -> dict:
 
-        pass
+        if outcome is None and column is None:
+            raise NameError("Please define the outcome to get the probability "
+                            "for. Or in the pairwise case a column for which "
+                            "to make predictions, or set full to true, which "
+                            "will return the probabilities of all possible "
+                            "permutations.")
+
+        if outcome is not None and column is not None:
+            raise NameError("Both outcome and column has been specified, "
+                            "please only feed one of these options in.")
+
+        predictions = self.predict_proba(
+            **self._prepare_data_for_prediction(task))
+
+        return self.prediction_wrapper(task, predictions, outcome, column)
 
 
 class PairwiseComparisonModel(Model):
@@ -507,75 +596,6 @@ class ClassificationReducer(ProbabilisticModel):
                       merge_columns: List[str] = None) -> np.array:
 
         return self.model.predict_proba(df_comb)
-
-    def predict_proba_task(
-            self, task: PrefTask,
-            outcome: Union[str, PosetVector, List[str], List[PosetVector]] = None,
-            column: Union[str, List[str]] = None, obs: Union[int, List[int]] = None,
-    ) -> dict:
-
-        predictions = self.predict_proba(
-            **self._prepare_data_for_prediction(task))
-
-        if outcome is None and column is None:
-            raise NameError("Please define the outcome to get the probability "
-                            "for. Or in the pairwise case a column for which "
-                            "to make predictions, or set full to true, which "
-                            "will return the probabilities of all possible "
-                            "permutations.")
-
-        if outcome is not None and column is not None:
-            raise NameError("Both outcome and column has been specified, "
-                            "please only feed one of these options in.")
-
-        if type(task) is PairwiseComparisonTask and self.keep_pairwise_format:
-
-            target_col = task.target_column_correspondence
-            other_col = np.setdiff1d(task.primary_table_alternatives_names,
-                                     target_col)
-            target_col_wins = np.array([l[1] for l in predictions])
-            target_col_loses = np.array([l[0] for l in predictions])
-
-            if isinstance(outcome, str):
-                return {
-                    outcome: np.where(
-
-                        task.primary_table[target_col].values == outcome,
-                        target_col_wins, np.where(
-                            task.primary_table[other_col[0]].values == outcome,
-                            target_col_loses, 0))
-                }
-
-            elif isinstance(outcome, list):
-                pred_probs = {}
-                for i in outcome:
-                    pred_probs[i] = np.where(
-                        task.primary_table[target_col].values == i,
-                        target_col_wins, np.where(
-                            task.primary_table[other_col[0]].values == i,
-                            target_col_loses, 0))
-
-                return pred_probs
-
-            elif isinstance(column, str):
-                return {
-                    column + ' is preferred': np.where(
-                        task.primary_table[column].values == task.primary_table[target_col].values,
-                        target_col_wins, np.where(
-                            task.primary_table[column].values == task.primary_table[other_col[0]].values,
-                            target_col_loses, 0))
-                }
-
-            elif isinstance(column, list):
-                pred_probs = {}
-                for i in column:
-                    pred_probs[i + ' is preferred'] = np.where(
-                        task.primary_table[i].values == task.primary_table[target_col].values,
-                        target_col_wins, np.where(
-                            task.primary_table[i].values == task.primary_table[other_col[0]].values,
-                            target_col_loses, 0))
-
-                return pred_probs
 
     def task_packer(self, predictions, task):
         if type(task) is PairwiseComparisonTask and self.keep_pairwise_format:

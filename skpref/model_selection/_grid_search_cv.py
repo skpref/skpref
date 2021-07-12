@@ -3,6 +3,8 @@ import pandas as pd
 from skpref.base import ClassificationReducer
 from skpref.task import PrefTask
 from sklearn.metrics import log_loss
+from typing import List, Type, Union
+from skpref.data_processing import PosetVector
 
 LOSS_FUNCTIONS = {
     'neg_log_loss': [log_loss, -1]
@@ -253,9 +255,11 @@ class GridSearchCV(object):
         """
         return self.gs.predict_proba(df)
 
-    def predict_proba_task(self, task):
+    def predict_proba_task(self, task: PrefTask,
+            outcome: Union[str, PosetVector, List[str], List[PosetVector]] = None,
+            column: str = None):
 
-        return self.best_estimator_.predict_proba_task(task)
+        return self.best_estimator_.predict_proba_task(task, outcome, column)
 
     def predict_choice(self, df):
         """ Predicts the entity that will be selected.

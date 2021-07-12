@@ -3,7 +3,7 @@ import numpy as np
 from numpy.testing import assert_array_equal
 from skpref.task import ChoiceTask, PairwiseComparisonTask
 from skpref.base import (PairwiseComparisonModel, SVMPairwiseComparisonModel,
-                         ClassificationReducer)
+                         ClassificationReducer, ProbabilisticModel)
 from pandas.testing import assert_frame_equal
 from sklearn.dummy import DummyClassifier
 from skpref.tests.shared_test_dataframes import *
@@ -459,3 +459,21 @@ class TestClassificationReducer(unittest.TestCase):
 
             assert_array_equal(expected_results.boot_input_data[i],
                                task_packer_results.boot_input_data[i])
+
+
+class TestProbabilisticModel(unittest.TestCase):
+
+    def test_prediction_wrapper(self):
+        # Test case for predicting with scikit-learn style classifier
+        test_task = PairwiseComparisonTask(
+            DATA, ['ent1', 'ent2'], 'result', 'ent1',
+            secondary_table=ENT1_ATTRIBUTES,
+            secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
+        my_prob_model = ProbabilisticModel()
+        my_prob_model.keep_pairwise_format = True
+        example_predictions = np.array([[0.4, 0.6], [0.2, 0.8], [0.5, 0.5], [0, 1]])
+        outcome = my_prob_model.prediction_wrapper(
+            predictions=example_predictions, task=test_task, outcome=['A', 'B'])
+        expected_outcome = {'A': [0.0, 0.8, 0.0, 0.0],
+                            'B': [0.6, 0.2, 0.0, 0.0]}
+        self.assertDictEqual(outcome, expected_outcome)
