@@ -298,9 +298,15 @@ class PairwiseComparisonModel(Model):
                 (type(task) is PairwiseComparisonTask) and
                 (self.pairwise_red_args['style'] == 'reciprocal')
         ):
-            pairwise_comparisons = task.subset_vec.pairwise_reducer(
-                target_colname=task.primary_table_target_name,
-                **self.pairwise_red_args)
+            pairwise_comparisons = \
+                task.subset_vec.pairwise_reducer(
+                    target_colname=task.primary_table_target_name,
+                    **self.pairwise_red_args)[0].copy()
+
+            self.unpacked_observations = task.subset_vec.pairwise_reducer(
+                    target_colname=task.primary_table_target_name,
+                    **self.pairwise_red_args)[1]
+
             if task.annotations['features_to_use'] is not None:
                 feats_in_primary = []
 
@@ -316,10 +322,14 @@ class PairwiseComparisonModel(Model):
 
                 if len(feats_in_primary) > 0:
                     feats_in_primary = np.unique(feats_in_primary).tolist()
+                    pairwise_comparisons['observation'] = \
+                        self.unpacked_observations
                     pairwise_comparisons = pairwise_comparisons.merge(
                         task.primary_table[feats_in_primary].reset_index()
                         .rename(columns={'index': 'observation'}),
                         how='left', on='observation', validate='m:1')
+                    pairwise_comparisons.drop('observation', axis=1,
+                                              inplace=True)
 
             _re_indexed_df = pairwise_comparisons.set_index(['alt1', 'alt2'])
 
@@ -339,22 +349,30 @@ class PairwiseComparisonModel(Model):
 
         if task.annotations['features_to_use'] is None:
 
-            if type(task) is not PairwiseComparisonTask:
-                _re_indexed_df.drop(['observation'], axis=1, inplace=True)
+            if task.primary_table_target_name is not None:
+                model_input = _re_indexed_df[[task.primary_table_target_name]].copy()
+            else:
+                model_input = _re_indexed_df.copy()
 
-            model_input = _re_indexed_df[[task.primary_table_target_name]].copy()
+            # Secondary table can always be ignored when no features are being
+            # used
             secondary_input = None
 
         elif task.annotations['features_to_use'] != 'all':
             model_input = _re_indexed_df[
                 [task.primary_table_target_name] +
-                task.primary_table_features_to_use.tolist() +
+                list(task.primary_table_features_to_use) +
                 input_merge_columns
                 ].copy()
-            secondary_input = secondary_re_indexed[
-                task.secondary_table_features_to_use.tolist() +
-                input_merge_columns
-                ].copy()
+
+            if len(task.secondary_table_features_to_use) == 0:
+                secondary_input = None
+
+            else:
+                secondary_input = secondary_re_indexed[
+                    list(task.secondary_table_features_to_use) +
+                    input_merge_columns
+                    ].copy()
         else:
             model_input = _re_indexed_df.copy()
             secondary_input = secondary_re_indexed.copy()
@@ -534,23 +552,26 @@ class ClassificationReducer(ProbabilisticModel):
                         ], inplace=True, axis=1)
 
             else:
-                model_input = task.primary_table.drop(
-                    task.primary_table_alternatives_names, axis=1).copy()
+                model_input = task.primary_table[
+                    [task.primary_table_target_name] +
+                    task.primary_table_features_to_use.tolist()].copy()
 
         # Create aggregation for choice task
         elif isinstance(task, ChoiceTask):
-            model_input = task.subset_vec.classifier_reducer(
+            model_input, observations = task.subset_vec.classifier_reducer(
                 chosen_name=task.primary_table_target_name)
             if task.primary_table_target_name is None:
                 model_input.drop(column=task.primary_table_target_name,
                                  inplace=True)
 
             if len(task.primary_table_features_to_use) > 0:
+                model_input['observation'] = observations
                 model_input = model_input.merge(
                     task.primary_table[task.primary_table_features_to_use],
                     how='inner', left_on='observation', right_index=True,
                     validate='m:1'
                 )
+                model_input.drop('observation', axis=1, inplace=True)
 
             if len(task.secondary_table_features_to_use) > 0:
                 _, _, left_on, right_on = task.find_merge_columns(
@@ -560,7 +581,7 @@ class ClassificationReducer(ProbabilisticModel):
                     task.secondary_table, how='left', left_on=list(left_on),
                     right_on=list(right_on), validate='m:1')
 
-                self.obs_col = model_input.observation.values
+                self.obs_col = observations
                 self.alternative = model_input.alternative.values
 
                 model_input = model_input[

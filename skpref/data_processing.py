@@ -216,7 +216,7 @@ class SubsetPosetVec(PosetVector):
     def pairwise_reducer(self, style: str = "positive",
                          rejection: Union[int, float] = 0, scramble: bool = True,
                          random_seed_scramble: int = None,
-                         target_colname='alt1_top') -> pd.DataFrame:
+                         target_colname='alt1_top') -> [pd.DataFrame, np.array]:
         """
         Breaks a SubsetPosetVec into the most elementary parts of a pairwise
         comparison.
@@ -242,7 +242,7 @@ class SubsetPosetVec(PosetVector):
 
         Returns
         --------
-        Pairwise DataFrame
+        Pairwise DataFrame and observations indexing numpy array
         """
 
         if style == "positive" and not scramble:
@@ -262,9 +262,8 @@ class SubsetPosetVec(PosetVector):
 
         if (style, rejection, scramble) in \
                 self.pairwise_comparison_reduction_dict.keys():
-            return self.pairwise_comparison_reduction_dict[style,
-                                                           rejection,
-                                                           scramble].copy()
+            return self.pairwise_comparison_reduction_dict[style, rejection,
+                                                           scramble]
 
         else:
             alt_type = type(self.top_input_data[0][0])
@@ -310,13 +309,19 @@ class SubsetPosetVec(PosetVector):
                         pairwise_comparison_reduction.astype(
                             {'observation': int, target_colname: int})
 
-            self.pairwise_comparison_reduction_dict[style, rejection, scramble] = \
-                pairwise_comparison_reduction
+            observations = \
+                pairwise_comparison_reduction.observation.astype(int).values
 
-            return pairwise_comparison_reduction
+            pairwise_comparison_reduction.drop(
+                'observation', axis=1, inplace=True)
+
+            self.pairwise_comparison_reduction_dict[style, rejection, scramble] = \
+                (pairwise_comparison_reduction, observations)
+
+            return pairwise_comparison_reduction, observations
 
     def classifier_reducer(self, rejection: int = 0, chosen_name: str = 'chosen'
-                           ) -> pd.DataFrame:
+                           ) -> [pd.DataFrame, np.array]:
         """
         Reduces observations to classifiers for example when the data looks like
         this top = [A], boot = [B, C] it will return the following:
@@ -361,6 +366,6 @@ class SubsetPosetVec(PosetVector):
         return pd.DataFrame({
             'observation': obs_in,
             'alternative': alts_in,
-            chosen_name: choice_in
+            chosen_name: choice_in,
         }).drop_duplicates(subset=['observation', 'alternative'])\
-            .reset_index(drop=True)
+            .drop('observation', axis=1).reset_index(drop=True), obs_in

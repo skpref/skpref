@@ -148,7 +148,9 @@ class TestChoiceTask(unittest.TestCase):
         choicetask = ChoiceTask(
             primary_table=DATA2,
             primary_table_alternatives_names='alternatives',
-            primary_table_target_name='result')
+            primary_table_target_name='result',
+            features_to_use=None
+        )
 
         correct_top_array = np.array([['C'], ['A'], ['D'], ['D']])
 
@@ -166,7 +168,9 @@ class TestChoiceTask(unittest.TestCase):
         choicetask = ChoiceTask(
             primary_table=DATA_het,
             primary_table_alternatives_names='alternatives',
-            primary_table_target_name='result')
+            primary_table_target_name='result',
+            features_to_use=None
+        )
 
         correct_top_array = np.array([np.array(['C', 'B']),
                                       np.array(['A']),
@@ -196,7 +200,9 @@ class TestPairwiseComparisonTask(unittest.TestCase):
             primary_table=DATA,
             primary_table_alternatives_names=['ent1', 'ent2'],
             primary_table_target_name='result',
-            target_column_correspondence='ent1')
+            target_column_correspondence='ent1',
+            features_to_use=None
+        )
 
         correct_top_array = np.array([['C'], ['A'], ['D'], ['D']])
 
@@ -215,7 +221,9 @@ class TestPairwiseComparisonTask(unittest.TestCase):
             primary_table=DATA,
             primary_table_alternatives_names=['ent1', 'ent2'],
             primary_table_target_name='result',
-            target_column_correspondence='ent2')
+            target_column_correspondence='ent2',
+            features_to_use=None
+        )
 
         correct_boot_array = np.array([['C'], ['A'], ['D'], ['D']])
 
@@ -234,7 +242,9 @@ class TestPairwiseComparisonTask(unittest.TestCase):
             primary_table=DATA,
             primary_table_alternatives_names=['ent1', 'ent2'],
             primary_table_target_name='result',
-            target_column_correspondence='ent2')
+            target_column_correspondence='ent2',
+            features_to_use=None
+        )
 
         self.assertEqual(corr_choicetask.subset_vec.poset_type.top_size_const,
                          True)

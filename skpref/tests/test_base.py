@@ -23,8 +23,8 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
 
         d1, d2, _ = mybt.task_indexing(test_task)
 
-        correct_d1 = test_task.subset_vec.pairwise_reducer() \
-            .set_index(['alt1', 'alt2'])
+        correct_d1 = test_task.subset_vec.pairwise_reducer()[0] \
+            .set_index(['alt1', 'alt2']).copy()
 
         correct_d2 = SUBSET_CHOICE_FEATS_TABLE.set_index('ID')
         assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
@@ -43,7 +43,7 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
 
         d1, d2, _id = mybt.task_indexing(test_task)
 
-        correct_d1 = test_task.subset_vec.pairwise_reducer() \
+        correct_d1 = test_task.subset_vec.pairwise_reducer()[0].copy() \
             .set_index(['alt1', 'alt2'])
 
         correct_d1['season'] = [7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8,
@@ -68,7 +68,7 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
 
         d1, d2, _id = mybt.task_indexing(test_task)
 
-        correct_d1 = test_task.subset_vec.pairwise_reducer() \
+        correct_d1 = test_task.subset_vec.pairwise_reducer()[0].copy() \
             .set_index(['alt1', 'alt2'])
 
         correct_d1['season'] = [7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8,
@@ -92,16 +92,18 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
 
         mybt = PairwiseComparisonModel()
 
+
         d1, d2, _id = mybt.task_indexing(test_task)
 
-        correct_d1 = test_task.subset_vec.pairwise_reducer() \
-            .set_index(['alt1', 'alt2'])
+        correct_d1, _ = test_task.subset_vec.pairwise_reducer()
+        correct_d1 = correct_d1.set_index(['alt1', 'alt2'])
 
         correct_d1['season'] = [7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8,
                                 8, 8, 8]
 
         correct_d2 = SUBSET_CHOICE_FEATS_TABLE_season.set_index('ID')
         correct_id = ['season']
+
 
         assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
         assert_frame_equal(d2.astype('int32'), correct_d2.astype('int32'))
@@ -177,12 +179,13 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
                            DATA.drop('result', axis=1).set_index(
                                ['ent1', 'ent2']))
 
-    def test_task_unpacer_subset_choice_no_result(self):
+    def test_task_unpacker_subset_choice_no_result(self):
         small_example_table = pd.DataFrame({
             'alternatives': [[1, 2], [1, 2, 3]]
         })
 
-        test_task = ChoiceTask(small_example_table, 'alternatives')
+        test_task = ChoiceTask(small_example_table, 'alternatives',
+                               features_to_use=None)
 
         mybt = PairwiseComparisonModel()
 
@@ -190,18 +193,22 @@ class TestPairwiseComparisonModelFunctions(unittest.TestCase):
 
         correct_table = pd.DataFrame({
             'alt1': [1, 2, 1, 1, 2, 2, 3, 3],
-            'alt2': [2, 1, 2, 3, 1, 3, 1, 2],
-            'observation': [0, 0, 1, 1, 1, 1, 1, 1]
+            'alt2': [2, 1, 2, 3, 1, 3, 1, 2]
         }).set_index(['alt1', 'alt2'])
+
+        correct_unpacked_observations = np.array([0, 0, 1, 1, 1, 1, 1, 1])
 
         assert_frame_equal(unpacker_dict['df_comb'].astype('int32'),
                            correct_table.astype('int32'))
+        assert_array_equal(correct_unpacked_observations,
+                           mybt.unpacked_observations)
 
 
 class TestSVMPairwiseComparisonModel(unittest.TestCase):
 
     def test_correct_indexing_choice(self):
-        test_task = ChoiceTask(SUBSET_CHOICE_TABLE, 'alternatives', 'choice')
+        test_task = ChoiceTask(SUBSET_CHOICE_TABLE, 'alternatives', 'choice',
+                               features_to_use=None)
 
         mybt = SVMPairwiseComparisonModel()
 
@@ -209,62 +216,71 @@ class TestSVMPairwiseComparisonModel(unittest.TestCase):
 
         correct_d1 = pd.DataFrame(
             [
-                [0, 512709, 490972, 1],
-                [0, 490972, 512709, 0],
-                [0, 512709, 685450, 1],
-                [0, 685450, 512709, 0],
-                [0, 512709, 5549502, 1],
-                [0, 5549502, 512709, 0],
-                [0, 529703, 490972, 1],
-                [0, 490972, 529703, 0],
-                [0, 529703, 685450, 1],
-                [0, 685450, 529703, 0],
-                [0, 529703, 5549502, 1],
-                [0, 5549502, 529703, 0],
-                [0, 696056, 490972, 1],
-                [0, 490972, 696056, 0],
-                [0, 696056, 685450, 1],
-                [0, 685450, 696056, 0],
-                [0, 696056, 5549502, 1],
-                [0, 5549502, 696056, 0],
-                [1, 723354, 550707, 1],
-                [1, 550707, 723354, 0],
-                [1, 723354, 551375, 1],
-                [1, 551375, 723354, 0],
-                [1, 723354, 591842, 1],
-                [1, 591842, 723354, 0],
-                [1, 723354, 601195, 1],
-                [1, 601195, 723354, 0],
-                [1, 723354, 732624, 1],
-                [1, 732624, 723354, 0],
-                [1, 723354, 778197, 1],
-                [1, 778197, 723354, 0],
-                [1, 723354, 813892, 1],
-                [1, 813892, 723354, 0],
-                [1, 723354, 817040, 1],
-                [1, 817040, 723354, 0],
-                [1, 723354, 576214, 1],
-                [1, 576214, 723354, 0],
-                [1, 723354, 673995, 1],
-                [1, 673995, 723354, 0]
-            ], columns=['observation', 'alt1', 'alt2', 'choice']
+                [512709, 490972, 1],
+                [490972, 512709, 0],
+                [512709, 685450, 1],
+                [685450, 512709, 0],
+                [512709, 5549502, 1],
+                [5549502, 512709, 0],
+                [529703, 490972, 1],
+                [490972, 529703, 0],
+                [529703, 685450, 1],
+                [685450, 529703, 0],
+                [529703, 5549502, 1],
+                [5549502, 529703, 0],
+                [696056, 490972, 1],
+                [490972, 696056, 0],
+                [696056, 685450, 1],
+                [685450, 696056, 0],
+                [696056, 5549502, 1],
+                [5549502, 696056, 0],
+                [723354, 550707, 1],
+                [550707, 723354, 0],
+                [723354, 551375, 1],
+                [551375, 723354, 0],
+                [723354, 591842, 1],
+                [591842, 723354, 0],
+                [723354, 601195, 1],
+                [601195, 723354, 0],
+                [723354, 732624, 1],
+                [732624, 723354, 0],
+                [723354, 778197, 1],
+                [778197, 723354, 0],
+                [723354, 813892, 1],
+                [813892, 723354, 0],
+                [723354, 817040, 1],
+                [817040, 723354, 0],
+                [723354, 576214, 1],
+                [576214, 723354, 0],
+                [723354, 673995, 1],
+                [673995, 723354, 0]
+            ], columns=['alt1', 'alt2', 'choice']
         ).set_index(['alt1', 'alt2'])
 
+        correct_unpacked_obs = np.array([
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+        ])
+
+        assert_array_equal(correct_unpacked_obs, mybt.unpacked_observations)
         assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
 
     def test_correct_indexing_pairwise(self):
         test_task = PairwiseComparisonTask(
-            DATA, ['ent1', 'ent2'], 'result', 'ent1')
+            DATA, ['ent1', 'ent2'], 'result', 'ent1', features_to_use=None)
 
         mybt = SVMPairwiseComparisonModel()
         d1, _, _ = mybt.task_indexing(test_task)
 
         correct_d1 = pd.DataFrame(
-            {'observation': [0, 0, 1, 1, 2, 2, 3, 3],
-             'alt1': ['C', 'B', 'A', 'B', 'D', 'C', 'D', 'C'],
+            {'alt1': ['C', 'B', 'A', 'B', 'D', 'C', 'D', 'C'],
              'alt2': ['B', 'C', 'B', 'A', 'C', 'D', 'C', 'D'],
              'result': [1, 0, 1, 0, 1, 0, 1, 0]}
         ).set_index(['alt1', 'alt2'])
+
+        correct_unpacked_obs = np.array([0, 0, 1, 1, 2, 2, 3, 3])
+
+        assert_array_equal(correct_unpacked_obs, mybt.unpacked_observations)
         assert_frame_equal(d1.astype('int32'), correct_d1.astype('int32'))
 
 
@@ -406,7 +422,8 @@ class TestClassificationReducer(unittest.TestCase):
         my_task = PairwiseComparisonTask(
             primary_table=DATA,
             primary_table_alternatives_names=['ent1', 'ent2'],
-            target_column_correspondence='ent1'
+            target_column_correspondence='ent1',
+            features_to_use=None
         )
 
         task_packer_results = my_model.task_packer(np.array([1, 1, 0, 1]),

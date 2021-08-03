@@ -81,7 +81,7 @@ class PrefTask(ABC):
                  primary_table_alternatives_names: Union[List[str], str],
                  primary_table_target_name: str = None,
                  secondary_table: pd.DataFrame = None,
-                 features_to_use: List[str] = 'all',
+                 features_to_use: Union[List[str], None] = 'all',
                  secondary_to_primary_link: dict = None):
 
         self.pref_task_type = pref_task_type
@@ -149,6 +149,15 @@ class PrefTask(ABC):
             'secondary_to_primary_link': secondary_to_primary_link,
             'features_to_use': features_to_use
         }
+
+        if features_to_use is not None and len(
+                self.secondary_table_features_to_use) == 0 and len(
+            self.primary_table_features_to_use) == 0:
+            raise Exception("Columns in features_to_use could not be found in"
+                            " any of the tables, please check spelling. Features"
+                            " to use is automatically set to 'all', if there are"
+                            " no features in the data please set the "
+                            "features_to_use parameter to None")
 
     def find_merge_columns(self, original_naming: bool = True
                            ) -> Tuple[pd.DataFrame, List[str], np.array,
@@ -309,7 +318,7 @@ class ChoiceTask(PrefTask):
                  secondary_to_primary_link: dict = None,
                  entity_slot_type_kwargs: dict = None,
                  target_type_kwargs: dict = None,
-                 features_to_use: Union[List[str], str] = 'all') -> None:
+                 features_to_use: Union[List[str], str, None] = 'all') -> None:
 
         super(ChoiceTask, self).__init__(
             pref_task_type=ChoiceTaskType(entity_slot_type_kwargs,
@@ -418,7 +427,7 @@ class PairwiseComparisonTask(ChoiceTask):
                  secondary_table: pd.DataFrame = None,
                  secondary_to_primary_link: dict = None,
                  target_type_kwargs: dict = None,
-                 features_to_use: Union[str, List[str]] = 'all') -> None:
+                 features_to_use: Union[str, List[str], None] = 'all') -> None:
 
         self.target_column_correspondence = target_column_correspondence
 
