@@ -4,6 +4,7 @@ import pandas as pd
 from scipy.sparse import csr_matrix
 from collections import defaultdict
 import random
+from typing import Union
 
 # Poset Types
 
@@ -171,7 +172,8 @@ class SubsetPosetVec(PosetVector):
         An option for the user to specify variables which are related to the
         PosetType such as {'boot_size_const': True, 'boot_size_length': 5}
     """
-    def __init__(self, top_input_data, boot_input_data, subset_type_vars=None):
+    def __init__(self, top_input_data: np.array, boot_input_data: np.array,
+                 subset_type_vars: dict = None):
         self.top_input_data = top_input_data
         self.boot_input_data = boot_input_data
         self.pairwise_comparison_reduction_dict = defaultdict()
@@ -211,8 +213,10 @@ class SubsetPosetVec(PosetVector):
         super(SubsetPosetVec, self).__init__(entity_universe, poset_type, dims,
                                              efficient_representation)
 
-    def pairwise_reducer(self, style="positive", rejection=0, scramble=True,
-                         random_seed_scramble=None):
+    def pairwise_reducer(self, style: str = "positive",
+                         rejection: Union[int, float] = 0, scramble: bool = True,
+                         random_seed_scramble: int = None,
+                         target_colname='alt1_top') -> [pd.DataFrame, np.array]:
         """
         Breaks a SubsetPosetVec into the most elementary parts of a pairwise
         comparison.
@@ -238,18 +242,18 @@ class SubsetPosetVec(PosetVector):
 
         Returns
         --------
-        Pairwise DataFrame
+        Pairwise DataFrame and observations indexing numpy array
         """
 
         if style == "positive" and not scramble:
             divisor = 3
-            columns = ['observation', 'top', 'boot']
+            columns = ['observation', 'alt1', 'alt2']
 
         elif scramble or style == "reciprocal":
             divisor = 4
-            columns = ['observation', 'alt1', 'alt2', 'alt1_top']
+            columns = ['observation', 'alt1', 'alt2', target_colname]
 
-        if style not in ['positive', 'reciprocal']:
+        else:
             raise NameError("style can only be positive or "
                             "reciprocal")
 
@@ -258,9 +262,8 @@ class SubsetPosetVec(PosetVector):
 
         if (style, rejection, scramble) in \
                 self.pairwise_comparison_reduction_dict.keys():
-            return self.pairwise_comparison_reduction_dict[style,
-                                                           rejection,
-                                                           scramble].copy()
+            return self.pairwise_comparison_reduction_dict[style, rejection,
+                                                           scramble]
 
         else:
             alt_type = type(self.top_input_data[0][0])
@@ -270,6 +273,8 @@ class SubsetPosetVec(PosetVector):
             for i, choice in enumerate(self.top_input_data):
                 for j in choice:
                     for k in self.boot_input_data[i]:
+                        if j == k:
+                            continue
                         if style == "positive" and not scramble:
                             observation = np.array([i, j, k])
                         elif style == "positive" and scramble:
@@ -302,9 +307,65 @@ class SubsetPosetVec(PosetVector):
                 if style == 'reciprocal':
                     pairwise_comparison_reduction = \
                         pairwise_comparison_reduction.astype(
-                            {'observation': int, 'alt1_top': int})
+                            {'observation': int, target_colname: int})
+
+            observations = \
+                pairwise_comparison_reduction.observation.astype(int).values
+
+            pairwise_comparison_reduction.drop(
+                'observation', axis=1, inplace=True)
 
             self.pairwise_comparison_reduction_dict[style, rejection, scramble] = \
-                pairwise_comparison_reduction
+                (pairwise_comparison_reduction, observations)
 
-            return pairwise_comparison_reduction
+            return pairwise_comparison_reduction, observations
+
+    def classifier_reducer(self, rejection: int = 0, chosen_name: str = 'chosen'
+                           ) -> [pd.DataFrame, np.array]:
+        """
+        Reduces observations to classifiers for example when the data looks like
+        this top = [A], boot = [B, C] it will return the following:
+        pd.DataFrame({
+        option: [A, B, C],
+        chosen: [1, 0, 0]
+        })
+        Inputs:
+        --------
+        rejection: int, default=0
+            controls what value gets assigned to rejections, -1 might be
+            preferred for SVM
+        chosen_name: str, default='chosen'
+            creates the name for the column that corresponds with 1/0 to whether
+            the product was chosen or not.
+        Outputs:
+        --------
+        DataFrame
+        """
+
+        obs = []
+        choice = []
+
+        for top_observation, item in enumerate(self.top_input_data):
+            obs.append(np.ones(len(item) +
+                               len(self.boot_input_data[top_observation]),
+                               dtype=int) *
+                       top_observation
+                       )
+            choice.append(np.append(
+                np.ones(len(item), dtype=int),
+                np.ones(len(self.boot_input_data[top_observation]), dtype=int) *
+                rejection
+            ))
+
+        obs_in = np.hstack(obs)
+        alts_in = np.hstack(np.hstack(np.hstack(
+            np.dstack((self.top_input_data, self.boot_input_data))
+        )))
+        choice_in = np.hstack(choice)
+
+        return pd.DataFrame({
+            'observation': obs_in,
+            'alternative': alts_in,
+            chosen_name: choice_in,
+        }).drop_duplicates(subset=['observation', 'alternative'])\
+            .drop('observation', axis=1).reset_index(drop=True), obs_in

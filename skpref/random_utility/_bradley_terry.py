@@ -9,10 +9,12 @@ import pandas as pd
 import numpy as np
 import pylogit as pl
 from scipy.special import expit
+from skpref.task import PrefTask, PairwiseComparisonTask, ChoiceTask
 from numpy import unique
 from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics import log_loss
-from ..base import GLMPairwiseComparisonModel
+from ..base import (GLMPairwiseComparisonModel,
+                    pairwise_comparison_pack_predictions)
 
 
 def check_indexing_of_entities(df):
@@ -120,17 +122,17 @@ class BradleyTerry(GLMPairwiseComparisonModel):
     >>> from skpref.task import ChoiceTask, PairwiseComparisonTask
     >>> import pandas as pd
     >>> # Using product choice data
-    >>> with open('skpref/examples/data/product_choices.pickle', 'rb') as handle:
-    ...     choice_data = pickle.load(handle)
-    >>> with open('skpref/examples/data/product_info.pickle', 'rb') as handle:
-    ...     product_data = pickle.load(handle)
-    >>> products_bought_train = ChoiceTask(
-    ... choice_data[:100], 'alternatives', 'choice',
-    ... features_to_use=['price_per_size', 'prod_size'],
-    ... secondary_table=product_data,
-    ... secondary_to_primary_link={"PRODUCT_ID": ['alternatives', 'choice']})
-    >>> mybt = BradleyTerry(method='BFGS', alpha=1e-5)
-    >>> mybt.fit_task(products_bought_train)
+    # >>> with open('skpref/examples/data/product_choices.pickle', 'rb') as handle:
+    # ...     choice_data = pickle.load(handle)
+    # >>> with open('skpref/examples/data/product_info.pickle', 'rb') as handle:
+    # ...     product_data = pickle.load(handle)
+    # >>> products_bought_train = ChoiceTask(
+    # ... choice_data[:100], 'alternatives', 'choice',
+    # ... features_to_use=['price_per_size', 'prod_size'],
+    # ... secondary_table=product_data,
+    # ... secondary_to_primary_link={"PRODUCT_ID": ['alternatives', 'choice']})
+    # >>> mybt = BradleyTerry(method='BFGS', alpha=1e-5)
+    # >>> mybt.fit_task(products_bought_train)
 
     >>> # using basketball match data
     >>> NBA_file_loc = 'skpref/examples/data/NBA_matches.csv'
@@ -153,6 +155,7 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         self.initial_params = initial_params
         self.max_iter = max_iter
         self.tol = tol
+        self.keep_pairwise_format = True
         super(BradleyTerry, self).__init__()
     @staticmethod
     def replace_entities_with_lkp(df, lkp):
@@ -207,7 +210,7 @@ class BradleyTerry(GLMPairwiseComparisonModel):
 
         # Format the data the way its required in choix
         data = defaultdict(list)
-        for counter, _res in enumerate(df[self.target_col_name].values):
+        for counter, _res in enumerate(_df[self.target_col_name].values):
             if _res == 1:
                 data['winner'].append(
                     (_df[entnames[0]].iloc[counter],
@@ -250,7 +253,8 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         all_unique_indices = get_distinct_entities(df)
         x_comb = df.reset_index()
 
-        ind_variables = df.drop([self.target_col_name], axis=1).columns.tolist()
+        ind_variables = df.drop([self.target_col_name], axis=1,
+                                errors='ignore').columns.tolist()
 
         for name in entnames:
             x_comb[name] = x_comb[name].map(self.rplc_lkp)
@@ -262,11 +266,28 @@ class BradleyTerry(GLMPairwiseComparisonModel):
                 (x_comb[entnames[1]] == self.rplc_lkp[i]), 1, 0)
             availability_vars[self.rplc_lkp[i]] = colname
 
-        x_comb['CHOICE'] = np.where(x_comb[self.target_col_name] == 1,
-                                    x_comb[entnames[0]],
-                                    x_comb[entnames[1]])
+        if self.target_col_name in x_comb.columns:
+            x_comb['CHOICE'] = np.where(x_comb[self.target_col_name] == 1,
+                                        x_comb[entnames[0]],
+                                        x_comb[entnames[1]])
 
-        x_comb.drop(self.target_col_name, axis=1, inplace=True)
+            x_comb.drop(self.target_col_name, axis=1, inplace=True)
+
+        # Else create some dummy choices that pylogit will take in
+        else:
+            # For pylogit we have to make sure that everything gets selected
+            if np.max(np.sort(x_comb[entnames[0]].unique()) != np.sort(
+                    x_comb[entnames[1]].unique())):
+                dummy_choices = []
+                for _counter, first_ent in enumerate(x_comb[entnames[1]]):
+                    if first_ent in dummy_choices:
+                        dummy_choices.append(x_comb[entnames[0]][_counter])
+                    else:
+                        dummy_choices.append(first_ent)
+
+                x_comb['CHOICE'] = dummy_choices
+            else:
+                x_comb['CHOICE'] = x_comb[entnames[0]].copy()
 
         custom_alt_id = 'entity'
         obs_id_column = 'observation'
@@ -674,7 +695,7 @@ class BradleyTerry(GLMPairwiseComparisonModel):
             diff = self.find_strength_diff(df)
             return expit(diff)
 
-    def unpack_task_for_predict(self, task):
+    def _prepare_data_for_prediction(self, task):
         """
         Unpacks tasks for the consumption of the existing predict methods
         Parameters:
@@ -690,28 +711,12 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         if (task.annotations['features_to_use'] != 'all') and (
                 task.annotations['features_to_use'] is not None):
             model_input = _re_indexed_df[
-                ['alt1_top'] +
                 task.primary_table_features_to_use.tolist() + input_merge_keys
                 ].copy()
         else:
             model_input = _re_indexed_df.copy()
 
-        return model_input
-
-    def predict_proba_task(self, task):
-        """
-        Predicts the probability that the corresponding entity will win in the
-        task.
-        Parameters:
-        -----------
-        task: ChoiceTask type
-
-        Returns:
-        --------
-        predict_proba
-        """
-        model_input = self.unpack_task_for_predict(task)
-        return self.predict_proba(model_input)
+        return {'df': model_input}
 
     def predict_choice(self, df):
         """ Predicts the entity that will be selected.
@@ -751,7 +756,7 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         --------
         predict_choice
         """
-        model_input = self.unpack_task_for_predict(task)
+        model_input = self._prepare_data_for_prediction(task)['df']
         return self.predict_choice(model_input)
 
     def predict(self, df_comb, df_i=None, df_j=None, merge_columns=None):
@@ -791,8 +796,9 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         --------
         predict
         """
-        model_input = self.unpack_task_for_predict(task)
-        return self.predict(model_input)
+        model_input = self._prepare_data_for_prediction(task)['df']
+        predictions = self.predict(model_input)
+        return pairwise_comparison_pack_predictions(predictions, task)
 
     def score(self, X):
         """
