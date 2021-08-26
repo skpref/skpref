@@ -78,3 +78,9 @@ ENT1_ATTRIBUTES_several_merge_cols = pd.DataFrame(
      'feat1': [1, 11, 12, 15, 2, 5],
      'season': [1, 1, 1, 1, 2, 2]}
 )
+
+# DISCRETE CHOICE DATA
+discrete_choice_data = pd.DataFrame({
+    'alt': [['a', 'b', 'c'], ['a', 'b'], ['c', 'd'], ['d']],
+    'choice': ['b', 'a', 'c', 'd']
+})

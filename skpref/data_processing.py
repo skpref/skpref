@@ -179,6 +179,7 @@ class SubsetPosetVec(PosetVector):
         self.pairwise_comparison_reduction_dict = defaultdict()
 
         dat_for_unique = np.array([])
+
         for in_dat in [top_input_data, boot_input_data]:
             if type(in_dat[0]) is np.ndarray:
                 dat_for_unique = np.append(dat_for_unique,
@@ -359,13 +360,14 @@ class SubsetPosetVec(PosetVector):
 
         obs_in = np.hstack(obs)
         alts_in = np.hstack(np.hstack(np.hstack(
-            np.dstack((self.top_input_data, self.boot_input_data))
+            np.dstack((self.top_input_data.reshape(-1,1), self.boot_input_data.reshape(-1,1)))
         )))
         choice_in = np.hstack(choice)
 
-        return pd.DataFrame({
+        return (pd.DataFrame({
             'observation': obs_in,
             'alternative': alts_in,
             chosen_name: choice_in,
         }).drop_duplicates(subset=['observation', 'alternative'])\
-            .drop('observation', axis=1).reset_index(drop=True), obs_in
+            .drop(['observation'], axis=1).reset_index(drop=True),
+            obs_in, alts_in)

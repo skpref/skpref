@@ -456,7 +456,7 @@ class TestClassificationReducer(unittest.TestCase):
         task_packer_results = my_model.task_packer(
             np.array([1, 0, 1, 0, 1, 0,
                       1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0]),
-            ChoiceTask)
+            test_task)
 
         expected_results = SubsetPosetVec(
             top_input_data=np.array(
@@ -495,5 +495,58 @@ class TestProbabilisticModel(unittest.TestCase):
                             'B': np.array([0.4, 0.8, 0.0, 0.0])}
 
         self.assertListEqual(list(expected_outcome.keys()), list(outcome.keys()))
+        for key in expected_outcome.keys():
+            assert_array_equal(expected_outcome[key], outcome[key])
+
+    def test_prediction_wrapper_for_discrete_choice(self):
+        test_task = ChoiceTask(
+            discrete_choice_data, 'alt', 'choice', features_to_use=None
+        )
+
+        dummy_class_reducer = ClassificationReducer(
+            DummyClassifier('constant', constant=1))
+
+        dummy_class_reducer.task_fit_features = None
+
+        dummy_class_reducer._prepare_data_for_prediction(test_task)
+
+        my_prob_model = ProbabilisticModel()
+        example_predictions = np.array(
+            [[0.4, 0.6], [0.2, 0.8], [0.5, 0.5], [0, 1], [0.5, 0.5], [0.3, 0.7],
+             [0.9, 0.1], [0.5, 0.5]
+             ])
+
+        outcome = my_prob_model.prediction_wrapper(
+            predictions=example_predictions, task=test_task, outcome='a')
+
+        expected_outcome = {'a': np.array([0.8, 1.0, 0.0, 0.0])}
+
+        for key in expected_outcome.keys():
+            assert_array_equal(expected_outcome[key], outcome[key])
+
+    def test_prediction_wrapper_for_discrete_choice_two_queries(self):
+        test_task = ChoiceTask(
+            discrete_choice_data, 'alt', 'choice', features_to_use=None
+        )
+
+        dummy_class_reducer = ClassificationReducer(
+            DummyClassifier('constant', constant=1))
+
+        dummy_class_reducer.task_fit_features = None
+
+        dummy_class_reducer._prepare_data_for_prediction(test_task)
+
+        my_prob_model = ProbabilisticModel()
+        example_predictions = np.array(
+            [[0.4, 0.6], [0.2, 0.8], [0.5, 0.5], [0, 1], [0.5, 0.5], [0.3, 0.7],
+             [0.9, 0.1], [0.5, 0.5]
+             ])
+
+        outcome = my_prob_model.prediction_wrapper(
+            predictions=example_predictions, task=test_task, outcome=['a', 'b'])
+
+        expected_outcome = {'a': np.array([0.8, 1.0, 0.0, 0.0]),
+                            'b': np.array([0.6, 0.5, 0.0, 0.0])}
+
         for key in expected_outcome.keys():
             assert_array_equal(expected_outcome[key], outcome[key])
