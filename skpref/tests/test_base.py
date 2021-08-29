@@ -8,6 +8,7 @@ from pandas.testing import assert_frame_equal
 from sklearn.dummy import DummyClassifier
 from skpref.tests.shared_test_dataframes import *
 from skpref.data_processing import SubsetPosetVec
+from sklearn.linear_model import LogisticRegression
 
 
 class TestPairwiseComparisonModelFunctions(unittest.TestCase):
@@ -465,6 +466,43 @@ class TestClassificationReducer(unittest.TestCase):
             boot_input_data=np.array(
              [np.array([529703, 490972, 5549502], dtype=object),
               np.array([601195, 732624, 778197, 813892, 576214, 673995], dtype=object)])
+        )
+
+        assert_array_equal(len(expected_results.top_input_data),
+                           len(task_packer_results.top_input_data))
+
+        for i in range(len(expected_results.top_input_data)):
+            assert_array_equal(expected_results.top_input_data[i],
+                               task_packer_results.top_input_data[i])
+
+            assert_array_equal(expected_results.boot_input_data[i],
+                               task_packer_results.boot_input_data[i])
+
+    def test_aggregation_to_dc(self):
+        test_task = ChoiceTask(
+            discrete_choice_data, 'alt', 'choice', features_to_use=None)
+
+        my_model = ClassificationReducer(LogisticRegression())
+
+        # Need to run unpacking before running packing
+        _ = my_model.task_unpacker(test_task)
+
+        input_preds_dict = {
+            'a': [0.35, 0.40, 0.00, 0.00],
+            'b': [0.89, 0.39, 0.00, 0.00],
+            'c': [0.80, 0.00, 0.90, 0.00],
+            'd': [0.00, 0.00, 0.94, 0.05]
+        }
+        task_packer_results = my_model.task_packer(input_preds_dict, test_task)
+
+        expected_results = SubsetPosetVec(
+            top_input_data=np.array(
+                ['b', 'a', 'd', 'd']),
+            boot_input_data=np.array(
+                [np.array(['a', 'c'], dtype='<U11'),
+                 np.array(['b'], dtype='<U11'),
+                 np.array(['c'], dtype='<U11'),
+                 np.array([], dtype='<U11')])
         )
 
         assert_array_equal(len(expected_results.top_input_data),

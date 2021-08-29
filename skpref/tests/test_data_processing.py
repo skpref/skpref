@@ -27,36 +27,38 @@ class TestSubsetPosetVec(unittest.TestCase):
         np.testing.assert_array_equal(self.test_spv.entity_universe,
                                       np.array(['a', 'b', 'c', 'd']))
 
-    def test_efficient_representation(self):
-        correct_top_array = np.array([
-            [1, 1, 1, 0],
-            [1, 1, 0, 1],
-            [0, 1, 1, 1]
-        ])
-
-        correct_boot_array = np.array([
-            [0, 0, 0, 1],
-            [0, 0, 1, 0],
-            [1, 0, 0, 0]
-        ])
-
-        np.testing.assert_array_equal(
-            self.test_spv.efficient_representation[0].A,
-            correct_top_array)
-
-        np.testing.assert_array_equal(
-            self.test_spv.efficient_representation[1].A,
-            correct_boot_array)
-
-        self.assertEqual(self.test_spv.efficient_representation[0].shape,
-                         (3, 4))
-
-        self.assertEqual(self.test_spv.efficient_representation[1].shape,
-                         (3, 4))
-
-        self.assertEqual(self.test_spv.efficient_representation[0].nnz, 9)
-
-        self.assertEqual(self.test_spv.efficient_representation[1].nnz, 3)
+    # I have decided not to include efficient representation into this version
+    # But code that I've written will be commented out for the future
+    # def test_efficient_representation(self):
+    #     correct_top_array = np.array([
+    #         [1, 1, 1, 0],
+    #         [1, 1, 0, 1],
+    #         [0, 1, 1, 1]
+    #     ])
+    #
+    #     correct_boot_array = np.array([
+    #         [0, 0, 0, 1],
+    #         [0, 0, 1, 0],
+    #         [1, 0, 0, 0]
+    #     ])
+    #
+    #     np.testing.assert_array_equal(
+    #         self.test_spv.efficient_representation[0].A,
+    #         correct_top_array)
+    #
+    #     np.testing.assert_array_equal(
+    #         self.test_spv.efficient_representation[1].A,
+    #         correct_boot_array)
+    #
+    #     self.assertEqual(self.test_spv.efficient_representation[0].shape,
+    #                      (3, 4))
+    #
+    #     self.assertEqual(self.test_spv.efficient_representation[1].shape,
+    #                      (3, 4))
+    #
+    #     self.assertEqual(self.test_spv.efficient_representation[0].nnz, 9)
+    #
+    #     self.assertEqual(self.test_spv.efficient_representation[1].nnz, 3)
 
     def test_pairwise_reducer(self):
 

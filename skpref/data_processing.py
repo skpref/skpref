@@ -109,12 +109,12 @@ class PosetVector(ABC):
     efficient_representation: scipy sparse matrix
         Compressed representation of the poset
     """
-    def __init__(self, entity_universe, poset_type, dims,
-                 efficient_representation):
+    def __init__(self, entity_universe, poset_type, dims):
+                 #efficient_representation):
         self.entity_universe = entity_universe
         self.poset_type = poset_type
         self.dims = dims
-        self.efficient_representation = efficient_representation
+        # self.efficient_representation = efficient_representation
 
 
 class OrderedPosetVec(PosetVector):
@@ -187,7 +187,7 @@ class SubsetPosetVec(PosetVector):
             else:
                 dat_for_unique = np.append(dat_for_unique, in_dat)
 
-        entity_universe = np.unique(dat_for_unique)
+        self.entity_universe = np.unique(dat_for_unique)
 
         if subset_type_vars is None:
             poset_type = SubsetPosetType('list')
@@ -201,18 +201,19 @@ class SubsetPosetVec(PosetVector):
             dims = len(top_input_data)
 
         # We will improve this just a placeholder to check if classes are working
-        # correctly
+        # correctly started some work on efficient representation, but I'm not
+        # using it for now, so this is a starter point if its needed later
 
-        efficient_top, self.lkp = sparsify_list_of_entities(entity_universe,
-                                                            self.top_input_data)
+        # efficient_top, self.lkp = sparsify_list_of_entities(self.entity_universe,
+        #                                                     self.top_input_data)
+        #
+        # efficient_boot, _ = sparsify_list_of_entities(self.entity_universe,
+        #                                               self.boot_input_data)
+        #
+        # efficient_representation = [efficient_top, efficient_boot]
 
-        efficient_boot, _ = sparsify_list_of_entities(entity_universe,
-                                                      self.boot_input_data)
-
-        efficient_representation = [efficient_top, efficient_boot]
-
-        super(SubsetPosetVec, self).__init__(entity_universe, poset_type, dims,
-                                             efficient_representation)
+        super(SubsetPosetVec, self).__init__(self.entity_universe, poset_type, dims)
+                                             #efficient_representation)
 
     def pairwise_reducer(self, style: str = "positive",
                          rejection: Union[int, float] = 0, scramble: bool = True,

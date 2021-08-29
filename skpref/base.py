@@ -101,6 +101,9 @@ class Model(BaseEstimator):
 
     This architecture is defined at the highest level and is fixed.
     """
+    def __init__(self):
+        self.model_type = None
+
     def task_unpacker(self, task: PrefTask) -> dict:
         pass
 
@@ -142,6 +145,11 @@ class Model(BaseEstimator):
     def predict_task(self, task: PrefTask) -> np.array:
         predictions = self.predict(**self._prepare_data_for_prediction(task))
         return self.task_packer(predictions, task)
+
+    # Creating this to aid aggregation of probabilistic models that need a
+    # probability prediction to aggregate an outcome prediction, such as classifiers
+    # into discrete choice
+    base_predict_task = predict_task
 
 
 class ProbabilisticModel(Model):
@@ -274,9 +282,17 @@ class ProbabilisticModel(Model):
         predictions = self.predict_proba(
             **self._prepare_data_for_prediction(task))
 
-        # return predictions
-
         return self.prediction_wrapper(task, predictions, outcome, column)
+
+    def predict_task(self, task: ChoiceTask) -> np.array:
+        if type(task) == ChoiceTask and self.model_type == "Classifier":
+            # Get all the distinct alternatives that are in alternatives
+            # Run probabilistic predictions for all the alternatives
+            preds = self.predict_proba_task(
+                task, outcome=list(task.subset_vec.entity_universe))
+            return self.task_packer(preds, task)
+        else:
+            return self.base_predict_task(task)
 
 
 class PairwiseComparisonModel(Model):
@@ -292,6 +308,7 @@ class PairwiseComparisonModel(Model):
         if pairwise_red_args is None:
             pairwise_red_args = {}
         self.pairwise_red_args = pairwise_red_args
+        self.model_type = "Pairwise Comparison"
 
     def task_indexing(self, task: PrefTask) -> \
             (pd.DataFrame, pd.DataFrame, List[str]):
@@ -437,6 +454,7 @@ class ClassificationReducer(ProbabilisticModel):
         self.obs_col = None
         self.keep_pairwise_format = True
         self.alternative = None
+        self.model_type = "Classifier"
 
     def task_unpacker(self, task: PrefTask, keep_pairwise_format: bool = True,
                       take_feautre_diff: bool = False) -> dict:
@@ -669,12 +687,21 @@ class ClassificationReducer(ProbabilisticModel):
 
         return self.model.predict_proba(df_comb)
 
-    def task_packer(self, predictions, task):
+    def task_packer(self, predictions, task) -> SubsetPosetVec:
         if type(task) is PairwiseComparisonTask and self.keep_pairwise_format:
             return pairwise_comparison_pack_predictions(predictions, task)
 
-        # elif type(task) is ChoiceTask and hasattr(self.model, "predict_proba"):
-        #     return self.model.predict_proba(df_comb)
+        elif (type(task) is ChoiceTask and type(predictions) is dict and
+                hasattr(self.model, "predict_proba")):
+
+            df_preds = pd.DataFrame(predictions)
+            top = list(df_preds.idxmax(axis=1).values)
+            alts = task.primary_table[task.primary_table_alternatives_names].copy().values
+            boot = [np.setdiff1d(alts[i], top[i]) for i in range(0, len(top))]
+
+            return SubsetPosetVec(top_input_data=np.array(top),
+                                  boot_input_data=np.array(boot))
+
         else:
 
             preds_df_acc = pd.DataFrame({
