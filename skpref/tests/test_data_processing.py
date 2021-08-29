@@ -27,36 +27,38 @@ class TestSubsetPosetVec(unittest.TestCase):
         np.testing.assert_array_equal(self.test_spv.entity_universe,
                                       np.array(['a', 'b', 'c', 'd']))
 
-    def test_efficient_representation(self):
-        correct_top_array = np.array([
-            [1, 1, 1, 0],
-            [1, 1, 0, 1],
-            [0, 1, 1, 1]
-        ])
-
-        correct_boot_array = np.array([
-            [0, 0, 0, 1],
-            [0, 0, 1, 0],
-            [1, 0, 0, 0]
-        ])
-
-        np.testing.assert_array_equal(
-            self.test_spv.efficient_representation[0].A,
-            correct_top_array)
-
-        np.testing.assert_array_equal(
-            self.test_spv.efficient_representation[1].A,
-            correct_boot_array)
-
-        self.assertEqual(self.test_spv.efficient_representation[0].shape,
-                         (3, 4))
-
-        self.assertEqual(self.test_spv.efficient_representation[1].shape,
-                         (3, 4))
-
-        self.assertEqual(self.test_spv.efficient_representation[0].nnz, 9)
-
-        self.assertEqual(self.test_spv.efficient_representation[1].nnz, 3)
+    # I have decided not to include efficient representation into this version
+    # But code that I've written will be commented out for the future
+    # def test_efficient_representation(self):
+    #     correct_top_array = np.array([
+    #         [1, 1, 1, 0],
+    #         [1, 1, 0, 1],
+    #         [0, 1, 1, 1]
+    #     ])
+    #
+    #     correct_boot_array = np.array([
+    #         [0, 0, 0, 1],
+    #         [0, 0, 1, 0],
+    #         [1, 0, 0, 0]
+    #     ])
+    #
+    #     np.testing.assert_array_equal(
+    #         self.test_spv.efficient_representation[0].A,
+    #         correct_top_array)
+    #
+    #     np.testing.assert_array_equal(
+    #         self.test_spv.efficient_representation[1].A,
+    #         correct_boot_array)
+    #
+    #     self.assertEqual(self.test_spv.efficient_representation[0].shape,
+    #                      (3, 4))
+    #
+    #     self.assertEqual(self.test_spv.efficient_representation[1].shape,
+    #                      (3, 4))
+    #
+    #     self.assertEqual(self.test_spv.efficient_representation[0].nnz, 9)
+    #
+    #     self.assertEqual(self.test_spv.efficient_representation[1].nnz, 3)
 
     def test_pairwise_reducer(self):
 
@@ -343,14 +345,18 @@ class TestSubsetPosetVec(unittest.TestCase):
         ], columns=['alternative', 'chosen'])
 
         correct_obs = np.array([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        correct_alts = np.array([512709, 529703, 696056, 490972, 685450, 5549502,
+                                 723354, 550707, 551375, 591842, 601195, 732624,
+                                 778197, 813892, 817040, 576214, 673995])
 
-        result_int_class_red, result_obs = self.test_spv_int.classifier_reducer()
+        result_int_class_red, result_obs, result_alts = self.test_spv_int.classifier_reducer()
 
         pd.testing.assert_frame_equal(
             correct_int_classifier_output.astype('int32'),
             result_int_class_red.astype('int32'))
 
         np.testing.assert_array_equal(correct_obs, result_obs)
+        np.testing.assert_array_equal(correct_alts, result_alts)
 
     def test_classifier_reducer_for_scoring(self):
         # Create a subset poset vector with no depvar
@@ -358,7 +364,7 @@ class TestSubsetPosetVec(unittest.TestCase):
         not_chosen = np.array([np.array([333]), np.array([])])
         test_scoring_vec = SubsetPosetVec(chosen, not_chosen)
 
-        pairwise_reduction, obs_output = test_scoring_vec.classifier_reducer()
+        pairwise_reduction, obs_output, alts_output = test_scoring_vec.classifier_reducer()
 
         expected_outcome = pd.DataFrame({
             'alternative': [111, 222, 333, 111, 222, 333],
@@ -366,8 +372,10 @@ class TestSubsetPosetVec(unittest.TestCase):
         })
 
         expected_obs = np.array([0, 0, 0, 1, 1, 1])
+        expected_alts = np.array([111, 222, 333, 111, 222, 333])
 
         pd.testing.assert_frame_equal(pairwise_reduction.astype('int32'),
                                       expected_outcome.astype('int32'))
 
         np.testing.assert_array_equal(obs_output, expected_obs)
+        np.testing.assert_array_equal(expected_alts, alts_output)

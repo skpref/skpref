@@ -8,6 +8,7 @@ from pandas.testing import assert_frame_equal
 from sklearn.dummy import DummyClassifier
 from skpref.tests.shared_test_dataframes import *
 from skpref.data_processing import SubsetPosetVec
+from sklearn.linear_model import LogisticRegression
 
 
 class TestPairwiseComparisonModelFunctions(unittest.TestCase):
@@ -456,7 +457,7 @@ class TestClassificationReducer(unittest.TestCase):
         task_packer_results = my_model.task_packer(
             np.array([1, 0, 1, 0, 1, 0,
                       1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0]),
-            ChoiceTask)
+            test_task)
 
         expected_results = SubsetPosetVec(
             top_input_data=np.array(
@@ -465,6 +466,43 @@ class TestClassificationReducer(unittest.TestCase):
             boot_input_data=np.array(
              [np.array([529703, 490972, 5549502], dtype=object),
               np.array([601195, 732624, 778197, 813892, 576214, 673995], dtype=object)])
+        )
+
+        assert_array_equal(len(expected_results.top_input_data),
+                           len(task_packer_results.top_input_data))
+
+        for i in range(len(expected_results.top_input_data)):
+            assert_array_equal(expected_results.top_input_data[i],
+                               task_packer_results.top_input_data[i])
+
+            assert_array_equal(expected_results.boot_input_data[i],
+                               task_packer_results.boot_input_data[i])
+
+    def test_aggregation_to_dc(self):
+        test_task = ChoiceTask(
+            discrete_choice_data, 'alt', 'choice', features_to_use=None)
+
+        my_model = ClassificationReducer(LogisticRegression())
+
+        # Need to run unpacking before running packing
+        _ = my_model.task_unpacker(test_task)
+
+        input_preds_dict = {
+            'a': [0.35, 0.40, 0.00, 0.00],
+            'b': [0.89, 0.39, 0.00, 0.00],
+            'c': [0.80, 0.00, 0.90, 0.00],
+            'd': [0.00, 0.00, 0.94, 0.05]
+        }
+        task_packer_results = my_model.task_packer(input_preds_dict, test_task)
+
+        expected_results = SubsetPosetVec(
+            top_input_data=np.array(
+                ['b', 'a', 'd', 'd']),
+            boot_input_data=np.array(
+                [np.array(['a', 'c'], dtype='<U11'),
+                 np.array(['b'], dtype='<U11'),
+                 np.array(['c'], dtype='<U11'),
+                 np.array([], dtype='<U11')])
         )
 
         assert_array_equal(len(expected_results.top_input_data),
@@ -495,5 +533,58 @@ class TestProbabilisticModel(unittest.TestCase):
                             'B': np.array([0.4, 0.8, 0.0, 0.0])}
 
         self.assertListEqual(list(expected_outcome.keys()), list(outcome.keys()))
+        for key in expected_outcome.keys():
+            assert_array_equal(expected_outcome[key], outcome[key])
+
+    def test_prediction_wrapper_for_discrete_choice(self):
+        test_task = ChoiceTask(
+            discrete_choice_data, 'alt', 'choice', features_to_use=None
+        )
+
+        dummy_class_reducer = ClassificationReducer(
+            DummyClassifier('constant', constant=1))
+
+        dummy_class_reducer.task_fit_features = None
+
+        dummy_class_reducer._prepare_data_for_prediction(test_task)
+
+        my_prob_model = ProbabilisticModel()
+        example_predictions = np.array(
+            [[0.4, 0.6], [0.2, 0.8], [0.5, 0.5], [0, 1], [0.5, 0.5], [0.3, 0.7],
+             [0.9, 0.1], [0.5, 0.5]
+             ])
+
+        outcome = my_prob_model.prediction_wrapper(
+            predictions=example_predictions, task=test_task, outcome='a')
+
+        expected_outcome = {'a': np.array([0.8, 1.0, 0.0, 0.0])}
+
+        for key in expected_outcome.keys():
+            assert_array_equal(expected_outcome[key], outcome[key])
+
+    def test_prediction_wrapper_for_discrete_choice_two_queries(self):
+        test_task = ChoiceTask(
+            discrete_choice_data, 'alt', 'choice', features_to_use=None
+        )
+
+        dummy_class_reducer = ClassificationReducer(
+            DummyClassifier('constant', constant=1))
+
+        dummy_class_reducer.task_fit_features = None
+
+        dummy_class_reducer._prepare_data_for_prediction(test_task)
+
+        my_prob_model = ProbabilisticModel()
+        example_predictions = np.array(
+            [[0.4, 0.6], [0.2, 0.8], [0.5, 0.5], [0, 1], [0.5, 0.5], [0.3, 0.7],
+             [0.9, 0.1], [0.5, 0.5]
+             ])
+
+        outcome = my_prob_model.prediction_wrapper(
+            predictions=example_predictions, task=test_task, outcome=['a', 'b'])
+
+        expected_outcome = {'a': np.array([0.8, 1.0, 0.0, 0.0]),
+                            'b': np.array([0.6, 0.5, 0.0, 0.0])}
+
         for key in expected_outcome.keys():
             assert_array_equal(expected_outcome[key], outcome[key])

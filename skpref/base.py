@@ -101,6 +101,9 @@ class Model(BaseEstimator):
 
     This architecture is defined at the highest level and is fixed.
     """
+    def __init__(self):
+        self.model_type = None
+
     def task_unpacker(self, task: PrefTask) -> dict:
         pass
 
@@ -136,11 +139,17 @@ class Model(BaseEstimator):
         task_unpack_dict['df_comb'] = task_unpack_dict['df_comb']\
             .drop(task_unpack_dict['target'], axis=1, errors='ignore')
         del task_unpack_dict['target']
+        # print(task_unpack_dict['df_comb'])
         return task_unpack_dict
 
     def predict_task(self, task: PrefTask) -> np.array:
         predictions = self.predict(**self._prepare_data_for_prediction(task))
         return self.task_packer(predictions, task)
+
+    # Creating this to aid aggregation of probabilistic models that need a
+    # probability prediction to aggregate an outcome prediction, such as classifiers
+    # into discrete choice
+    base_predict_task = predict_task
 
 
 class ProbabilisticModel(Model):
@@ -171,18 +180,19 @@ class ProbabilisticModel(Model):
         observation
         """
 
+        if len(predictions.shape) == 2:
+            target_col_wins = np.array([l[1] for l in predictions])
+            target_col_loses = np.array([l[0] for l in predictions])
+
+        else:
+            target_col_wins = predictions
+            target_col_loses = np.ones(len(target_col_wins)) - target_col_wins
+
         if type(task) is PairwiseComparisonTask and self.keep_pairwise_format:
 
             target_col = task.target_column_correspondence
             other_col = np.setdiff1d(task.primary_table_alternatives_names,
                                      target_col)
-            if len(predictions.shape) == 2:
-                target_col_wins = np.array([l[1] for l in predictions])
-                target_col_loses = np.array([l[0] for l in predictions])
-
-            else:
-                target_col_wins = predictions
-                target_col_loses = np.ones(len(target_col_wins)) - target_col_wins
 
             if isinstance(outcome, str):
                 return {
@@ -225,6 +235,33 @@ class ProbabilisticModel(Model):
 
                 return pred_probs
 
+        if type(task) == ChoiceTask:
+
+            if isinstance(outcome, str):
+                outcome = [outcome]
+
+            pred_probs = {}
+
+            for _outcome in outcome:
+                # For each observation check if the outcome is a possibility amongst the alternatives
+                preds = []
+                for n in range(np.max(task.obs_col)+1):
+                    # Find all the alternatives that are in the observation
+                    pos = np.where(task.obs_col == n)[0].tolist()
+                    alts = task.alternative[tuple([[pos]])][0].copy()
+
+                    # If the outcome is not a possibility set the probability to 0,
+                    # otherwise find the relevant probability
+                    if _outcome in alts:
+                        outcome_pos = pos[np.where(alts == _outcome)[0][0]]
+                        preds.append(target_col_wins[outcome_pos])
+                    else:
+                        preds.append(0)
+
+                pred_probs[_outcome] = np.array(preds)
+
+            return pred_probs
+
     def predict_proba_task(
             self, task: PrefTask,
             outcome: Union[str, PosetVector, List[str], List[PosetVector]] = None,
@@ -247,6 +284,16 @@ class ProbabilisticModel(Model):
 
         return self.prediction_wrapper(task, predictions, outcome, column)
 
+    def predict_task(self, task: ChoiceTask) -> np.array:
+        if type(task) == ChoiceTask and self.model_type == "Classifier":
+            # Get all the distinct alternatives that are in alternatives
+            # Run probabilistic predictions for all the alternatives
+            preds = self.predict_proba_task(
+                task, outcome=list(task.subset_vec.entity_universe))
+            return self.task_packer(preds, task)
+        else:
+            return self.base_predict_task(task)
+
 
 class PairwiseComparisonModel(Model):
     """
@@ -261,6 +308,7 @@ class PairwiseComparisonModel(Model):
         if pairwise_red_args is None:
             pairwise_red_args = {}
         self.pairwise_red_args = pairwise_red_args
+        self.model_type = "Pairwise Comparison"
 
     def task_indexing(self, task: PrefTask) -> \
             (pd.DataFrame, pd.DataFrame, List[str]):
@@ -406,6 +454,7 @@ class ClassificationReducer(ProbabilisticModel):
         self.obs_col = None
         self.keep_pairwise_format = True
         self.alternative = None
+        self.model_type = "Classifier"
 
     def task_unpacker(self, task: PrefTask, keep_pairwise_format: bool = True,
                       take_feautre_diff: bool = False) -> dict:
@@ -558,20 +607,38 @@ class ClassificationReducer(ProbabilisticModel):
 
         # Create aggregation for choice task
         elif isinstance(task, ChoiceTask):
-            model_input, observations = task.subset_vec.classifier_reducer(
+            model_input, task.obs_col, task.alternative = \
+                task.subset_vec.classifier_reducer(
                 chosen_name=task.primary_table_target_name)
             if task.primary_table_target_name is None:
                 model_input.drop(column=task.primary_table_target_name,
                                  inplace=True)
 
-            if len(task.primary_table_features_to_use) > 0:
-                model_input['observation'] = observations
+            """
+            If we have primary table features or keys that need merging on after
+            a reduction we do it here. First we need to figure out what are the
+            keys for merging on that aren't already in the table, the name of the
+            alternatives column might have change to 'alternative', so we need to
+            remove the original name given from the list of columns.
+            """
+
+            if task.secondary_to_primary_link is not None:
+                merge_keys = list(np.setdiff1d(
+                    np.setdiff1d(list(task.secondary_to_primary_link.values()),
+                                 task.primary_table_alternatives_names),
+                    list(model_input.columns)))
+            else:
+                merge_keys = []
+
+            if len(task.primary_table_features_to_use) > 0 or len(merge_keys) > 0:
+                model_input['observation'] = task.obs_col
                 model_input = model_input.merge(
-                    task.primary_table[task.primary_table_features_to_use],
+                    task.primary_table[
+                        task.primary_table_features_to_use.tolist() + merge_keys]
+                    .reset_index(drop=True),
                     how='inner', left_on='observation', right_index=True,
                     validate='m:1'
                 )
-                model_input.drop('observation', axis=1, inplace=True)
 
             if len(task.secondary_table_features_to_use) > 0:
                 _, _, left_on, right_on = task.find_merge_columns(
@@ -581,18 +648,20 @@ class ClassificationReducer(ProbabilisticModel):
                     task.secondary_table, how='left', left_on=list(left_on),
                     right_on=list(right_on), validate='m:1')
 
-                self.obs_col = observations
-                self.alternative = model_input.alternative.values
-
                 model_input = model_input[
                     [task.primary_table_target_name] +
                     list(np.setdiff1d(task.secondary_table_features_to_use,
                                       right_on))
                 ]
-
         else:
             raise UnderDevError(
                 "This method has not yet been developed for this type of task")
+
+        if ('observation' in model_input.columns and
+                'alternative' in model_input.columns):
+
+            model_input.drop(['observation', 'alternative'],
+                             axis=1, inplace=True)
 
         return {'df_comb': model_input,
                 'target': task.primary_table_target_name,
@@ -618,20 +687,32 @@ class ClassificationReducer(ProbabilisticModel):
 
         return self.model.predict_proba(df_comb)
 
-    def task_packer(self, predictions, task):
+    def task_packer(self, predictions, task) -> SubsetPosetVec:
         if type(task) is PairwiseComparisonTask and self.keep_pairwise_format:
             return pairwise_comparison_pack_predictions(predictions, task)
+
+        elif (type(task) is ChoiceTask and type(predictions) is dict and
+                hasattr(self.model, "predict_proba")):
+
+            df_preds = pd.DataFrame(predictions)
+            top = list(df_preds.idxmax(axis=1).values)
+            alts = task.primary_table[task.primary_table_alternatives_names].copy().values
+            boot = [np.setdiff1d(alts[i], top[i]) for i in range(0, len(top))]
+
+            return SubsetPosetVec(top_input_data=np.array(top),
+                                  boot_input_data=np.array(boot))
+
         else:
 
             preds_df_acc = pd.DataFrame({
-                'prediction': np.where(predictions == 1, self.alternative,
+                'prediction': np.where(predictions == 1, task.alternative,
                                        None),
-                'obs': self.obs_col}).dropna().groupby('obs')
+                'obs': task.obs_col}).dropna().groupby('obs')
 
             preds_df_rej = pd.DataFrame({
-                'rejection': np.where(predictions == 0, self.alternative,
+                'rejection': np.where(predictions == 0, task.alternative,
                                       None),
-                'obs': self.obs_col}).dropna().groupby('obs')
+                'obs': task.obs_col}).dropna().groupby('obs')
 
             return SubsetPosetVec(
                 top_input_data=preds_df_acc['prediction'].unique().values,

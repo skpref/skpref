@@ -117,11 +117,10 @@ class PrefTask(ABC):
             self.primary_table_features_to_use = []
 
         # Read in secondary table
+        self.secondary_to_primary_link = secondary_to_primary_link
         if secondary_table is not None:
             self.secondary_table, sec_name, sec_hook = \
                 _table_reader(secondary_table)
-
-            self.secondary_to_primary_link = secondary_to_primary_link
 
             if features_to_use is not None and features_to_use != 'all':
                 self.secondary_table_features_to_use = np.intersect1d(
@@ -192,7 +191,7 @@ class PrefTask(ABC):
                         value == self.primary_table_alternatives_names or
                         value == self.primary_table_target_name):
 
-                    secondary_re_indexed = self.secondary_table.set_index(key)
+                    secondary_re_indexed = self.secondary_table.set_index(key).copy()
                     found_correspondence = True
                     if original_naming:
                         left_on += value
@@ -300,8 +299,8 @@ class ChoiceTask(PrefTask):
         of public transportation.
     secondary_to_primary_link: dict, default:None
         How to link the primary and secondary tables together. The key in the
-        dictionary will correspond to the field in the primary table and the
-        value for each key will be the field in the secondary table
+        dictionary will correspond to the field in the secondary table and the
+        value for each key will be the field in the primary table
     entity_slot_type_kwargs: dict of PosetType args
         arguments to tell about the PosetType of the entity slot type
     target_type_kwargs: dict of PosetType args
@@ -404,8 +403,8 @@ class PairwiseComparisonTask(ChoiceTask):
             will also read in pandas DataFrames and scipy.io.arff
         secondary_to_primary_link: dict, default:None
             How to link the primary and secondary tables together. The key in the
-            dictionary will correspond to the field in the primary table and the
-            value for each key will be the field in the secondary table
+            dictionary will correspond to the field in the secondary table and the
+            value for each key will be the field in the primary table
         target_type_kwargs: dict of PosetType args
             arguments to tell about the PosetType of the entity slot type
         features_to_use: list of strings, default = 'all'
