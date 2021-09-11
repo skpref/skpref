@@ -1,12 +1,16 @@
 import unittest
 import numpy as np
+from scipy.special import softmax
 from pandas.testing import assert_frame_equal
+from numpy.testing import assert_array_almost_equal
 from skpref.random_utility import (check_indexing_of_entities,
                                    get_distinct_entities,
                                    generate_entity_lookup,
                                    BradleyTerry)
 
 from skpref.tests.shared_test_dataframes import *
+
+from skpref.task import ChoiceTask
 
 INDEXED_DATA = DATA.set_index(['ent1', 'ent2'])
 
@@ -474,4 +478,42 @@ class TestBradleyTerryFunctions(unittest.TestCase):
         # self.assertFalse(run_choix_m_1_2)
 
 
+    def test_predict_proba_task(self):
+        bt = BradleyTerry()
+        bt.pylogit_fit = False
+        my_task = ChoiceTask(discrete_choice_data, 'alt',
+                             features_to_use=None)
+        bt.params_ = pd.DataFrame({
+            'entity': ['a', 'b', 'c', 'd'],
+            'learned_strength': [0.1, 0.2, 0.3, 0.4]
+        })
 
+        preds = bt.predict_proba_task(my_task, outcome=['a', 'b', 'c', 'd'])
+
+        expected_preds = {
+            'a': np.array([softmax([0.1, 0.2, 0.3])[0],
+                           softmax([0.1, 0.2])[0],
+                           0,
+                           0
+                           ]),
+            'b': np.array([softmax([0.1, 0.2, 0.3])[1],
+                           softmax([0.1, 0.2])[1],
+                           0,
+                           0
+                           ]),
+            'c': np.array([softmax([0.1, 0.2, 0.3])[2],
+                           0,
+                           softmax([0.3, 0.4])[0],
+                           0
+                           ]),
+            'd': np.array([0,
+                           0,
+                           softmax([0.3, 0.4])[1],
+                           1
+                           ]),
+        }
+
+        self.assertEqual(preds.keys(), expected_preds.keys())
+
+        for key in expected_preds.keys():
+            assert_array_almost_equal(expected_preds[key], preds[key])

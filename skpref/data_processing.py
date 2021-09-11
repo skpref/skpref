@@ -300,6 +300,10 @@ class SubsetPosetVec(PosetVector):
                                              divisor), columns=columns
             )
 
+            if target_colname in columns:
+                pairwise_comparison_reduction[target_colname] = \
+                    pairwise_comparison_reduction[target_colname].astype(int)
+
             if alt_type == np.str_:
                 if style == 'positive' and not scramble:
                     pairwise_comparison_reduction = \
