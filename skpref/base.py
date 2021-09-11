@@ -3,7 +3,8 @@ from skpref.task import PrefTask, PairwiseComparisonTask, ChoiceTask
 import pandas as pd
 from typing import List, Type, Union
 import numpy as np
-from skpref.utils import UnderDevError
+from skpref.utils import (
+    UnderDevError, aggregate_full_probability_predictions_to_discrete_choice)
 from skpref.data_processing import PosetVector, SubsetPosetVec
 
 
@@ -385,7 +386,7 @@ class PairwiseComparisonModel(Model):
                 'df_i': secondary_input,
                 'merge_columns': input_merge_columns}
 
-    def task_packer(self, predictions: np.array, task: PairwiseComparisonTask
+    def task_packer(self, predictions: Union[np.array, dict], task: PrefTask
                     ) -> SubsetPosetVec:
             """
             When a task is set up as a pairwise comparison, the format will be
@@ -411,27 +412,36 @@ class PairwiseComparisonModel(Model):
             -------
             A SubsetPosetVector with the results
             """
-            target_col = task.target_column_correspondence
-            other_col = np.setdiff1d(task.primary_table_alternatives_names,
-                                     target_col)
-            top = np.array([])
-            boot = np.array([])
+            if type(task) is PairwiseComparisonTask:
+                target_col = task.target_column_correspondence
+                other_col = np.setdiff1d(task.primary_table_alternatives_names,
+                                         target_col)
+                top = np.array([])
+                boot = np.array([])
 
-            for _i, pred in enumerate(predictions):
-                if pred == 1:
-                    top = np.append(top,
-                                    task.primary_table[target_col].iloc[_i])
-                    boot = np.append(boot,
-                                     task.primary_table[other_col].iloc[_i])
+                for _i, pred in enumerate(predictions):
+                    if pred == 1:
+                        top = np.append(top,
+                                        task.primary_table[target_col].iloc[_i])
+                        boot = np.append(boot,
+                                         task.primary_table[other_col].iloc[_i])
 
-                else:
-                    top = np.append(top,
-                                    task.primary_table[other_col].iloc[_i])
-                    boot = np.append(boot,
-                                     task.primary_table[target_col].iloc[_i])
+                    else:
+                        top = np.append(top,
+                                        task.primary_table[other_col].iloc[_i])
+                        boot = np.append(boot,
+                                         task.primary_table[target_col].iloc[_i])
 
-            return SubsetPosetVec(top_input_data=np.array(top),
-                                  boot_input_data=np.array(boot))
+                return SubsetPosetVec(top_input_data=np.array(top),
+                                      boot_input_data=np.array(boot))
+
+            elif type(task) is ChoiceTask and type(predictions) is dict:
+
+                return aggregate_full_probability_predictions_to_discrete_choice(
+                    predictions, task)
+
+            else:
+                print("This type of aggregation has not yet been developed")
 
 
 class GLMPairwiseComparisonModel(PairwiseComparisonModel, ProbabilisticModel):
@@ -698,13 +708,9 @@ class ClassificationReducer(ProbabilisticModel):
         elif (type(task) is ChoiceTask and type(predictions) is dict and
                 hasattr(self.model, "predict_proba")):
 
-            df_preds = pd.DataFrame(predictions)
-            top = list(df_preds.idxmax(axis=1).values)
-            alts = task.primary_table[task.primary_table_alternatives_names].copy().values
-            boot = [np.setdiff1d(alts[i], top[i]) for i in range(0, len(top))]
-
-            return SubsetPosetVec(top_input_data=np.array(top),
-                                  boot_input_data=np.array(boot))
+            return aggregate_full_probability_predictions_to_discrete_choice(
+                predictions, task
+            )
 
         else:
 
