@@ -39,5 +39,5 @@ def aggregate_full_probability_predictions_to_discrete_choice(
     alts = task.primary_table[task.primary_table_alternatives_names].copy().values
     boot = [np.setdiff1d(alts[i], top[i]) for i in range(0, len(top))]
 
-    return SubsetPosetVec(top_input_data=np.array(top),
-                          boot_input_data=np.array(boot))
+    return SubsetPosetVec(top_input_data=np.array(top, dtype=object),
+                          boot_input_data=np.array(boot, dtype=object))

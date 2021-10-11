@@ -91,7 +91,6 @@ class Model(BaseEstimator):
         task_unpack_dict['df_comb'] = task_unpack_dict['df_comb']\
             .drop(task_unpack_dict['target'], axis=1, errors='ignore')
         del task_unpack_dict['target']
-        # print(task_unpack_dict['df_comb'])
         return task_unpack_dict
 
     def predict_task(self, task: PrefTask) -> PosetVector:
@@ -329,9 +328,11 @@ class PairwiseComparisonModel(Model):
                     pairwise_comparisons['observation'] = \
                         self.unpacked_observations
                     pairwise_comparisons = pairwise_comparisons.merge(
-                        task.primary_table[feats_in_primary].reset_index()
-                        .rename(columns={'index': 'observation'}),
+                        task.primary_table[feats_in_primary]
+                            .reset_index(drop=True).reset_index()
+                            .rename(columns={'index': 'observation'}),
                         how='left', on='observation', validate='m:1')
+
                     pairwise_comparisons.drop('observation', axis=1,
                                               inplace=True)
 

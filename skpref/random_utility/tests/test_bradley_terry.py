@@ -258,6 +258,27 @@ class TestBradleyTerryFunctions(unittest.TestCase):
         assert_frame_equal(long_format_pylogit.astype('int32'),
                            correct_lf_output.astype('int32'))
 
+    def test_unpack_data_for_pylogit_with_mergecol(self):
+        bt = BradleyTerry()
+
+        bt.rplc_lkp, bt.lkp = generate_entity_lookup(
+            get_distinct_entities(EVERYONE_WINS_ONCE_DATA_MERGECOL_INDEXED))
+
+        bt.target_col_name = 'result'
+
+        long_format_pylogit = bt.unpack_data_for_pylogit(
+            EVERYONE_WINS_ONCE_DATA_MERGECOL_INDEXED, ['ent1', 'ent2'])
+
+        correct_lf_output = pd.DataFrame(
+            {'observation': [1, 1, 2, 2, 3, 3, 4, 4, 5, 5],
+             'entity': [1, 2, 0, 1, 2, 3, 2, 3, 1, 3],
+             'CHOICE': [0, 1, 1, 0, 0, 1, 0, 1, 1, 0],
+             'mergecol': [1, 1, 1, 1, 1, 1, 2, 2, 2, 2]}
+        )
+
+        assert_frame_equal(long_format_pylogit.astype('int32'),
+                           correct_lf_output.astype('int32'))
+
     def test_unpack_data_for_pylogit_no_ground_truth(self):
         bt = BradleyTerry()
 
@@ -477,7 +498,6 @@ class TestBradleyTerryFunctions(unittest.TestCase):
         # self.assertListEqual(x_comb_entnames_m_1_2, ['ent1', 'ent2'])
         # self.assertFalse(run_choix_m_1_2)
 
-
     def test_predict_proba_task(self):
         bt = BradleyTerry()
         bt.pylogit_fit = False
@@ -512,6 +532,59 @@ class TestBradleyTerryFunctions(unittest.TestCase):
                            1
                            ]),
         }
+
+        self.assertEqual(preds.keys(), expected_preds.keys())
+
+        for key in expected_preds.keys():
+            assert_array_almost_equal(expected_preds[key], preds[key])
+
+    def test_predict_proba_task_with_params(self):
+        bt = BradleyTerry()
+        bt.pylogit_fit = True
+        secondary_data = pd.DataFrame({
+            'ent': ['a', 'b', 'c', 'd'],
+            'feat': [1, 2, 3, 4]
+        })
+        my_task = ChoiceTask(discrete_choice_data, 'alt',
+                             features_to_use='feat',
+                             secondary_table=secondary_data,
+                             secondary_to_primary_link={'ent': 'alt'})
+
+        bt.params_ = pd.DataFrame({
+            'entity': ['a', 'b', 'c', 'd'],
+            'learned_strength': [0.1, 0.2, 0.3, 0.4]
+        })
+
+        bt._feat_params = pd.DataFrame({
+            'index': ['a', 'b', 'c', 'd', 'feat'],
+            'parameters': [0.1, 0.2, 0.3, 0.4, 0.5]
+        })
+
+        expected_preds = {
+            'a': np.array([softmax([0.1+0.5*1, 0.2+0.5*2, 0.3+0.5*3])[0],
+                           softmax([0.1+0.5, 0.2+0.5*2])[0],
+                           0,
+                           0
+                           ]),
+            'b': np.array([softmax([0.1+0.5, 0.2+0.5*2, 0.3+0.5*3])[1],
+                           softmax([0.1+0.5, 0.2+0.5*2])[1],
+                           0,
+                           0
+                           ]),
+
+            'c': np.array([softmax([0.1+0.5, 0.2+1, 0.3+1.5])[2],
+                           0,
+                           softmax([0.3+1.5, 0.4+2])[0],
+                           0
+                           ]),
+            'd': np.array([0,
+                           0,
+                           softmax([0.3+1.5, 0.4+2])[1],
+                           1
+                           ]),
+        }
+
+        preds = bt.predict_proba_task(my_task, outcome=['a', 'b', 'c', 'd'])
 
         self.assertEqual(preds.keys(), expected_preds.keys())
 

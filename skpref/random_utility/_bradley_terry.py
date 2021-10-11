@@ -793,41 +793,64 @@ class BradleyTerry(GLMPairwiseComparisonModel):
             return self.predict_proba_task_base(task, outcome=outcome,
                                                 column=column)
         elif type(task) == ChoiceTask:
-            if self.pylogit_fit:
-                print("not yet started")
+            tab = task.primary_table.copy()
+            tab['obs_index'] = [i for i in range(0, len(tab))]
+            tab_merged = tab.explode(task.primary_table_alternatives_names).merge(
+                self.params_, how='left', right_on='entity',
+                    left_on=task.primary_table_alternatives_names)\
+
+            if self.pylogit_fit and \
+                    task.secondary_table_features_to_use is not None \
+                    and task.primary_table_alternatives_names in \
+                        task.secondary_to_primary_link.values():
+
+                _, _, left_on, right_on = task.find_merge_columns()
+                tab_merged = tab_merged.merge(
+                    task.secondary_table, how='left', left_on=left_on.tolist(),
+                    right_on=right_on.tolist()
+                )
+
+                for _feat in task.features_to_use:
+                    tab_merged[_feat] = tab_merged[_feat] * (
+                        self._feat_params[self._feat_params['index'] == _feat]['parameters'].values[
+                            0])
+
+                strength_contrib = ['learned_strength'] + task.features_to_use
+
             else:
-                softmax_base = []
-                for alts in task.primary_table[task.primary_table_alternatives_names]:
-                    obs_base = []
-                    for _alt in alts:
-                        obs_base.append(
-                            self.params_[self.params_.entity == _alt]
-                                .learned_strength.values[0])
-                    softmax_base.append(obs_base)
+                strength_contrib = ['learned_strength']
 
-                if type(outcome) != list:
-                    _outcome = list(outcome)
-                else:
-                    _outcome = outcome
+            tab_merged['tot_strength'] = np.exp(
+                tab_merged[strength_contrib].sum(axis=1))
 
-                all_preds = {}
-                for _ocm in _outcome:
-                    preds = []
-                    strength = (self.params_[self.params_.entity == _ocm]
-                                .learned_strength.values[0])
-                    for obs, soft_base in enumerate(softmax_base):
-                        it_values = (
-                            task.primary_table[
-                                task.primary_table_alternatives_names].values)
-                        if _ocm in it_values[obs]:
-                            prob = np.exp(strength) / np.sum(np.exp(soft_base))
-                        else:
-                            prob = 0
-                        preds.append(prob)
+            tab_merged['denom_strength'] = tab_merged.groupby(
+                'obs_index')['tot_strength'].transform('sum')
 
-                    all_preds[_ocm] = np.array(preds)
+            tab_merged['probability'] = (
+                    tab_merged.tot_strength / tab_merged.denom_strength)
 
-                return all_preds
+            if type(outcome) != list:
+                _outcome = list(outcome)
+            else:
+                _outcome = outcome
+            all_preds = {}
+            for _ocm in _outcome:
+                preds = []
+                for obs in range(len(task.primary_table)):
+                    obs_table = tab_merged[tab_merged['obs_index'] == obs]
+                    if _ocm in obs_table[task.primary_table_alternatives_names].values:
+                        prob = obs_table[
+                            obs_table[
+                                task.primary_table_alternatives_names]
+                            == _ocm].probability.values[0]
+                    else:
+                        prob = 0
+
+                    preds.append(prob)
+
+                all_preds[_ocm] = np.array(preds)
+
+            return all_preds
 
     def score(self, X):
         """
