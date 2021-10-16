@@ -92,6 +92,13 @@ class PrefTask(ABC):
 
         self.data_hook = prim_hook
 
+        if type(features_to_use) == list:
+            self.features_to_use = features_to_use
+        elif features_to_use is not None and features_to_use != 'all':
+            self.features_to_use = [features_to_use]
+        else:
+            self.features_to_use = features_to_use
+
         if features_to_use is not None and features_to_use != 'all':
             self.primary_table_features_to_use = np.intersect1d(
                 features_to_use, self.primary_table.columns)
@@ -194,7 +201,10 @@ class PrefTask(ABC):
                     secondary_re_indexed = self.secondary_table.set_index(key).copy()
                     found_correspondence = True
                     if original_naming:
-                        left_on += value
+                        if type(value) == list:
+                            left_on += value
+                        else:
+                            left_on.append(value)
                     else:
                         left_on.append('alternative')
                     right_on.append(key)
@@ -273,7 +283,7 @@ def _convert_array_of_lists_to_array_of_arrays(ar):
         The array to inspect
     """
     if (type(ar[0]) is list) and (type(ar) is np.ndarray):
-        return np.array([np.array(x) for x in ar])
+        return np.array([np.array(x) for x in ar], dtype=object)
     else:
         return ar
 
@@ -360,9 +370,9 @@ class ChoiceTask(PrefTask):
 
         if self.top is not None:
             joint_alts = np.array([[self.top[i], alts[i]]
-                                   for i in range(len(alts))])
+                                   for i in range(len(alts))], dtype=object)
             boot = np.array([np.setdiff1d(x[1], x[0], assume_unique=True)
-                             for x in joint_alts])
+                             for x in joint_alts], dtype=object)
         else:
             boot = alts
             self.top = boot

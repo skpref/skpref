@@ -257,6 +257,8 @@ class TestSubsetPosetVec(unittest.TestCase):
 
         output_red_str_rec, output_red_str_rec_obs = self.test_spv.pairwise_reducer(style='reciprocal')
 
+        self.assertIsInstance(output_red_str_rec.alt1_top[0], np.integer)
+
         pd.testing.assert_frame_equal(
             correct_string_pairwise_red_rec.astype({'alt1_top': 'int32'}),
             output_red_str_rec.astype({'alt1_top': 'int32'}))

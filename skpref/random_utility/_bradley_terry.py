@@ -13,8 +13,9 @@ from skpref.task import PrefTask, PairwiseComparisonTask, ChoiceTask
 from numpy import unique
 from sklearn.utils.validation import check_is_fitted
 from sklearn.metrics import log_loss
-from ..base import (GLMPairwiseComparisonModel,
-                    pairwise_comparison_pack_predictions)
+from ..base import (GLMPairwiseComparisonModel)
+from skpref.data_processing import PosetVector, SubsetPosetVec
+from typing import List, Type, Union
 
 
 def check_indexing_of_entities(df):
@@ -759,15 +760,15 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         model_input = self._prepare_data_for_prediction(task)['df']
         return self.predict_choice(model_input)
 
-    def predict(self, df_comb, df_i=None, df_j=None, merge_columns=None):
+    def predict(self, df, df_i=None, df_j=None, merge_columns=None):
         """ Predicts the result (1,0) of comparison where the leftmost indexed
         entity being chosen is labelled as 1.
 
         Parameters
         ----------
-        df_comb : DataFrame
-                 DataFrame with multi-index where each index is an entity and object
-                 of comparison made.
+        df : DataFrame
+             DataFrame with multi-index where each index is an entity and object
+             of comparison made.
 
         Returns
         -------
@@ -775,30 +776,81 @@ class BradleyTerry(GLMPairwiseComparisonModel):
             The entity which is expected to be chosen.
         """
         if self.pylogit_fit:
-            self.fit_checks(df_comb)
-            probs = self.predict_proba(df_comb, df_i, df_j, merge_columns)
+            self.fit_checks(df)
+            probs = self.predict_proba(df, df_i, df_j, merge_columns)
             diff = probs - 0.5
 
         else:
-            diff = self.find_strength_diff(df_comb)
+            diff = self.find_strength_diff(df)
 
         return np.where(diff >= 0, 1, 0)
 
-    def predict_task(self, task):
-        """
-        Predicts the probability that the corresponding entity will win in the
-        task.
-        Parameters:
-        -----------
-        task: ChoiceTask type
+    def predict_proba_task(
+            self, task: PrefTask,
+            outcome: Union[str, PosetVector, List[str], List[PosetVector]] = None,
+            column: str = None) -> dict:
+        if type(task) == PairwiseComparisonTask:
+            return self.predict_proba_task_base(task, outcome=outcome,
+                                                column=column)
+        elif type(task) == ChoiceTask:
+            tab = task.primary_table.copy()
+            tab['obs_index'] = [i for i in range(0, len(tab))]
+            tab_merged = tab.explode(task.primary_table_alternatives_names).merge(
+                self.params_, how='left', right_on='entity',
+                    left_on=task.primary_table_alternatives_names)\
 
-        Returns:
-        --------
-        predict
-        """
-        model_input = self._prepare_data_for_prediction(task)['df']
-        predictions = self.predict(model_input)
-        return pairwise_comparison_pack_predictions(predictions, task)
+            if self.pylogit_fit and \
+                    task.secondary_table_features_to_use is not None \
+                    and task.primary_table_alternatives_names in \
+                        task.secondary_to_primary_link.values():
+
+                _, _, left_on, right_on = task.find_merge_columns()
+                tab_merged = tab_merged.merge(
+                    task.secondary_table, how='left', left_on=left_on.tolist(),
+                    right_on=right_on.tolist()
+                )
+
+                for _feat in task.features_to_use:
+                    tab_merged[_feat] = tab_merged[_feat] * (
+                        self._feat_params[self._feat_params['index'] == _feat]['parameters'].values[
+                            0])
+
+                strength_contrib = ['learned_strength'] + task.features_to_use
+
+            else:
+                strength_contrib = ['learned_strength']
+
+            tab_merged['tot_strength'] = np.exp(
+                tab_merged[strength_contrib].sum(axis=1))
+
+            tab_merged['denom_strength'] = tab_merged.groupby(
+                'obs_index')['tot_strength'].transform('sum')
+
+            tab_merged['probability'] = (
+                    tab_merged.tot_strength / tab_merged.denom_strength)
+
+            if type(outcome) != list:
+                _outcome = list(outcome)
+            else:
+                _outcome = outcome
+            all_preds = {}
+            for _ocm in _outcome:
+                preds = []
+                for obs in range(len(task.primary_table)):
+                    obs_table = tab_merged[tab_merged['obs_index'] == obs]
+                    if _ocm in obs_table[task.primary_table_alternatives_names].values:
+                        prob = obs_table[
+                            obs_table[
+                                task.primary_table_alternatives_names]
+                            == _ocm].probability.values[0]
+                    else:
+                        prob = 0
+
+                    preds.append(prob)
+
+                all_preds[_ocm] = np.array(preds)
+
+            return all_preds
 
     def score(self, X):
         """
