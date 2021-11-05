@@ -788,11 +788,11 @@ class BradleyTerry(GLMPairwiseComparisonModel):
     def predict_proba_task(
             self, task: PrefTask,
             outcome: Union[str, PosetVector, List[str], List[PosetVector]] = None,
-            column: str = None) -> dict:
-        if type(task) == PairwiseComparisonTask:
-            return self.predict_proba_task_base(task, outcome=outcome,
-                                                column=column)
-        elif type(task) == ChoiceTask:
+            column: str = None,
+            aggregation_method: str = 'Luce'
+    ) -> dict:
+
+        if type(task) == ChoiceTask and aggregation_method == 'Luce':
             tab = task.primary_table.copy()
             tab['obs_index'] = [i for i in range(0, len(tab))]
             tab_merged = tab.explode(task.primary_table_alternatives_names).merge(
@@ -829,28 +829,11 @@ class BradleyTerry(GLMPairwiseComparisonModel):
             tab_merged['probability'] = (
                     tab_merged.tot_strength / tab_merged.denom_strength)
 
-            if type(outcome) != list:
-                _outcome = list(outcome)
-            else:
-                _outcome = outcome
-            all_preds = {}
-            for _ocm in _outcome:
-                preds = []
-                for obs in range(len(task.primary_table)):
-                    obs_table = tab_merged[tab_merged['obs_index'] == obs]
-                    if _ocm in obs_table[task.primary_table_alternatives_names].values:
-                        prob = obs_table[
-                            obs_table[
-                                task.primary_table_alternatives_names]
-                            == _ocm].probability.values[0]
-                    else:
-                        prob = 0
+            return self.compile_predictions(outcome, tab_merged, task)
 
-                    preds.append(prob)
-
-                all_preds[_ocm] = np.array(preds)
-
-            return all_preds
+        else:
+            return self.predict_proba_task_GLM_base(
+                task, outcome=outcome, column=column)
 
     def score(self, X):
         """
