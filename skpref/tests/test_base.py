@@ -449,8 +449,8 @@ class TestClassificationReducer(unittest.TestCase):
             {'ID': ['choice', 'alternatives']}
         )
 
-        my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+        dc = DummyClassifier('constant', constant=1)
+        my_model = ClassificationReducer(dc)
 
         # Need to run unpacking before running packing
         _ = my_model.task_unpacker(test_task)
