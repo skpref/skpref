@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from numpy.testing import assert_array_equal
+from numpy.testing import assert_array_equal, assert_array_almost_equal
 from skpref.task import ChoiceTask, PairwiseComparisonTask
 from skpref.base import (PairwiseComparisonModel, SVMPairwiseComparisonModel,
                          ClassificationReducer, ProbabilisticModel)
@@ -9,6 +9,7 @@ from sklearn.dummy import DummyClassifier
 from skpref.tests.shared_test_dataframes import *
 from skpref.data_processing import SubsetPosetVec
 from sklearn.linear_model import LogisticRegression
+from skpref.random_utility import BradleyTerry
 
 
 class TestPairwiseComparisonModelFunctions(unittest.TestCase):
@@ -294,7 +295,7 @@ class TestClassificationReducer(unittest.TestCase):
             secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
 
         my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         unpacker_dict = my_model.task_unpacker(test_task)
 
@@ -313,7 +314,7 @@ class TestClassificationReducer(unittest.TestCase):
             secondary_to_primary_link={'ent': ['ent1', 'ent2']})
 
         my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         unpacker_dict = my_model.task_unpacker(test_task)
 
@@ -332,7 +333,7 @@ class TestClassificationReducer(unittest.TestCase):
             secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
 
         my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         unpacker_dict = my_model.task_unpacker(test_task,
                                                take_feautre_diff=True)
@@ -352,7 +353,7 @@ class TestClassificationReducer(unittest.TestCase):
         )
 
         my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         unpacker_dict = my_model.task_unpacker(test_task)
 
@@ -404,7 +405,7 @@ class TestClassificationReducer(unittest.TestCase):
             secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
 
         my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         unpacker_dict = my_model.task_unpacker(test_task,
                                                take_feautre_diff=True)
@@ -418,7 +419,7 @@ class TestClassificationReducer(unittest.TestCase):
     def test_task_packer_pairwise_comparison(self):
 
         my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         my_task = PairwiseComparisonTask(
             primary_table=DATA,
@@ -449,7 +450,7 @@ class TestClassificationReducer(unittest.TestCase):
         )
 
         my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         # Need to run unpacking before running packing
         _ = my_model.task_unpacker(test_task)
@@ -542,7 +543,7 @@ class TestProbabilisticModel(unittest.TestCase):
         )
 
         dummy_class_reducer = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         dummy_class_reducer.task_fit_features = None
 
@@ -568,7 +569,7 @@ class TestProbabilisticModel(unittest.TestCase):
         )
 
         dummy_class_reducer = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         dummy_class_reducer.task_fit_features = None
 
@@ -588,3 +589,77 @@ class TestProbabilisticModel(unittest.TestCase):
 
         for key in expected_outcome.keys():
             assert_array_equal(expected_outcome[key], outcome[key])
+
+
+class TestGLMPairwiseComparisonModel(unittest.TestCase):
+    def test_predict_proba_task(self):
+        # Create a dummy discrete choice task
+        my_task = ChoiceTask(
+            discrete_choice_data2,
+            'alt', 'choice',
+            features_to_use=['covariate'],
+            secondary_table=discrete_choice_data_secondary_covariates,
+            secondary_to_primary_link={'alternative': 'alt'}
+        )
+        # Apply a Bradley Terry calculation
+        my_bt = BradleyTerry()
+        my_bt.fit_task(my_task)
+        # Modify manually the variables
+        my_bt._feat_params = pd.DataFrame({
+            'index': ['covariate', 'a', 'b', 'c', 'd'],
+            'parameters': [0.5, 2.0, 3.0, 4.0, 5.0]
+        })
+
+        my_bt.params_ = pd.DataFrame({
+            'index': ['a', 'b', 'c', 'd'],
+            'parameters': [2, 3, 4, 5]
+        })
+
+        my_bt.bt_with_feats.coefs.covariate = 0.5
+        my_bt.bt_with_feats.coefs.a = 2
+        my_bt.bt_with_feats.coefs.b = 3
+        my_bt.bt_with_feats.coefs.c = 4
+        my_bt.bt_with_feats.coefs.d = 5
+        # Apply the predict equation with 'independent transitive' setting
+        predicted_prob = my_bt.predict_proba_task(
+            my_task, aggregation_method='independent transitive',
+            outcome=['a', 'b', 'c', 'd'])
+
+        # Calculate by hand the expected output
+        a_strength = np.exp(2+0.5*1)
+        b_strength = np.exp(3+0.5*2)
+        c_strength = np.exp(4+0.5*3)
+        d_strength = np.exp(5+0.5*4)
+
+        p_a_pref_b = a_strength / (a_strength + b_strength)
+        p_a_pref_c = a_strength / (a_strength + c_strength)
+        p_b_pref_c = b_strength / (b_strength + c_strength)
+        p_c_pref_d = c_strength / (c_strength + d_strength)
+
+        expected_output = {
+            'a': np.array([(p_a_pref_b * p_a_pref_c) /
+                           (p_a_pref_b * p_a_pref_c +
+                            (1-p_a_pref_b) * p_b_pref_c +
+                            (1-p_a_pref_c) * (1-p_b_pref_c)),
+                            p_a_pref_b, 0, 0
+                           ]),
+            'b': np.array([((1-p_a_pref_b) * p_b_pref_c) /
+                           (p_a_pref_b * p_a_pref_c +
+                            (1-p_a_pref_b) * p_b_pref_c +
+                            (1-p_a_pref_c) * (1-p_b_pref_c)),
+                           (1-p_a_pref_b), 0, 0],
+                          ),
+            'c': np.array([((1-p_a_pref_c) * (1-p_b_pref_c)) /
+                           (p_a_pref_b * p_a_pref_c +
+                            (1-p_a_pref_b) * p_b_pref_c +
+                            (1-p_a_pref_c) * (1-p_b_pref_c)),
+                           0, p_c_pref_d, p_c_pref_d]),
+            'd': np.array([0, 0, 1-p_c_pref_d, 1-p_c_pref_d])
+        }
+
+        # Check if expected output matches
+        self.assertEqual(predicted_prob.keys(), expected_output.keys())
+
+        for key in expected_output.keys():
+            assert_array_almost_equal(expected_output[key],
+                                      predicted_prob[key])

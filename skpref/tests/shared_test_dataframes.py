@@ -84,3 +84,13 @@ discrete_choice_data = pd.DataFrame({
     'alt': [['a', 'b', 'c'], ['a', 'b'], ['c', 'd'], ['d']],
     'choice': ['b', 'a', 'c', 'd']
 })
+
+discrete_choice_data2 = pd.DataFrame({
+    'alt': [['a', 'b', 'c'], ['a', 'b'], ['c', 'd'], ['c','d']],
+    'choice': ['b', 'a', 'c', 'd']
+})
+
+discrete_choice_data_secondary_covariates = pd.DataFrame({
+    'alternative': ['a', 'b', 'c', 'd'],
+    'covariate': [1, 2, 3, 4]
+})

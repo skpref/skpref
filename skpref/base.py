@@ -216,7 +216,8 @@ class ProbabilisticModel(Model):
     def predict_proba_task(
             self, task: PrefTask,
             outcome: Union[str, PosetVector, List[str], List[PosetVector]] = None,
-            column: str = None
+            column: str = None,
+            aggregation_method: str = None
     ) -> dict:
 
         if outcome is None and column is None:
@@ -237,14 +238,16 @@ class ProbabilisticModel(Model):
 
     predict_proba_task_base = predict_proba_task
 
-    def predict_task(self, task: ChoiceTask) -> PosetVector:
+    def predict_task(self, task: ChoiceTask, aggregation_method: str = None
+                     ) -> PosetVector:
         if type(task) == ChoiceTask and (
                 self.model_type == "Classifier" or
                 self.model_type == 'Pairwise Comparison'):
             # Get all the distinct alternatives that are in alternatives
             # Run probabilistic predictions for all the alternatives
             preds = self.predict_proba_task(
-                task, outcome=list(task.subset_vec.entity_universe))
+                task, outcome=list(task.subset_vec.entity_universe),
+                aggregation_method=aggregation_method)
             return self.task_packer(preds, task)
         else:
             return self.base_predict_task(task)
@@ -448,6 +451,106 @@ class PairwiseComparisonModel(Model):
 class GLMPairwiseComparisonModel(PairwiseComparisonModel, ProbabilisticModel):
     def __init__(self):
         super(GLMPairwiseComparisonModel, self).__init__()
+
+    @staticmethod
+    def compile_predictions(
+                            outcome: Union[str, List[str]],
+                            df: pd.DataFrame,
+                            task: PrefTask) -> dict:
+
+        if type(outcome) != list:
+            _outcome = list(outcome)
+        else:
+            _outcome = outcome
+        all_preds = {}
+        for _ocm in _outcome:
+            preds = []
+            for obs in range(len(task.primary_table)):
+                obs_table = df[df['obs_index'] == obs]
+                if _ocm in obs_table[task.primary_table_alternatives_names].values:
+                    prob = obs_table[
+                        obs_table[
+                            task.primary_table_alternatives_names]
+                        == _ocm].probability.values[0]
+                else:
+                    prob = 0
+
+                preds.append(prob)
+
+            all_preds[_ocm] = np.array(preds)
+
+        return all_preds
+
+    def predict_proba_task(
+            self, task: PrefTask,
+            outcome: Union[str, PosetVector, List[str], List[PosetVector]] = None,
+            column: str = None,
+            aggregation_method: str = 'independent transitive'
+    ) -> dict:
+
+        if type(task) == PairwiseComparisonTask:
+            return self.predict_proba_task_base(task, outcome=outcome,
+                                                column=column)
+        elif (type(task) == ChoiceTask and
+              aggregation_method == 'independent transitive'):
+
+            all_comb = (
+                task.primary_table[[task.primary_table_alternatives_names]]
+                    .explode(task.primary_table_alternatives_names)
+                    .merge(task.primary_table
+                           .drop(task.primary_table_target_name, axis=1)
+                           .explode(task.primary_table_alternatives_names),
+                           how='outer', left_index=True, right_index=True
+                           )
+            )
+
+            no_repeats = (
+                all_comb[
+                    all_comb[task.primary_table_alternatives_names + '_x'] !=
+                    all_comb[task.primary_table_alternatives_names + '_y']]
+                .copy()
+                .rename(columns={
+                    task.primary_table_alternatives_names + '_x': 'alt1',
+                    task.primary_table_alternatives_names + '_y': 'alt2'})
+            )
+
+            df_mapping = pd.DataFrame({
+                'sort_values': task.primary_table.index.values,
+            })
+
+            sort_mapping = df_mapping.reset_index().set_index('sort_values')
+
+            no_repeats['prob'] = (
+                self.predict_proba(no_repeats.set_index(['alt1', 'alt2']))
+            )
+
+            choice_prob = (
+                no_repeats.reset_index()[['alt1', 'index', 'prob']]
+                .groupby(['alt1', 'index'], as_index=False).prod()
+            )
+
+            choice_prob['normaliser'] = (
+                choice_prob[['index', 'prob']]
+                .groupby('index').transform('sum')
+            )
+
+            choice_prob['probability'] = (
+                    choice_prob['prob'] / choice_prob['normaliser']
+            )
+
+            choice_prob['obs_index'] = (
+                choice_prob['index'].map(sort_mapping['index'])
+            )
+
+            tab_merged = (
+                choice_prob.sort_values('obs_index')
+                .rename(
+                    columns={'alt1': task.primary_table_alternatives_names})
+            )
+
+            return self.compile_predictions(outcome, tab_merged, task)
+
+    predict_proba_task_GLM_base = predict_proba_task
 
 
 class SVMPairwiseComparisonModel(PairwiseComparisonModel):
