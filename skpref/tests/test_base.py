@@ -295,7 +295,7 @@ class TestClassificationReducer(unittest.TestCase):
             secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
 
         my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         unpacker_dict = my_model.task_unpacker(test_task)
 
@@ -314,7 +314,7 @@ class TestClassificationReducer(unittest.TestCase):
             secondary_to_primary_link={'ent': ['ent1', 'ent2']})
 
         my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         unpacker_dict = my_model.task_unpacker(test_task)
 
@@ -333,7 +333,7 @@ class TestClassificationReducer(unittest.TestCase):
             secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
 
         my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         unpacker_dict = my_model.task_unpacker(test_task,
                                                take_feautre_diff=True)
@@ -353,7 +353,7 @@ class TestClassificationReducer(unittest.TestCase):
         )
 
         my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         unpacker_dict = my_model.task_unpacker(test_task)
 
@@ -405,7 +405,7 @@ class TestClassificationReducer(unittest.TestCase):
             secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
 
         my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         unpacker_dict = my_model.task_unpacker(test_task,
                                                take_feautre_diff=True)
@@ -419,7 +419,7 @@ class TestClassificationReducer(unittest.TestCase):
     def test_task_packer_pairwise_comparison(self):
 
         my_model = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         my_task = PairwiseComparisonTask(
             primary_table=DATA,
@@ -449,8 +449,8 @@ class TestClassificationReducer(unittest.TestCase):
             {'ID': ['choice', 'alternatives']}
         )
 
-        dc = DummyClassifier('constant', constant=1)
-        my_model = ClassificationReducer(dc)
+        my_model = ClassificationReducer(
+            DummyClassifier(strategy='constant', constant=1))
 
         # Need to run unpacking before running packing
         _ = my_model.task_unpacker(test_task)
@@ -543,7 +543,7 @@ class TestProbabilisticModel(unittest.TestCase):
         )
 
         dummy_class_reducer = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         dummy_class_reducer.task_fit_features = None
 
@@ -569,7 +569,7 @@ class TestProbabilisticModel(unittest.TestCase):
         )
 
         dummy_class_reducer = ClassificationReducer(
-            DummyClassifier('constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1))
 
         dummy_class_reducer.task_fit_features = None
 
