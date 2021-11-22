@@ -1,7 +1,7 @@
 from skpref.data_processing import SubsetPosetVec
 import numpy as np
 from sklearn.metrics import log_loss as sklearn_log_loss
-from scipy.stats import ttest_ind
+from scipy.stats import ttest_rel
 
 
 def true_positives(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> int:
@@ -201,6 +201,6 @@ def log_loss_compare_with_t_test(actuals: SubsetPosetVec, predicted1: dict,
                 np.nan_to_num(logged2 * binarized_outcome) +
                 np.nan_to_num(logged_oneminus2 * inv_binarized_outcome))
 
-        ll_t[_alternative] = ttest_ind(final_losses1, final_losses2)
+        ll_t[_alternative] = ttest_rel(final_losses1, final_losses2)
 
     return ll_t
