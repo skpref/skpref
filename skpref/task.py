@@ -289,8 +289,8 @@ def _convert_array_of_lists_to_array_of_arrays(ar):
 
 
 class ChoiceTask(PrefTask):
-    """
-    Task for choice based models
+    """Task for discrete and subset choice models
+
     Parameters:
     -----------
     primary_table: DataFrame
@@ -390,45 +390,46 @@ class ChoiceTask(PrefTask):
 
 class PairwiseComparisonTask(ChoiceTask):
     """
-        Task for choice based models
-        Parameters:
-        -----------
-        primary_table: str, DataFrame, scipy.io.arff
-            The primary table is the one that contains the target variable and
-            covariates that vary on the target observation level. For example the
-            available methods of transportation for an individual and weather it
-            rained or not at the time of the journey.
-            If str it will be the directory where the primary table sits. Otherwise
-            will also read in pandas DataFrames and scipy.io.arff
-        primary_table_alternatives_names: str
-            The column or attribute which corresponds to the alternatives in the
-            primary table.
-        primary_table_target_name: str
-            The column name or attribute which corresponds to the ground truth
-        secondary_table: str, DataFrame, scipy.io.arff, default=None
-            The secondary table that usually contains information about the
-            alternatives in the primary table. For example the cleanliness perception
-            of public transportation.
-            If str it will be the directory where the primary table sits. Otherwise
-            will also read in pandas DataFrames and scipy.io.arff
-        secondary_to_primary_link: dict, default:None
-            How to link the primary and secondary tables together. The key in the
-            dictionary will correspond to the field in the secondary table and the
-            value for each key will be the field in the primary table
-        target_type_kwargs: dict of PosetType args
-            arguments to tell about the PosetType of the entity slot type
-        features_to_use: list of strings, default = 'all'
-            Column names of the features to use, by default the task will try to use
-            every column as features. If the user wants to use a model that doesn't
-            use any features then it should be set to None
-        target_column_correspondence: str, default=None
-            If the choice is a pairwise comparison and the target is not the name
-            of an entity but a {1,0} variable that corresponds to one of the entities
-            being chosen in one of the columns, then this should be the name of the
-            column for which when the target variable is 1 then that column's entity
-            has been chosen. i.e. there is a column with home team another one with
-            away team and target is 1 when home team wins.
-        """
+    Task for choice based models
+
+    Parameters:
+    -----------
+    primary_table: str, DataFrame, scipy.io.arff
+        The primary table is the one that contains the target variable and
+        covariates that vary on the target observation level. For example the
+        available methods of transportation for an individual and weather it
+        rained or not at the time of the journey.
+        If str it will be the directory where the primary table sits. Otherwise
+        will also read in pandas DataFrames and scipy.io.arff
+    primary_table_alternatives_names: str
+        The column or attribute which corresponds to the alternatives in the
+        primary table.
+    primary_table_target_name: str
+        The column name or attribute which corresponds to the ground truth
+    secondary_table: str, DataFrame, scipy.io.arff, default=None
+        The secondary table that usually contains information about the
+        alternatives in the primary table. For example the cleanliness perception
+        of public transportation.
+        If str it will be the directory where the primary table sits. Otherwise
+        will also read in pandas DataFrames and scipy.io.arff
+    secondary_to_primary_link: dict, default:None
+        How to link the primary and secondary tables together. The key in the
+        dictionary will correspond to the field in the secondary table and the
+        value for each key will be the field in the primary table
+    target_type_kwargs: dict of PosetType args
+        arguments to tell about the PosetType of the entity slot type
+    features_to_use: list of strings, default = 'all'
+        Column names of the features to use, by default the task will try to use
+        every column as features. If the user wants to use a model that doesn't
+        use any features then it should be set to None
+    target_column_correspondence: str, default=None
+        If the choice is a pairwise comparison and the target is not the name
+        of an entity but a {1,0} variable that corresponds to one of the entities
+        being chosen in one of the columns, then this should be the name of the
+        column for which when the target variable is 1 then that column's entity
+        has been chosen. i.e. there is a column with home team another one with
+        away team and target is 1 when home team wins.
+    """
     def __init__(self, primary_table: pd.DataFrame,
                  primary_table_alternatives_names: List[str],
                  primary_table_target_name: str = None,
@@ -451,9 +452,6 @@ class PairwiseComparisonTask(ChoiceTask):
                 primary_table[target_column_correspondence],
                 primary_table[self.inverse_correspondence_column[0]]
             ).reshape(len(primary_table), 1)
-
-        else:
-            self.top = None
 
         entity_slot_type_kwargs = {
             'top_size_const': True,

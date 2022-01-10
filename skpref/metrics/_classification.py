@@ -5,13 +5,18 @@ from scipy.stats import ttest_rel
 
 
 def true_positives(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> int:
-    """
+    """True positive count
+
     The number of alternatives predicted to be chosen and were actually chosen
     (tp)
+
     Parameters
     ----------
-    actuals: the true values
-    predicted: predicted values
+
+    actuals: SubsetPosetVector
+        the true values
+    predicted: SubsetPosetVector
+        the predicted values
     """
     tp = 0
     for i in range(len(actuals.top_input_data)):
@@ -23,13 +28,18 @@ def true_positives(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> int:
 
 
 def true_negatives(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> int:
-    """
+    """True negative count
+
     The number of alternatives predicted to be bot chosen and were actually not
     chosen (tn)
+
     Parameters
     ----------
-    actuals: the true values
-    predicted: predicted values
+
+    actuals: SubsetPosetVector
+        the true values
+    predicted: SubsetPosetVector
+        the predicted values
 
     """
 
@@ -43,13 +53,18 @@ def true_negatives(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> int:
 
 
 def false_positives(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> int:
-    """
+    """ False positive count
+
     The number of alternatives predicted to be chosen and were actually not
     chosen (fp)
+
     Parameters
     ----------
-    actuals: the true values
-    predicted: predicted values
+
+    actuals: SubsetPosetVector
+        the true values
+    predicted: SubsetPosetVector
+        the predicted values
     """
     fp = 0
     for i in range(len(actuals.top_input_data)):
@@ -61,13 +76,18 @@ def false_positives(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> int:
 
 
 def false_negatives(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> int:
-    """
+    """False negative count
+
     The number of alternatives predicted to be not chosen and were actually
     chosen (fn)
+
     Parameters
     ----------
-    actuals: the true values
-    predicted: predicted values
+
+    actuals: SubsetPosetVector
+        the true values
+    predicted: SubsetPosetVector
+        the predicted values
     """
 
     fn = 0
@@ -80,13 +100,18 @@ def false_negatives(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> int:
 
 
 def accuracy(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> float:
-    """
+    """Accuracy
+
     The percentage of alternatives correctly identified:
     (tp + tn) / (tp+fp+tn+fn)
+
     Parameters
     ----------
-    actuals: the true values
-    predicted: predicted values
+
+    actuals: SubsetPosetVector
+        the true values
+    predicted: SubsetPosetVector
+        the predicted values
     """
 
     tp = true_positives(actuals, predicted)
@@ -100,14 +125,19 @@ def accuracy(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> float:
 
 
 def precision(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> float:
-    """
+    """Precision
+
     Percentage of the alternatives predicted to be chosen and were actually
     chosen
     tp/(tp+fp)
+
     Parameters
     ----------
-    actuals: the true values
-    predicted: predicted values
+
+    actuals: SubsetPosetVector
+        the true values
+    predicted: SubsetPosetVector
+        the predicted values
     """
 
     tp = true_positives(actuals, predicted)
@@ -117,13 +147,18 @@ def precision(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> float:
 
 
 def recall(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> float:
-    """
+    """Recall
+
     The percentage of chosen alternatives identified correctly by the predictions
     tp / (tp + fn)
+
     Parameters
     ----------
-    actuals: the true values
-    predicted: predicted values
+
+    actuals: SubsetPosetVector
+        the true values
+    predicted: SubsetPosetVector
+        the predicted values
     """
 
     tp = true_positives(actuals, predicted)
@@ -133,13 +168,18 @@ def recall(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> float:
 
 
 def f1_score(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> float:
-    """
+    """F1 Score
+
     The harmonic mean between precision and recall
     (2 x precision x recall) / (precision + recall)
+
     Parameters
     ----------
-    actuals: the true values
-    predicted: predicted values
+
+    actuals: SubsetPosetVector
+        the true values
+    predicted: SubsetPosetVector
+        the predicted values
     """
 
     rc = recall(actuals, predicted)
@@ -151,13 +191,19 @@ def f1_score(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> float:
 
 
 def log_loss(actuals: SubsetPosetVec, predicted: dict, **kwargs) -> dict:
-    """
+    """Log Loss
+
     Calculates the mean log loss for each alternative, can provide arguments
     as in scikit-learn log loss
+
     Parameters
     ----------
-    actuals: the true values
-    predicted: predicted values
+
+    actuals: SubsetPosetVector
+        the true values
+    predicted: dict
+        the dictionary of predicted probability values where key is the predicted
+        outcome and values are the probabilities for each row
     """
     ll = {}
     for _alternative in list(predicted.keys()):
@@ -172,14 +218,24 @@ def log_loss(actuals: SubsetPosetVec, predicted: dict, **kwargs) -> dict:
 
 def log_loss_compare_with_t_test(actuals: SubsetPosetVec, predicted1: dict,
                                  predicted2: dict) -> dict:
-    """
+    """Compares the log loss from two predictions with a paired t-test
+
     For two different probabilistic predictions calculates whether they are
-    significantly different
+    significantly different with a paired t-test.
+
     Parameters
     ----------
-    actuals: the true values
-    predicted1: predicted values 1
-    predicted2: predicted values 2
+
+    actuals: SubsetPosetVec
+        the true values
+    predicted1: dict
+        the dictionary of predicted probability values where key is the predicted
+        outcome and values are the probabilities for each row for predictions from
+        method 1
+    predicted2: dict
+        the dictionary of predicted probability values where key is the predicted
+        outcome and values are the probabilities for each row for predictions from
+        method 2
     """
     ll_t = {}
     for _alternative in list(predicted1.keys()):

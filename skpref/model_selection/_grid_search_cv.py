@@ -14,38 +14,33 @@ LOSS_FUNCTIONS = {
 class GridSearchCV(object):
     """
     An adaption of scikit-learn's GridSearchCV into a choice model interface.
+
     Parameters
     -----------
     estimator : estimator object.
         This is assumed to implement the scikit-learn estimator interface.
         Either estimator needs to provide a ``score`` function,
         or ``scoring`` must be passed.
+
     param_grid : dict or list of dictionaries
         Dictionary with parameters names (string) as keys and lists of
         parameter settings to try as values, or a list of such
         dictionaries, in which case the grids spanned by each dictionary
         in the list are explored. This enables searching over any sequence
         of parameter settings.
+
     kwargs : args
         all arguments that GridSearchCV takes from scikit-learn
 
-    Example usage:
-    --------------
-     >>> import pickle
+    Example
+    ----------
+    >>> import pickle
     >>> import sys
     >>> sys.path.insert(0, "..")
     >>> from skpref.random_utility import BradleyTerry
     >>> from skpref.task import ChoiceTask, PairwiseComparisonTask
     >>> import pandas as pd
     >>> # Using product choice data
-    # >>> with open('skpref/examples/data/product_choices.pickle', 'rb') as handle:
-    # ...     choice_data = pickle.load(handle)
-    # >>> products_bought_train = ChoiceTask(
-    # ... choice_data[:100], 'alternatives', 'choice', features_to_use=None)
-    # >>> to_tune = {'alpha': [0.1, 0.5, 1], 'method': ['BFGS', 'Newton-CG']}
-    # >>> gs_bt = GridSearchCV(BradleyTerry(), to_tune,  cv=3)
-    # >>> gs_bt.fit_task(products_bought_train)
-
     >>> # using basketball match data
     >>> NBA_file_loc = 'skpref/examples/data/'
     >>> NBA_results = pd.read_csv(NBA_file_loc + 'NBA_matches.csv')
@@ -65,7 +60,16 @@ class GridSearchCV(object):
     >>> to_tune = {'alpha': [1, 2, 4], 'method': ['BFGS']}
     >>> gs_bt = GridSearchCV(BradleyTerry(), to_tune,  cv=3)
     >>> gs_bt.fit_task(NBA_results_task_train)
+
     """
+
+    # >>> with open('skpref/examples/data/product_choices.pickle', 'rb') as handle:
+    # ...     choice_data = pickle.load(handle)
+    # >>> products_bought_train = ChoiceTask(
+    # ... choice_data[:100], 'alternatives', 'choice', features_to_use=None)
+    # >>> to_tune = {'alpha': [0.1, 0.5, 1], 'method': ['BFGS', 'Newton-CG']}
+    # >>> gs_bt = GridSearchCV(BradleyTerry(), to_tune,  cv=3)
+    # >>> gs_bt.fit_task(products_bought_train)
 
     def __init__(self, estimator, param_grid, scoring=None, **kwargs):
         self.estimator = estimator
@@ -133,6 +137,15 @@ class GridSearchCV(object):
         self.refit_time_ = self.gs.refit_time_
 
     def fit_task(self, task: PrefTask):
+        """
+        Fits the grid search based on a task
+
+        Parameters
+        ----------
+        task: PrefTask
+              The task for which the GridSearch should be run
+
+        """
         if isinstance(self.scoring, str) or callable(self.scoring):
 
             def task_scorer(function: callable, table: pd.DataFrame,
@@ -208,17 +221,22 @@ class GridSearchCV(object):
         print(res.sort_values('mean_test_score', ascending=False))
 
     def rank_entities(self, ascending=True):
-        """ Outputs the ranked order of entities.
+        """
+
+        Outputs the ranked order of entities.
+
         Parameters
         ----------
         ascending : Boolean, default=True
                     When True the weakest entity will be first in the list,
                     when False the strongest entity will be first in the list.
+
         Returns
         -------
         rank : ndarray, shape (n_ents)
                The ranks of the entities.
         """
+
         return self.best_estimator_.rank_entities(ascending=ascending)
 
     def predict(self, df):
@@ -237,16 +255,27 @@ class GridSearchCV(object):
         return self.gs.predict(df)
 
     def predict_task(self, task):
+        """
+        Creates predictions for a task
+
+        Parameters
+        ----------
+        task: PrefTask
+              The task for which predictions should be made
+
+        """
 
         return self.best_estimator_.predict_task(task)
 
     def predict_proba(self, df):
         """ Predicts the probability of the result = 1 in the match up.
+
         Parameters
         ----------
         df : DataFrame
              DataFrame with multi-index where each index is an entity and object
              of comparison made.
+
         Returns
         -------
         y : ndarray, shape (n_samples,)
@@ -258,6 +287,34 @@ class GridSearchCV(object):
     def predict_proba_task(self, task: PrefTask,
             outcome: Union[str, PosetVector, List[str], List[PosetVector]] = None,
             column: str = None):
+
+        """
+        Predicts the probability of specified outcomes for a specific task
+
+        Parameters
+        ----------
+        task: PrefTask
+              The task for which predictions should be made
+
+        outcome: List
+                 The outcome for which predictions should be made, for example if
+                 the alternatives are 'Car', 'Train', 'Bicycle' then the user can
+                 ask for probabilities of ['Car', 'Train] if they're only interested
+                 in the probability of choosing 'Car' or 'Train'
+
+        column: str
+                Can also take a column name for which predictions should be made,
+                probably more useful in pairwise comparison set ups, where team1
+                is in one column and team2 in another.
+
+        Returns
+        -------
+        A dictionary with the alternatives being the keys and for each key there's \
+        a numpy array of floats which reflects the probability with which that \
+        alternative will be selected. When the alternative is not in the list of \
+        choices for a specific row the value will be 0. When a column is given \
+        instead of an outcome then the keys are the column name.
+        """
 
         return self.best_estimator_.predict_proba_task(task, outcome, column)
 
@@ -276,5 +333,16 @@ class GridSearchCV(object):
         return self.best_estimator_.predict_choice(df)
 
     def predict_choice_task(self, task):
+        """
+        Predicts the probability that the corresponding entity will win in the
+        task.
 
+        Parameters
+        -----------
+        task: ChoiceTask type
+
+        Returns
+        --------
+        predict_choice
+        """
         return self.best_estimator_.predict_choice_task(task)
