@@ -46,7 +46,7 @@ which can be augmented with covariates. It achieves this by interfacing with the
 It is also possible to reduce tasks to classification tasks and use the interface to fir any classifier available in
 scikit-learn.
 
-A whishlist of models
+A wishlist of models
 ----------------------
 We welcome anyone who would like to contribute to the package by interfacing an existing solution for or developing a
 solution for the following models (and more):
