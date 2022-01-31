@@ -1,0 +1,1451 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="prev" title="Bradley Terry example notebook" href="example_using_sports_data.html" />
+
+    <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
+        <title>We will demonstrate skpref on discrete choice data - skpref 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=fade93df149f7c5fedb3ff897f799dc7d283b420" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  body[data-theme="dark"] {
+    --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+  }
+  @media (prefers-color-scheme: dark) {
+    body:not([data-theme="light"]) {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+  }
+</style></head>
+  <body>
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" />
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="10" y1="12" x2="20" y2="12" />
+      <line x1="6" y1="18" x2="20" y2="18" />
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">skpref 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">skpref 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README_symbolic.html">Welcome to skpref</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README_symbolic.html#models-in-the-package">Models in the package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README_symbolic.html#novelties-in-skpref-to-the-scikit-learn-user">Novelties in skpref to the scikit-learn user</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README_symbolic.html#types-of-relations-that-can-be-modelled-in-skpref-11-01-2022">Types of relations that can be modelled in skpref (11/01/2022)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_documentation.html">Module documentation</a></li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="jupyter_notebook_examples.html">Jupyter Notebook Examples</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html">Bradley Terry example notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Reading-in-the-data">Reading in the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Setting-up-the-tasks">Setting up the tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Let’s-fit-a-reduction-to-logistic-regression-first">Let’s fit a reduction to logistic regression first</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Let’s-fit-a-reduction-to-logistic-regression-with-the-salary-covariate">Let’s fit a reduction to logistic regression with the salary covariate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Bradley-Terry-model-with-salary-covariate">Bradley Terry model with salary covariate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Example-using-GridSearchCV()">Example using GridSearchCV()</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">We will demonstrate skpref on discrete choice data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#We-will-need-to-make-a-couple-of-changes-to-the-format-of-this-table-for-skpref-to-read-it-easier.">We will need to make a couple of changes to the format of this table for skpref to read it easier.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#We-will-use-a-subset-of-the-available-features-to-make-the-skpref-demo-easier">We will use a subset of the available features to make the skpref demo easier</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<div class="section" id="We-will-demonstrate-skpref-on-discrete-choice-data">
+<h1>We will demonstrate skpref on discrete choice data<a class="headerlink" href="#We-will-demonstrate-skpref-on-discrete-choice-data" title="Permalink to this headline">¶</a></h1>
+<p>We wil use the swissmetro dataset available to download on <a class="reference external" href="https://transp-or.epfl.ch/pythonbiogeme/examples_swissmetro.html">https://transp-or.epfl.ch/pythonbiogeme/examples_swissmetro.html</a> This dataset tracks 470 respondents on which transportation alternative they have taken. There are 3 options in general: train, car and swissmetro. More details on the original use of the dataset can be found here: <a class="reference external" href="http://strc.ch/2001/bierlaire1.pdf">http://strc.ch/2001/bierlaire1.pdf</a></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="n">pd</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">display</span><span class="o">.</span><span class="n">max_columns</span> <span class="o">=</span> <span class="mi">999</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">"../.."</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">skpref.base</span> <span class="kn">import</span> <span class="n">ClassificationReducer</span>
+<span class="kn">from</span> <span class="nn">skpref.random_utility</span> <span class="kn">import</span> <span class="n">BradleyTerry</span>
+<span class="kn">from</span> <span class="nn">skpref.task</span> <span class="kn">import</span> <span class="n">ChoiceTask</span>
+<span class="kn">from</span> <span class="nn">skpref.metrics</span> <span class="kn">import</span> <span class="n">f1_score</span><span class="p">,</span> <span class="n">log_loss</span><span class="p">,</span> <span class="n">log_loss_compare_with_t_test</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OneHotEncoder</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">swissmetro</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">"data/swissmetro.dat"</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)</span>
+<span class="n">swissmetro</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<div class="table-wrapper"><table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>GROUP</th>
+<th>SURVEY</th>
+<th>SP</th>
+<th>ID</th>
+<th>PURPOSE</th>
+<th>FIRST</th>
+<th>TICKET</th>
+<th>WHO</th>
+<th>LUGGAGE</th>
+<th>AGE</th>
+<th>MALE</th>
+<th>INCOME</th>
+<th>GA</th>
+<th>ORIGIN</th>
+<th>DEST</th>
+<th>TRAIN_AV</th>
+<th>CAR_AV</th>
+<th>SM_AV</th>
+<th>TRAIN_TT</th>
+<th>TRAIN_CO</th>
+<th>TRAIN_HE</th>
+<th>SM_TT</th>
+<th>SM_CO</th>
+<th>SM_HE</th>
+<th>SM_SEATS</th>
+<th>CAR_TT</th>
+<th>CAR_CO</th>
+<th>CHOICE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>2</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>3</td>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>112</td>
+<td>48</td>
+<td>120</td>
+<td>63</td>
+<td>52</td>
+<td>20</td>
+<td>0</td>
+<td>117</td>
+<td>65</td>
+<td>2</td>
+</tr>
+<tr>
+<th>1</th>
+<td>2</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>3</td>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>103</td>
+<td>48</td>
+<td>30</td>
+<td>60</td>
+<td>49</td>
+<td>10</td>
+<td>0</td>
+<td>117</td>
+<td>84</td>
+<td>2</td>
+</tr>
+<tr>
+<th>2</th>
+<td>2</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>3</td>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>130</td>
+<td>48</td>
+<td>60</td>
+<td>67</td>
+<td>58</td>
+<td>30</td>
+<td>0</td>
+<td>117</td>
+<td>52</td>
+<td>2</td>
+</tr>
+<tr>
+<th>3</th>
+<td>2</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>3</td>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>103</td>
+<td>40</td>
+<td>30</td>
+<td>63</td>
+<td>52</td>
+<td>20</td>
+<td>0</td>
+<td>72</td>
+<td>52</td>
+<td>2</td>
+</tr>
+<tr>
+<th>4</th>
+<td>2</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>3</td>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+<td>2</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>130</td>
+<td>36</td>
+<td>60</td>
+<td>63</td>
+<td>42</td>
+<td>20</td>
+<td>0</td>
+<td>90</td>
+<td>84</td>
+<td>2</td>
+</tr>
+</tbody>
+</table></div>
+</div></div>
+</div>
+<p>Looking at the data we can see that each row represents a choice. The full explanations of variables can be found here: <a class="reference external" href="https://transp-or.epfl.ch/pythonbiogeme/examples/swissmetro/swissmetro.pdf">https://transp-or.epfl.ch/pythonbiogeme/examples/swissmetro/swissmetro.pdf</a></p>
+</div>
+<div class="section" id="We-will-need-to-make-a-couple-of-changes-to-the-format-of-this-table-for-skpref-to-read-it-easier.">
+<h1>We will need to make a couple of changes to the format of this table for skpref to read it easier.<a class="headerlink" href="#We-will-need-to-make-a-couple-of-changes-to-the-format-of-this-table-for-skpref-to-read-it-easier." title="Permalink to this headline">¶</a></h1>
+<ol class="arabic simple">
+<li><p>In this table the availability of alternatives is marked by TRAIN_AV, CAR_AV, SM_AV which indicate with 1 if the alternative is available and 0 otherwise. We need to convert these to a column that contains a list of alternatives for each row.</p></li>
+<li><p>The choices are indicated by the CHOICE column, which contains 0 for unknown (we will dropping these), 1 for Train, 2 for Swissmetro and 3 for a Car usage. We need to name these explicitly. We could just create a list of alternatives called 1,2,3 in step 1 which would bypass step 2, however, we prefer the clarity of having the alternatives named explicitly.</p></li>
+</ol>
+</div>
+<div class="section" id="We-will-use-a-subset-of-the-available-features-to-make-the-skpref-demo-easier">
+<h1>We will use a subset of the available features to make the skpref demo easier<a class="headerlink" href="#We-will-use-a-subset-of-the-available-features-to-make-the-skpref-demo-easier" title="Permalink to this headline">¶</a></h1>
+<p>Under normal circumstances we would use one-hot encoding on a lot of the binary features before training a serious model, however, to make the demo simple, we will only use the travel time and cost features. Users can of course do whatever feature transformations they like before fitting a model. To build a classifier based on travel time and costs, we first need to split some columns from the swissmetro dataset into a secondary table.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train_vals</span> <span class="o">=</span> <span class="n">swissmetro</span><span class="p">[[</span><span class="s1">'TRAIN_TT'</span><span class="p">,</span> <span class="s1">'TRAIN_CO'</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">train_vals</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Travel Time'</span><span class="p">,</span> <span class="s1">'Cost'</span><span class="p">]</span>
+<span class="n">train_vals</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">train_vals</span><span class="p">[</span><span class="s1">'alternative'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'Train'</span>
+<span class="n">swissmetro_vals</span> <span class="o">=</span> <span class="n">swissmetro</span><span class="p">[[</span><span class="s1">'SM_TT'</span><span class="p">,</span> <span class="s1">'SM_CO'</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">swissmetro_vals</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Travel Time'</span><span class="p">,</span> <span class="s1">'Cost'</span><span class="p">]</span>
+<span class="n">swissmetro_vals</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">swissmetro_vals</span><span class="p">[</span><span class="s1">'alternative'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'Swiss Metro'</span>
+<span class="n">car_vals</span> <span class="o">=</span> <span class="n">swissmetro</span><span class="p">[[</span><span class="s1">'CAR_TT'</span><span class="p">,</span> <span class="s1">'CAR_CO'</span><span class="p">]]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">car_vals</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Travel Time'</span><span class="p">,</span> <span class="s1">'Cost'</span><span class="p">]</span>
+<span class="n">car_vals</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">car_vals</span><span class="p">[</span><span class="s1">'alternative'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'Car'</span>
+<span class="n">dummy_secondary_table</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">train_vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">swissmetro_vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">car_vals</span><span class="p">))</span>
+<span class="p">)</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="s1">'index'</span><span class="p">)</span>
+<span class="n">dummy_secondary_table</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">'index'</span><span class="p">:</span> <span class="s1">'merge_index'</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">dummy_secondary_table</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<div class="table-wrapper"><table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>merge_index</th>
+<th>Travel Time</th>
+<th>Cost</th>
+<th>alternative</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>0</td>
+<td>112</td>
+<td>48</td>
+<td>Train</td>
+</tr>
+<tr>
+<th>0</th>
+<td>0</td>
+<td>63</td>
+<td>52</td>
+<td>Swiss Metro</td>
+</tr>
+<tr>
+<th>0</th>
+<td>0</td>
+<td>117</td>
+<td>65</td>
+<td>Car</td>
+</tr>
+<tr>
+<th>1</th>
+<td>1</td>
+<td>103</td>
+<td>48</td>
+<td>Train</td>
+</tr>
+<tr>
+<th>1</th>
+<td>1</td>
+<td>60</td>
+<td>49</td>
+<td>Swiss Metro</td>
+</tr>
+</tbody>
+</table></div>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">binary_concats</span> <span class="o">=</span> <span class="p">(</span><span class="n">swissmetro</span><span class="o">.</span><span class="n">TRAIN_AV</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span> <span class="o">+</span>
+                  <span class="n">swissmetro</span><span class="o">.</span><span class="n">CAR_AV</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>  <span class="o">+</span>
+                  <span class="n">swissmetro</span><span class="o">.</span><span class="n">SM_AV</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+                 <span class="p">)</span>
+
+<span class="n">alts</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">binary_concats</span><span class="o">.</span><span class="n">values</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="s1">'111'</span><span class="p">:</span>
+        <span class="n">alts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">'Train'</span><span class="p">,</span> <span class="s1">'Car'</span><span class="p">,</span> <span class="s1">'Swiss Metro'</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="s1">'100'</span><span class="p">:</span>
+        <span class="n">alts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">'Train'</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="s1">'000'</span><span class="p">:</span>
+        <span class="n">alts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">'None'</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="s1">'010'</span><span class="p">:</span>
+        <span class="n">alts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">'Car'</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="s1">'001'</span><span class="p">:</span>
+        <span class="n">alts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">'Swiss Metro'</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="s1">'101'</span><span class="p">:</span>
+        <span class="n">alts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">'Train'</span><span class="p">,</span> <span class="s1">'Swiss Metro'</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="s1">'110'</span><span class="p">:</span>
+        <span class="n">alts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">'Train'</span><span class="p">,</span> <span class="s1">'Car'</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="s1">'011'</span><span class="p">:</span>
+        <span class="n">alts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">'Car'</span><span class="p">,</span> <span class="s1">'Swiss Metro'</span><span class="p">])</span>
+
+<span class="n">swissmetro</span><span class="p">[</span><span class="s1">'alternatives'</span><span class="p">]</span> <span class="o">=</span> <span class="n">alts</span>
+
+<span class="n">swissmetro</span><span class="p">[</span><span class="s1">'chosen'</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">swissmetro</span><span class="o">.</span><span class="n">CHOICE</span><span class="o">.</span><span class="n">values</span><span class="o">==</span><span class="mi">1</span><span class="p">,</span> <span class="s1">'Train'</span><span class="p">,</span>
+                       <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">swissmetro</span><span class="o">.</span><span class="n">CHOICE</span><span class="o">.</span><span class="n">values</span><span class="o">==</span><span class="mi">2</span><span class="p">,</span> <span class="s1">'Swiss Metro'</span><span class="p">,</span>
+                       <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">swissmetro</span><span class="o">.</span><span class="n">CHOICE</span><span class="o">.</span><span class="n">values</span><span class="o">==</span><span class="mi">3</span><span class="p">,</span> <span class="s1">'Car'</span><span class="p">,</span>
+                                <span class="s1">'unknown'</span><span class="p">)))</span>
+<span class="n">swissmetro</span> <span class="o">=</span> <span class="n">swissmetro</span><span class="p">[</span><span class="n">swissmetro</span><span class="o">.</span><span class="n">CHOICE</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">swissmetro</span> <span class="o">=</span> <span class="n">swissmetro</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()[[</span><span class="s1">'alternatives'</span><span class="p">,</span> <span class="s1">'chosen'</span><span class="p">,</span> <span class="s1">'index'</span><span class="p">]]</span>
+<span class="n">swissmetro</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">'index'</span><span class="p">:</span> <span class="s1">'merge_index'</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">swissmetro</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<div class="table-wrapper"><table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>alternatives</th>
+<th>chosen</th>
+<th>merge_index</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>[Train, Car, Swiss Metro]</td>
+<td>Swiss Metro</td>
+<td>0</td>
+</tr>
+<tr>
+<th>1</th>
+<td>[Train, Car, Swiss Metro]</td>
+<td>Swiss Metro</td>
+<td>1</td>
+</tr>
+<tr>
+<th>2</th>
+<td>[Train, Car, Swiss Metro]</td>
+<td>Swiss Metro</td>
+<td>2</td>
+</tr>
+<tr>
+<th>3</th>
+<td>[Train, Car, Swiss Metro]</td>
+<td>Swiss Metro</td>
+<td>3</td>
+</tr>
+<tr>
+<th>4</th>
+<td>[Train, Car, Swiss Metro]</td>
+<td>Swiss Metro</td>
+<td>4</td>
+</tr>
+</tbody>
+</table></div>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">swissmetro</span><span class="o">.</span><span class="n">alternatives</span><span class="o">.</span><span class="n">values</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([list(['Train', 'Car', 'Swiss Metro']),
+       list(['Train', 'Car', 'Swiss Metro']),
+       list(['Train', 'Car', 'Swiss Metro']), ...,
+       list(['Train', 'Car', 'Swiss Metro']),
+       list(['Train', 'Car', 'Swiss Metro']),
+       list(['Train', 'Car', 'Swiss Metro'])], dtype=object)
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train</span><span class="p">,</span> <span class="n">test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">swissmetro</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="n">swiss_metro_train</span> <span class="o">=</span> <span class="n">ChoiceTask</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="s1">'alternatives'</span><span class="p">,</span> <span class="s1">'chosen'</span><span class="p">,</span>
+                               <span class="n">features_to_use</span><span class="o">=</span><span class="p">[</span><span class="s1">'Travel Time'</span><span class="p">,</span> <span class="s1">'Cost'</span><span class="p">],</span>
+                               <span class="n">secondary_table</span><span class="o">=</span><span class="n">dummy_secondary_table</span><span class="p">,</span>
+                               <span class="n">secondary_to_primary_link</span><span class="o">=</span><span class="p">{</span>
+                                   <span class="s1">'merge_index'</span><span class="p">:</span> <span class="s1">'merge_index'</span><span class="p">,</span>
+                                   <span class="s1">'alternative'</span><span class="p">:</span> <span class="s1">'alternatives'</span>
+                               <span class="p">}</span>
+                              <span class="p">)</span>
+
+<span class="n">swiss_metro_test</span> <span class="o">=</span> <span class="n">ChoiceTask</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="s1">'alternatives'</span><span class="p">,</span> <span class="s1">'chosen'</span><span class="p">,</span>
+                              <span class="n">features_to_use</span><span class="o">=</span><span class="p">[</span><span class="s1">'Travel Time'</span><span class="p">,</span> <span class="s1">'Cost'</span><span class="p">],</span>
+                              <span class="n">secondary_table</span><span class="o">=</span><span class="n">dummy_secondary_table</span><span class="p">,</span>
+                              <span class="n">secondary_to_primary_link</span><span class="o">=</span><span class="p">{</span>
+                                   <span class="s1">'merge_index'</span><span class="p">:</span> <span class="s1">'merge_index'</span><span class="p">,</span>
+                                   <span class="s1">'alternative'</span><span class="p">:</span> <span class="s1">'alternatives'</span>
+                               <span class="p">}</span>
+                             <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_log_red</span> <span class="o">=</span> <span class="n">ClassificationReducer</span><span class="p">(</span><span class="n">LogisticRegression</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s1">'lbfgs'</span><span class="p">))</span>
+<span class="n">my_log_red</span><span class="o">.</span><span class="n">fit_task</span><span class="p">(</span><span class="n">swiss_metro_train</span><span class="p">)</span>
+<span class="n">preds</span> <span class="o">=</span> <span class="n">my_log_red</span><span class="o">.</span><span class="n">predict_proba_task</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="p">,</span>
+                                      <span class="p">[</span><span class="s1">'Swiss Metro'</span><span class="p">,</span><span class="s1">'Train'</span><span class="p">,</span> <span class="s1">'Car'</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">preds</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{'Swiss Metro': array([0.4873467 , 0.55661961, 0.39863582, ..., 0.46693185, 0.3517729 ,
+        0.51405707]),
+ 'Train': array([0.30457664, 0.44643913, 0.16638042, ..., 0.35997311, 0.29034294,
+        0.2626234 ]),
+ 'Car': array([0.33291693, 0.        , 0.19868472, ..., 0.45209947, 0.36246787,
+        0.25068403])}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">outocme_preds</span> <span class="o">=</span> <span class="n">my_log_red</span><span class="o">.</span><span class="n">predict_task</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">outocme_preds</span><span class="o">.</span><span class="n">top_input_data</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">outocme_preds</span><span class="o">.</span><span class="n">boot_input_data</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+['Swiss Metro' 'Swiss Metro' 'Swiss Metro' 'Swiss Metro' 'Swiss Metro']
+[array(['Car', 'Train'], dtype='&lt;U11') array(['Train'], dtype='&lt;U11')
+ array(['Car', 'Train'], dtype='&lt;U11')
+ array(['Car', 'Train'], dtype='&lt;U11')
+ array(['Car', 'Train'], dtype='&lt;U11')]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fit a Bradley Terry model with no features</span>
+<span class="n">swiss_metro_train_BT</span> <span class="o">=</span> <span class="n">ChoiceTask</span><span class="p">(</span><span class="n">train</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">'merge_index'</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                                  <span class="s1">'alternatives'</span><span class="p">,</span>
+                                  <span class="s1">'chosen'</span><span class="p">,</span> <span class="n">features_to_use</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="n">swiss_metro_test_BT</span> <span class="o">=</span> <span class="n">ChoiceTask</span><span class="p">(</span><span class="n">test</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">'merge_index'</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                                 <span class="s1">'alternatives'</span><span class="p">,</span>
+                                 <span class="s1">'chosen'</span><span class="p">,</span> <span class="n">features_to_use</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_BT_red</span> <span class="o">=</span> <span class="n">BradleyTerry</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">'BFGS'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+<span class="n">my_BT_red</span><span class="o">.</span><span class="n">fit_task</span><span class="p">(</span><span class="n">swiss_metro_train_BT</span><span class="p">)</span>
+<span class="n">preds</span> <span class="o">=</span> <span class="n">my_BT_red</span><span class="o">.</span><span class="n">predict_proba_task</span><span class="p">(</span><span class="n">swiss_metro_test_BT</span><span class="p">,</span>
+                                     <span class="p">[</span><span class="s1">'Swiss Metro'</span><span class="p">,</span><span class="s1">'Train'</span><span class="p">,</span> <span class="s1">'Car'</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">preds</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{'Swiss Metro': array([0.54530381, 0.8344241 , 0.54530381, ..., 0.54530381, 0.54530381,
+        0.54530381]),
+ 'Train': array([0.10820537, 0.1655759 , 0.10820537, ..., 0.10820537, 0.10820537,
+        0.10820537]),
+ 'Car': array([0.34649083, 0.        , 0.34649083, ..., 0.34649083, 0.34649083,
+        0.34649083])}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">choice_preds</span> <span class="o">=</span> <span class="n">my_BT_red</span><span class="o">.</span><span class="n">predict_task</span><span class="p">(</span><span class="n">swiss_metro_test_BT</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">choice_preds</span><span class="o">.</span><span class="n">top_input_data</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">choice_preds</span><span class="o">.</span><span class="n">boot_input_data</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+['Swiss Metro' 'Swiss Metro' 'Swiss Metro' 'Swiss Metro' 'Swiss Metro']
+[array(['Car', 'Train'], dtype='&lt;U11') array(['Train'], dtype='&lt;U11')
+ array(['Car', 'Train'], dtype='&lt;U11')
+ array(['Car', 'Train'], dtype='&lt;U11')
+ array(['Car', 'Train'], dtype='&lt;U11')]
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fit a Bradley Terry model with features</span>
+<span class="c1"># Reducing training set because on my PC this gives a memory error</span>
+<span class="n">swiss_metro_train_BT_feats</span> <span class="o">=</span> <span class="n">ChoiceTask</span><span class="p">(</span>
+    <span class="n">train</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="mf">0.5</span><span class="p">),</span> <span class="s1">'alternatives'</span><span class="p">,</span> <span class="s1">'chosen'</span><span class="p">,</span>
+    <span class="n">secondary_table</span><span class="o">=</span><span class="n">dummy_secondary_table</span><span class="p">,</span>
+    <span class="n">secondary_to_primary_link</span><span class="o">=</span><span class="p">{</span>
+        <span class="s1">'merge_index'</span><span class="p">:</span> <span class="s1">'merge_index'</span><span class="p">,</span>
+        <span class="s1">'alternative'</span><span class="p">:</span> <span class="s1">'alternatives'</span>
+    <span class="p">},</span>
+    <span class="n">features_to_use</span><span class="o">=</span><span class="p">[</span><span class="s1">'Travel Time'</span><span class="p">,</span> <span class="s1">'Cost'</span><span class="p">])</span>
+
+<span class="n">swiss_metro_test</span> <span class="o">=</span> <span class="n">ChoiceTask</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="s1">'alternatives'</span><span class="p">,</span> <span class="s1">'chosen'</span><span class="p">,</span>
+                              <span class="n">features_to_use</span><span class="o">=</span><span class="p">[</span><span class="s1">'Travel Time'</span><span class="p">,</span> <span class="s1">'Cost'</span><span class="p">],</span>
+                              <span class="n">secondary_table</span><span class="o">=</span><span class="n">dummy_secondary_table</span><span class="p">,</span>
+                              <span class="n">secondary_to_primary_link</span><span class="o">=</span><span class="p">{</span>
+                                   <span class="s1">'merge_index'</span><span class="p">:</span> <span class="s1">'merge_index'</span><span class="p">,</span>
+                                   <span class="s1">'alternative'</span><span class="p">:</span> <span class="s1">'alternatives'</span>
+                               <span class="p">}</span>
+                             <span class="p">)</span>
+
+<span class="n">my_BT_red_feats</span> <span class="o">=</span> <span class="n">BradleyTerry</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">'BFGS'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+<span class="n">my_BT_red_feats</span><span class="o">.</span><span class="n">fit_task</span><span class="p">(</span><span class="n">swiss_metro_train_BT_feats</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">swiss_metro_test</span> <span class="o">=</span> <span class="n">ChoiceTask</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="s1">'alternatives'</span><span class="p">,</span> <span class="s1">'chosen'</span><span class="p">,</span>
+                              <span class="n">features_to_use</span><span class="o">=</span><span class="p">[</span><span class="s1">'Travel Time'</span><span class="p">,</span> <span class="s1">'Cost'</span><span class="p">],</span>
+                              <span class="n">secondary_table</span><span class="o">=</span><span class="n">dummy_secondary_table</span><span class="p">,</span>
+                              <span class="n">secondary_to_primary_link</span><span class="o">=</span><span class="p">{</span>
+                                   <span class="s1">'merge_index'</span><span class="p">:</span> <span class="s1">'merge_index'</span><span class="p">,</span>
+                                   <span class="s1">'alternative'</span><span class="p">:</span> <span class="s1">'alternatives'</span>
+                               <span class="p">}</span>
+                             <span class="p">)</span>
+<span class="n">preds</span> <span class="o">=</span> <span class="n">my_BT_red_feats</span><span class="o">.</span><span class="n">predict_proba_task</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="p">,</span>
+                                      <span class="p">[</span><span class="s1">'Swiss Metro'</span><span class="p">,</span><span class="s1">'Train'</span><span class="p">,</span> <span class="s1">'Car'</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_BT_red_feats</span><span class="o">.</span><span class="n">predict_task</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="p">)</span><span class="o">.</span><span class="n">top_input_data</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array(['Swiss Metro', 'Swiss Metro', 'Swiss Metro', ..., 'Car', 'Car',
+       'Swiss Metro'], dtype=object)
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">preds</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{'Swiss Metro': array([0.56275278, 0.77173434, 0.67096487, ..., 0.40555301, 0.37622761,
+        0.6920563 ]),
+ 'Train': array([0.1116056 , 0.22826566, 0.07890942, ..., 0.11959485, 0.13415101,
+        0.09350961]),
+ 'Car': array([0.32564162, 0.        , 0.25012571, ..., 0.47485214, 0.48962138,
+        0.21443408])}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ind_trans_preds</span> <span class="o">=</span> <span class="n">my_BT_red_feats</span><span class="o">.</span><span class="n">predict_proba_task</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="p">,</span>
+                                   <span class="p">[</span><span class="s1">'Swiss Metro'</span><span class="p">,</span><span class="s1">'Train'</span><span class="p">,</span> <span class="s1">'Car'</span><span class="p">],</span>
+                                   <span class="n">aggregation_method</span><span class="o">=</span><span class="s1">'independent transitive'</span><span class="p">)</span>
+<span class="n">ind_trans_preds</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{'Swiss Metro': array([0.62643345, 0.77173434, 0.73777348, ..., 0.4273645 , 0.39028417,
+        0.77002546]),
+ 'Train': array([0.05005995, 0.22826566, 0.02856546, ..., 0.05504243, 0.06887847,
+        0.04138344]),
+ 'Car': array([0.3235066 , 0.        , 0.23366106, ..., 0.51759307, 0.54083736,
+        0.18859109])}
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">preds_outcome_ind_trans</span> <span class="o">=</span> <span class="n">my_BT_red_feats</span><span class="o">.</span><span class="n">predict_task</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="p">,</span>
+                             <span class="n">aggregation_method</span><span class="o">=</span><span class="s1">'independent transitive'</span><span class="p">)</span>
+<span class="n">preds_outcome_Luce</span> <span class="o">=</span> <span class="n">my_BT_red_feats</span><span class="o">.</span><span class="n">predict_task</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dummy_secondary_table</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">'alternative'</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<div class="table-wrapper"><table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>merge_index</th>
+<th>Travel Time</th>
+<th>Cost</th>
+</tr>
+<tr>
+<th>alternative</th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>Car</th>
+<td>5363.5</td>
+<td>123.795209</td>
+<td>78.742077</td>
+</tr>
+<tr>
+<th>Swiss Metro</th>
+<td>5363.5</td>
+<td>87.466350</td>
+<td>670.340697</td>
+</tr>
+<tr>
+<th>Train</th>
+<td>5363.5</td>
+<td>166.626025</td>
+<td>514.335477</td>
+</tr>
+</tbody>
+</table></div>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_BT_red_feats</span><span class="o">.</span><span class="n">bt_with_feats</span><span class="o">.</span><span class="n">print_summaries</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+
+
+Number of Parameters                                                      5
+Number of Observations                                                 8883
+Null Log-Likelihood                                            -6157.226405
+Fitted Log-Likelihood                                          -4634.988551
+Rho-Squared                                                        0.247228
+Rho-Bar-Squared                                                    0.246416
+Estimation Message        Desired error not necessarily achieved due to ...
+dtype: object
+==============================
+             parameters     std_err    t_stats       p_values  robust_std_err  \
+Cost           0.000274    0.000031   8.724925   2.663564e-18        0.000034
+Travel Time   -0.011972    0.000550 -21.787243  3.065593e-105        0.000938
+Car            0.380587  129.099445   0.002948   9.976478e-01             NaN
+Swiss Metro    0.154561  129.099446   0.001197   9.990448e-01             NaN
+Train         -0.535147  129.099446  -0.004145   9.966926e-01             NaN
+
+             robust_t_stats  robust_p_values
+Cost               8.160524     3.335754e-16
+Travel Time      -12.762452     2.657027e-37
+Car                     NaN              NaN
+Swiss Metro             NaN              NaN
+Train                   NaN              NaN
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The F1 score of the Luce aggregation was </span><span class="se">\</span>
+<span class="si">{</span><span class="n">f1_score</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="o">.</span><span class="n">subset_vec</span><span class="p">,</span> <span class="n">preds_outcome_Luce</span><span class="p">)</span><span class="si">:</span><span class="s2"> .3</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The F1 score of the generic aggregation was </span><span class="se">\</span>
+<span class="si">{</span><span class="n">f1_score</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="o">.</span><span class="n">subset_vec</span><span class="p">,</span> <span class="n">preds_outcome_ind_trans</span><span class="p">)</span><span class="si">:</span><span class="s2">.3</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The F1 score of the Luce aggregation was  0.595
+The F1 score of the generic aggregation was 0.595
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">random_probs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">'Swiss Metro'</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">),</span>
+    <span class="s1">'Train'</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">),</span>
+    <span class="s1">'Car'</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">test</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+<span class="p">}</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The log loss for each alternative in the Luce aggregation was </span><span class="se">\</span>
+<span class="si">{</span><span class="n">log_loss</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="o">.</span><span class="n">subset_vec</span><span class="p">,</span> <span class="n">preds</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The log loss for each alternative in the generic aggregation was </span><span class="se">\</span>
+<span class="si">{</span><span class="n">log_loss</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="o">.</span><span class="n">subset_vec</span><span class="p">,</span> <span class="n">ind_trans_preds</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The log loss for each alternative assigning random probability was </span><span class="se">\</span>
+<span class="si">{</span><span class="n">log_loss</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="o">.</span><span class="n">subset_vec</span><span class="p">,</span> <span class="n">random_probs</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The log loss for each alternative in the Luce aggregation was {'Swiss Metro_log_loss': 0.7023664871593164, 'Train_log_loss': 0.383649993519745, 'Car_log_loss': 0.5174650954050872}
+The log loss for each alternative in the generic aggregation was {'Swiss Metro_log_loss': 0.711234682056963, 'Train_log_loss': 0.39622633781562233, 'Car_log_loss': 0.5207606018292977}
+The log loss for each alternative assigning random probability was {'Swiss Metro_log_loss': 0.7973001747306709, 'Train_log_loss': 0.5037471710233804, 'Car_log_loss': 0.6084951591303872}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The t-test for H0: Luce aggregation = Generic aggregation </span><span class="se">\</span>
+<span class="si">{</span><span class="n">log_loss_compare_with_t_test</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="o">.</span><span class="n">subset_vec</span><span class="p">,</span> <span class="n">preds</span><span class="p">,</span> <span class="n">ind_trans_preds</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The t-test for H0: Generic aggregation = random probability </span><span class="se">\</span>
+<span class="si">{</span><span class="n">log_loss_compare_with_t_test</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="o">.</span><span class="n">subset_vec</span><span class="p">,</span> <span class="n">ind_trans_preds</span><span class="p">,</span> <span class="n">random_probs</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+The t-test for H0: Luce aggregation = Generic aggregation {'Swiss Metro': Ttest_relResult(statistic=2.3844799687642295, pvalue=0.01727655183381647), 'Train': Ttest_relResult(statistic=1.8876865507212632, pvalue=0.059338206864608084), 'Car': Ttest_relResult(statistic=1.4551854443597005, pvalue=0.14591095911650695)}
+The t-test for H0: Generic aggregation = random probability {'Swiss Metro': Ttest_relResult(statistic=3.505669485303979, pvalue=0.00047431133111994943), 'Train': Ttest_relResult(statistic=5.593686571881314, pvalue=2.821407818283642e-08), 'Car': Ttest_relResult(statistic=5.825562533722975, pvalue=7.52159149793693e-09)}
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+../..\skpref\metrics\_classification.py:190: RuntimeWarning: divide by zero encountered in log
+  logged = np.log(predicted1[_alternative])
+../..\skpref\metrics\_classification.py:194: RuntimeWarning: invalid value encountered in multiply
+  np.nan_to_num(logged * binarized_outcome) +
+../..\skpref\metrics\_classification.py:197: RuntimeWarning: divide by zero encountered in log
+  logged2 = np.log(predicted2[_alternative])
+../..\skpref\metrics\_classification.py:201: RuntimeWarning: invalid value encountered in multiply
+  np.nan_to_num(logged2 * binarized_outcome) +
+</pre></div></div>
+</div>
+</div>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          <a class="prev-page" href="example_using_sports_data.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Bradley Terry example notebook</div>
+                
+              </div>
+            </a>
+        </div>
+
+        <div class="related-information">
+              Copyright &#169; 2022, István Papp, Franz Király, Ioanna Manolopoulou, Karlson Pfannschmidt, Pritha Gupta |
+          Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+          <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            | <a class="muted-link" href="_sources/swissmetro_discrete_choice.ipynb.txt"
+               rel="nofollow">
+              Show Source
+            </a>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            Contents
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">We will demonstrate skpref on discrete choice data</a></li>
+<li><a class="reference internal" href="#We-will-need-to-make-a-couple-of-changes-to-the-format-of-this-table-for-skpref-to-read-it-easier.">We will need to make a couple of changes to the format of this table for skpref to read it easier.</a></li>
+<li><a class="reference internal" href="#We-will-use-a-subset-of-the-available-features-to-make-the-skpref-demo-easier">We will use a subset of the available features to make the skpref demo easier</a></li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    </body>
+</html>

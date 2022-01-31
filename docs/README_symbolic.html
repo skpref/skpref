@@ -1,0 +1,793 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Module documentation" href="module_documentation.html" /><link rel="prev" title="Welcome to skpref’s documentation!" href="index.html" />
+
+    <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
+        <title>Welcome to skpref - skpref 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=fade93df149f7c5fedb3ff897f799dc7d283b420" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  body[data-theme="dark"] {
+    --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+  }
+  @media (prefers-color-scheme: dark) {
+    body:not([data-theme="light"]) {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+  }
+</style></head>
+  <body>
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" />
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="10" y1="12" x2="20" y2="12" />
+      <line x1="6" y1="18" x2="20" y2="18" />
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">skpref 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">skpref 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Welcome to skpref</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#models-in-the-package">Models in the package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#novelties-in-skpref-to-the-scikit-learn-user">Novelties in skpref to the scikit-learn user</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#types-of-relations-that-can-be-modelled-in-skpref-11-01-2022">Types of relations that can be modelled in skpref (11/01/2022)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="module_documentation.html">Module documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_using_sports_data.html">Bradley Terry example notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_using_sports_data.html#Reading-in-the-data">Reading in the data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_using_sports_data.html#Setting-up-the-tasks">Setting up the tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_using_sports_data.html#Let’s-fit-a-reduction-to-logistic-regression-first">Let’s fit a reduction to logistic regression first</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_using_sports_data.html#Let’s-fit-a-reduction-to-logistic-regression-with-the-salary-covariate">Let’s fit a reduction to logistic regression with the salary covariate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_using_sports_data.html#Bradley-Terry-model-with-salary-covariate">Bradley Terry model with salary covariate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="example_using_sports_data.html#Example-using-GridSearchCV()">Example using GridSearchCV()</a></li>
+</ul>
+
+</div>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <p><img alt="Build Status" src="https://travis-ci.org/skpref/skpref.svg?branch=master"/> <a class="reference external" href="https://coveralls.io/github/skpref/skpref?branch=master"><img alt="Coverage" src="https://coveralls.io/repos/github/skpref/skpref/badge.svg?branch=master&amp;service=github"/></a></p>
+<div class="section" id="welcome-to-skpref">
+<h1>Welcome to skpref<a class="headerlink" href="#welcome-to-skpref" title="Permalink to this headline">¶</a></h1>
+<p>Skpref is a python package that aims to create an infrastructure for supervsied preference models. The long-term vision
+of this repository is that it becomes a comprehensive supervised machine learning interface for practitioners, that has
+the familiar interface and many developer principles of the popular package scikit-learn, but designed in a way to better
+suit preference models.</p>
+<p>A preference contains the following components:</p>
+<ul class="simple">
+<li><p>A set of alternatives. This can be anything ranging from, products in a store, options of transportation, homes to rent and many more.</p></li>
+<li><p>A question over the set of alternatives, which can be: “Which products would you rather buy from this list of products?”, “Which house would you rather rent”, “Would you take a cab or a bus?”, “Which team has won the match?”, “Which box is the heaviest?” or “How would you rank these three things?”.</p></li>
+<li><p>A relation expressed over the set of alternatives for a given question. This can have many forms for example to the question “Which products would you rather buy?” the relation can be a choice in the form of a selection of a subset of the alternatives. Or to the question “Which Sushi was the best tasting?” a relation expressed could be fully ranked order of all the Sushis that were tried from best to worst. Currently skpref has been developed with the following applications in mind: pairwise comparisons (choose one of two, or tie, e.g. football match results), discrete choices (choose one of many, e.g. choice of method of transportation), subset choices (choose many from many, e.g. shopping in at a grocery store). We believe it could be expandable to partial orders (ranking with ties e.g. start rating system) and full orders (full ranks).</p></li>
+<li><p>A deciding process or choice maker. Someone, something or a process that is presented the set of alternatives and generates a relation over this set of alternatives based on the question asked over the set of alternatives.</p></li>
+</ul>
+<p>skpref is designed to hold supervised  learning models where the ground truth is the relation expressed over the set of
+alternatives. In its current form, it is a demonstration of the architectural ideas that in our opinion would facilitate
+these kinds of models:</p>
+<ul class="simple">
+<li><p>The user has the ability to express relations of: pairwise comparison, discrete choice and subset choice. This is done via the SubsetPosetVector which is explained in the next section. The interface was designed to be expanded to hold partial and full orders (ranks) also, and we invite the community to do so.</p></li>
+<li><p>It contains architectural demos of how the package could be interfaced with the scikit-learn infrastructure, such as GridSearchCV</p></li>
+<li><p>It is designed to be used with a relational data set up thereby inviting researchers to figure out efficiency gains in numerical optimisation that the relational set-up may hold. To do this there’s an additional type of object which would be new to previous scikit-learn users, which is the Task object.</p></li>
+<li><p>It has been designed in a way to facilitate reduction and aggregation a popular technique in the field.</p></li>
+</ul>
+<div class="section" id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline">¶</a></h2>
+<p>Although the current state of the package is a humble demo of the original conceptualisation. Even this could not have
+been possible without the tireless guidance and brilliant ideas of Dr. Franz Kiraly and Dr. Ioanna Manolopoulou and the
+energetic brainstorming sessions with Karlson Pfannschmidt and Pritha Gupta.</p>
+</div>
+<div class="section" id="future-contributions">
+<h2>Future contributions<a class="headerlink" href="#future-contributions" title="Permalink to this headline">¶</a></h2>
+<p>We welcome anyone who would like to continue working on this concept. If you would like to contribute to this package
+please reach out to Istvan Papp at <a class="reference external" href="mailto:istvan.papp.16%40ucl.ac.uk">istvan<span>.</span>papp<span>.</span>16<span>@</span>ucl<span>.</span>ac<span>.</span>uk</a> or to Dr. Ioanna Manolopoulou at <a class="reference external" href="mailto:i.manolopoulou%40ucl.ac.uk">i<span>.</span>manolopoulou<span>@</span>ucl<span>.</span>ac<span>.</span>uk</a>.</p>
+</div>
+</div>
+<div class="section" id="models-in-the-package">
+<h1>Models in the package<a class="headerlink" href="#models-in-the-package" title="Permalink to this headline">¶</a></h1>
+<p>Currently skpref contains only implementations of the Bradley-Terry model for pairwise comparisons
+which can be augmented with covariates. It achieves this by interfacing with the <a class="reference external" href="https://github.com/timothyb0912/pylogit">pylogit</a> and <a class="reference external" href="https://github.com/lucasmaystre/choix">choix</a> packages.
+It is also possible to reduce tasks to classification tasks and use the interface to fir any classifier available in
+scikit-learn.</p>
+<div class="section" id="a-whishlist-of-models">
+<h2>A whishlist of models<a class="headerlink" href="#a-whishlist-of-models" title="Permalink to this headline">¶</a></h2>
+<p>We welcome anyone who would like to contribute to the package by interfacing an existing solution for or developing a
+solution for the following models (and more):</p>
+<ul class="simple">
+<li><p>Thurstone</p></li>
+<li><p>Plackett-Luce</p></li>
+<li><p>Luce (can be achieved with further integration with pylogit)</p></li>
+<li><p>Interface with cs-ranking specifically the FATE and FETA models</p></li>
+<li><p>Coherency Driven model</p></li>
+<li><p>Nested Logit models (can be achieved with further integration with pylogit)</p></li>
+<li><p>Elimination by Aspects</p></li>
+<li><p>Support Vector Machines for choice models</p></li>
+<li><p>ListNet</p></li>
+<li><p>Bradley-Terry abd Plackett-Luce trees</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="novelties-in-skpref-to-the-scikit-learn-user">
+<h1>Novelties in skpref to the scikit-learn user<a class="headerlink" href="#novelties-in-skpref-to-the-scikit-learn-user" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="the-task-based-interface">
+<h2>The task based interface<a class="headerlink" href="#the-task-based-interface" title="Permalink to this headline">¶</a></h2>
+<p>The main object with which end users will interact and the one that is the furthest step away in intuition from the scikit-learn
+set-up is the Task object. The Task object’s main purpose is to containerise key aspects of the data that is
+being modelled, such as, what are the dataframes that will be used, what is the ground truth, what is the set of alternatives
+for each observation and how these all link together.</p>
+<p>Tasks are specific to relations expressed, therefore, at the moment skpref has a demo of a PairwiseComparisonTask,
+a ChoiceTask and a ClassificationReducer. Between these the interface covers Pairwise Comparisons, Discrete Choice and reductions
+from both of those to classification problems, and also a reduction from Discrete Choice to Pairwise Comparisons.</p>
+<p>We justify asking end users to learn how to use the task based interface with the following:</p>
+<ul class="simple">
+<li><p>It saves time and energy compared to having to merge normalised tables together into denormalised tables. In the future,
+we believe it should be possible to create computational efficiencies from using normalised tables, so we designed an
+an interface that allows for this already.</p></li>
+<li><p>It allows reduction and aggregation to happen in the back-end of the code, rather than putting the onus on the user to
+create data transformations that may not be trivial.</p></li>
+</ul>
+<p>Suppose you have two tables that you would like to use for analysis, one contains information about choices that people
+made:</p>
+<div class="table-wrapper"><table class="docutils align-default">
+<colgroup>
+<col style="width: 35%"/>
+<col style="width: 65%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Choices</p></th>
+<th class="head"><p>Alternatives</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>‘A’</p></td>
+<td><p>[‘A’, ‘B’]</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘C’</p></td>
+<td><p>[‘A’, ‘B’, ‘C’]</p></td>
+</tr>
+<tr class="row-even"><td><p>‘B’</p></td>
+<td><p>[‘A’, ‘B’, ‘C’]</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘A’</p></td>
+<td><p>[‘A’, ‘B’, ‘C’]</p></td>
+</tr>
+<tr class="row-even"><td><p>‘B’</p></td>
+<td><p>[‘A’, ‘B’]</p></td>
+</tr>
+</tbody>
+</table></div>
+<p>and the other features that describe each alternative:</p>
+<div class="table-wrapper"><table class="docutils align-default">
+<colgroup>
+<col style="width: 28%"/>
+<col style="width: 24%"/>
+<col style="width: 24%"/>
+<col style="width: 24%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Alternative</p></th>
+<th class="head"><p>Feature 1</p></th>
+<th class="head"><p>Feature 2</p></th>
+<th class="head"><p>Feature 3</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>‘A’</p></td>
+<td><p>9</p></td>
+<td><p>5</p></td>
+<td><p>9</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘B’</p></td>
+<td><p>3</p></td>
+<td><p>4</p></td>
+<td><p>6</p></td>
+</tr>
+<tr class="row-even"><td><p>‘C’</p></td>
+<td><p>7</p></td>
+<td><p>4</p></td>
+<td><p>10</p></td>
+</tr>
+</tbody>
+</table></div>
+<p>Without the task based set up a user would have to combine the choice table with the alternative table to be able to use
+the features describing the alternatives in a model. However, apart from this being a repetitive task, it might even be
+non-trivial in difficulty and different models and packages might deal with different ways of combining this data. The
+task-based set up allows flexibility on handling the data differently for different models.</p>
+<p>To allow for this in skpref all model objects have a train_task and a predict_task function (and a predict_proba_task
+function, where appropriate) to take the burden off from the user of having to create these joint tables.</p>
+<p>A task for this data would be set up in the following way:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skpref.task</span> <span class="kn">import</span> <span class="n">SomeTypeOfTask</span>
+<span class="kn">from</span> <span class="nn">skpref.model_type_folder</span> <span class="kn">import</span> <span class="n">some_type_of_model</span>
+
+<span class="n">example_train_task</span> <span class="o">=</span> <span class="n">SomeTypeOfTask</span><span class="p">(</span>
+  <span class="n">primary_table</span><span class="o">=</span><span class="n">train_example_choice_table</span><span class="p">,</span>
+  <span class="n">primary_table_alternatives_names</span><span class="o">=</span><span class="s1">'Alternatives'</span><span class="p">,</span>
+  <span class="n">primary_table_target_name</span> <span class="o">=</span><span class="s1">'Choices'</span><span class="p">,</span>
+  <span class="n">features_to_use</span><span class="o">=</span><span class="p">[</span><span class="s1">'Feature 1'</span><span class="p">,</span> <span class="s1">'Feature 2'</span><span class="p">,</span> <span class="s1">'Feature 3'</span><span class="p">],</span>
+  <span class="n">secondary_table</span><span class="o">=</span><span class="n">example_alternative_level_feature_table</span>
+  <span class="n">secondary_to_primary_link</span><span class="o">=</span><span class="p">{</span><span class="s1">'Alternative'</span><span class="p">:</span> <span class="s1">'Alternatives'</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">example_test_task</span> <span class="o">=</span> <span class="n">SomeTypeOfTask</span><span class="p">(</span>
+  <span class="n">primary_table</span><span class="o">=</span><span class="n">test_example_choice_table</span><span class="p">,</span>
+  <span class="n">primary_table_alternatives_names</span><span class="o">=</span><span class="s1">'Alternatives'</span><span class="p">,</span>
+  <span class="n">features_to_use</span><span class="o">=</span><span class="p">[</span><span class="s1">'Feature 1'</span><span class="p">,</span> <span class="s1">'Feature 2'</span><span class="p">,</span> <span class="s1">'Feature 3'</span><span class="p">],</span>
+  <span class="n">secondary_table</span><span class="o">=</span><span class="n">example_alternative_level_feature_table</span>
+  <span class="n">secondary_to_primary_link</span><span class="o">=</span><span class="p">{</span><span class="s1">'Alternative'</span><span class="p">:</span> <span class="s1">'Alternatives'</span><span class="p">}</span>
+<span class="p">)</span>
+
+<span class="n">my_initalised_model</span> <span class="o">=</span> <span class="n">some_type_of_model</span><span class="p">()</span>
+<span class="n">my_initialised_model</span><span class="o">.</span><span class="n">fit_task</span><span class="p">(</span><span class="n">example_train_task</span><span class="p">)</span>
+<span class="n">my_outcome_predictions</span> <span class="o">=</span> <span class="n">my_initialised_model</span><span class="o">.</span><span class="n">predict_task</span><span class="p">(</span><span class="n">example_test_task</span><span class="p">)</span>
+<span class="n">my_probabilistic_predictions</span> <span class="o">=</span> <span class="n">my_initialised_model</span><span class="o">.</span><span class="n">predict_proba_task</span><span class="p">(</span><span class="n">example_test_task</span><span class="p">,</span> <span class="n">outcome</span><span class="o">=</span><span class="p">[</span><span class="s1">'A'</span><span class="p">,</span> <span class="s1">'B'</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Below we will show examples of pairwise comparisons and discrete choices and show how the task based interface can be used
+for setting up the models.</p>
+<div class="section" id="distinction-between-decision-level-covariates-and-alternnative-level-covariates">
+<h3>Distinction between decision level covariates and alternnative level covariates<a class="headerlink" href="#distinction-between-decision-level-covariates-and-alternnative-level-covariates" title="Permalink to this headline">¶</a></h3>
+<p>In the module documentation for skpref we often refer to decision level data and alternative level data.</p>
+<ul class="simple">
+<li><p><em>Decision level data</em>, include the set of alternatives presented to a decision maker, and what relations they have
+expressed over these alternatives, there may be other recordings that describe the circumstances of the decision, such
+as the temperature on a day someone went shopping. This generally contains information that varies by decision.
+Note that this is not data about the decision makers / processes, but rather data that describes the circumstances that
+are unique to each decision, whereas a decision maker / process can make several decisions under different circumstances,
+for example, shopping on different days.</p></li>
+</ul>
+<p>An example of decision level data is the table below:</p>
+<div class="table-wrapper"><table class="docutils align-default">
+<colgroup>
+<col style="width: 19%"/>
+<col style="width: 19%"/>
+<col style="width: 23%"/>
+<col style="width: 38%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="4"><p>Decision Level data</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>team 1</p></td>
+<td><p>team 2</p></td>
+<td><p>team 1 won</p></td>
+<td><p>location</p></td>
+</tr>
+<tr class="row-odd"><td><p>Viginia</p></td>
+<td><p>Purdue</p></td>
+<td><p>1</p></td>
+<td><p>Richmond, Virginia</p></td>
+</tr>
+<tr class="row-even"><td><p>Kentucky</p></td>
+<td><p>Auburn</p></td>
+<td><p>0</p></td>
+<td><p>Dallas, Texas</p></td>
+</tr>
+<tr class="row-odd"><td><p>Duke</p></td>
+<td><p>MI State</p></td>
+<td><p>0</p></td>
+<td><p>New York, New York</p></td>
+</tr>
+</tbody>
+</table></div>
+<ul class="simple">
+<li><p><em>Alternative level data</em>, are recordings that describe the alternatives, such as the price of a product.
+This generally contains information that varies by alternative, but for the same alternative would be constant across
+different decisions, for example, different shoppers facing the same price for the same product.</p></li>
+</ul>
+<div class="table-wrapper"><table class="docutils align-default">
+<colgroup>
+<col style="width: 20%"/>
+<col style="width: 80%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head" colspan="2"><p>Alternative Level data</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>team</p></td>
+<td><p>mean points scored in previous season</p></td>
+</tr>
+<tr class="row-odd"><td><p>Viginia</p></td>
+<td><p>80</p></td>
+</tr>
+<tr class="row-even"><td><p>Kentucky</p></td>
+<td><p>75</p></td>
+</tr>
+<tr class="row-odd"><td><p>Duke</p></td>
+<td><p>67</p></td>
+</tr>
+<tr class="row-even"><td><p>Purdue</p></td>
+<td><p>96</p></td>
+</tr>
+<tr class="row-odd"><td><p>Auburn</p></td>
+<td><p>62</p></td>
+</tr>
+<tr class="row-even"><td><p>MI State</p></td>
+<td><p>85</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="section" id="subsetposetvectors">
+<h2>SubsetPosetVectors<a class="headerlink" href="#subsetposetvectors" title="Permalink to this headline">¶</a></h2>
+<p>Understanding SubsetPosetVectors will be useful for those who are considering becoming future developers in for the skpref
+package. A SubsetPosetVector is an object that has been designed to contain relations where the nature of the relation is to select
+a subset of the list of alternatives. As such it contains two numpy arrays <code class="code docutils literal notranslate"><span class="pre">top_input_data</span></code> and <code class="code docutils literal notranslate"><span class="pre">boot_input_data</span></code>
+to indicate the alternatives chosen and not chosen respectively. Each SubsetPosetVector represents the choices and discards
+of an entire data set, so these numpy arrays, may include ragged-nested arrays also, we expand on these in below. The end user
+is not expected to be interacting much with SubsetPosetVectors, however, it is the internal representation of the data
+that models use and it is the data type that is returned in outcome predictions.</p>
+</div>
+</div>
+<div class="section" id="types-of-relations-that-can-be-modelled-in-skpref-11-01-2022">
+<h1>Types of relations that can be modelled in skpref (11/01/2022)<a class="headerlink" href="#types-of-relations-that-can-be-modelled-in-skpref-11-01-2022" title="Permalink to this headline">¶</a></h1>
+<p>In this section we discuss three types of relations that are currently supported by the infrastructure of skpref,
+pairwise comparisons, discrete choice and subset choice. The way the package currently deals with such relations is via
+the SubsetPosetVector. Below are more detailed descriptions of these types of relations, and examples of how the
+SubsetPosetVector represents these. We do not expect end users to use SubsetPosetVectors to read in their data, as the main
+use right now is a back-end representation of the data. This section, however, provides a useful discussion on what types
+of relations the SubsetPosetVector supports.</p>
+<div class="section" id="pairwise-comparisons">
+<h2>Pairwise Comparisons<a class="headerlink" href="#pairwise-comparisons" title="Permalink to this headline">¶</a></h2>
+<p>For Pairwise comparisons only two alternatives are presented to decision makers or decision processes, examples could be
+football matches, where there are only two teams playing at a time and either one team wins or there’s a draw. As another example,
+consider the table below which contains made up examples of US college basketball matches. In the first column we identify
+the winning team, and in the second column we identify the two teams that played. The defining characteristic of pairwise
+comparisons is that the number of alternatives presented is always two.</p>
+<div class="table-wrapper"><table class="docutils align-default">
+<colgroup>
+<col style="width: 37%"/>
+<col style="width: 63%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Winning team</p></th>
+<th class="head"><p>Matchup</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>‘Virginia’</p></td>
+<td><p>[‘Purdue’, ‘Virginia’]</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘Auburn’</p></td>
+<td><p>[‘Auburn’, ‘Kentucky’]</p></td>
+</tr>
+<tr class="row-even"><td><p>‘MI State’</p></td>
+<td><p>[‘MI State’, ‘Duke’]</p></td>
+</tr>
+</tbody>
+</table></div>
+<div class="section" id="setting-up-a-pairwisecomparisontask">
+<h3>Setting up a PairwiseComparisonTask<a class="headerlink" href="#setting-up-a-pairwisecomparisontask" title="Permalink to this headline">¶</a></h3>
+<p>For the table above we would have the following set up for a PairwiseComparisonTask</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skpref.task</span> <span class="kn">import</span> <span class="n">PairwiseComparisonTask</span>
+<span class="n">example_PCTask</span> <span class="o">=</span> <span class="n">PairwiseComparisonTask</span><span class="p">(</span>
+  <span class="n">primary_table</span><span class="o">=</span><span class="n">basketball_data</span><span class="p">,</span>
+  <span class="n">primary_table_alternatives_names</span><span class="o">=</span><span class="s1">'Matchup'</span><span class="p">,</span>
+  <span class="n">primary_table_target_name</span> <span class="o">=</span><span class="s1">'Winning team'</span><span class="p">,</span>
+  <span class="n">features_to_use</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The PairwiseComparisonTask automatically sets up the SubsetPosetVector which in this case would be stored in the object
+<code class="code docutils literal notranslate"><span class="pre">example_PCTask.subset_vec</span></code>.</p>
+<p>Note that pairwise comparison tasks also often follow the below data structure</p>
+<div class="table-wrapper"><table class="docutils align-default">
+<colgroup>
+<col style="width: 32%"/>
+<col style="width: 35%"/>
+<col style="width: 32%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Team 1</p></th>
+<th class="head"><p>Team 2</p></th>
+<th class="head"><p>Team 1 won</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>‘Purdue’</p></td>
+<td><p>‘Virginina’</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘Auburn’</p></td>
+<td><p>‘Kentucky’</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-even"><td><p>‘MI State’</p></td>
+<td><p>‘Duke’</p></td>
+<td><p>1</p></td>
+</tr>
+</tbody>
+</table></div>
+<p>In which case the PairwiseComparisonTask can be set up this way:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skpref.task</span> <span class="kn">import</span> <span class="n">PairwiseComparisonTask</span>
+<span class="n">example_PCTask</span> <span class="o">=</span> <span class="n">PairwiseComparisonTask</span><span class="p">(</span>
+  <span class="n">primary_table</span><span class="o">=</span><span class="n">basketball_data</span><span class="p">,</span>
+  <span class="n">primary_table_alternatives_names</span><span class="o">=</span><span class="p">[</span><span class="s1">'Team 1'</span><span class="p">,</span> <span class="s1">'Team 2'</span><span class="p">],</span>
+  <span class="n">primary_table_target_name</span> <span class="o">=</span><span class="s1">'Team 1 won'</span><span class="p">,</span>
+  <span class="n">target_column_correspondence</span> <span class="o">=</span> <span class="s1">'Team 1'</span>
+  <span class="n">features_to_use</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Now that the PairwiseComparisonTask is set up, it is possible to fit a model, say a Bradley-Terry model:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skpref.random_utility</span> <span class="kn">import</span> <span class="n">BradleyTerry</span>
+<span class="n">my_bt_model</span> <span class="o">=</span> <span class="n">BradleyTerry</span><span class="p">()</span>
+<span class="n">my_bt_model</span><span class="o">.</span><span class="n">fit_task</span><span class="p">(</span><span class="n">example_PCTask</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can also use the <code class="code docutils literal notranslate"><span class="pre">my_bt_model.predict_task()</span></code> or the <code class="code docutils literal notranslate"><span class="pre">my_bt_model.predict_proba_task()</span></code> to predict the
+outcomes. Since the Bradley-Terry model has a ranking output too, we can query this by running <code class="code docutils literal notranslate"><span class="pre">mybt.rank_entities()</span></code>.</p>
+</div>
+<div class="section" id="setting-up-a-subsetposetvectors-for-pairwise-comparisons">
+<h3>Setting up a SubsetPosetVectors for Pairwise Comparisons<a class="headerlink" href="#setting-up-a-subsetposetvectors-for-pairwise-comparisons" title="Permalink to this headline">¶</a></h3>
+<p>The way the SubsetPosetVector would represent this information is the following way.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skpref.data_processing</span> <span class="kn">import</span> <span class="n">SubsetPosetVec</span>
+<span class="n">example_pairwise_comparison_vec</span> <span class="o">=</span> <span class="n">SubsetPosetVec</span><span class="p">(</span>
+    <span class="n">top_input_data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">'Virginia'</span><span class="p">,</span> <span class="s1">'Auburn'</span><span class="p">,</span> <span class="s1">'MI State'</span><span class="p">]),</span>
+    <span class="n">boot_input_data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">'Purdue'</span><span class="p">,</span> <span class="s1">'Kentucky'</span><span class="p">,</span> <span class="s1">'Duke'</span><span class="p">])</span>
+    <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="discrete-choice">
+<h2>Discrete Choice<a class="headerlink" href="#discrete-choice" title="Permalink to this headline">¶</a></h2>
+<p>In a discrete choice the deciding process or decision maker only chooses one and only one alternative from the set of alternatives.
+It is used widely for modelling choices made in transportation, where an individual can naturally be only taking one mode
+of transportation at a time (it is rare to see someone riding a bike whilst driving a car). Below we show an example of this data
+where each row is a commuting decision, the first column is the mode of transport taken, and the second column is the available options.</p>
+<div class="table-wrapper"><table class="docutils align-default">
+<colgroup>
+<col style="width: 52%"/>
+<col style="width: 48%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Chosen Mode of Transportation</p></th>
+<th class="head"><p>Options</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>‘bicycle’</p></td>
+<td><p>[‘train’, ‘bicycle’]</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘car’</p></td>
+<td><p>[‘train’, ‘bicycle’, ‘car’]</p></td>
+</tr>
+<tr class="row-even"><td><p>‘train’</p></td>
+<td><p>[‘train’, ‘bicycle’, ‘car’]</p></td>
+</tr>
+<tr class="row-odd"><td><p>‘car’</p></td>
+<td><p>[‘train’, ‘bicycle’, ‘car’]</p></td>
+</tr>
+<tr class="row-even"><td><p>‘train’</p></td>
+<td><p>[‘train’, ‘bicycle’]</p></td>
+</tr>
+</tbody>
+</table></div>
+<div class="section" id="setting-up-a-choicetask">
+<h3>Setting up a ChoiceTask<a class="headerlink" href="#setting-up-a-choicetask" title="Permalink to this headline">¶</a></h3>
+<p>For the table above we would have the following set up for a ChoiceTask</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skpref.task</span> <span class="kn">import</span> <span class="n">ChoiceTask</span>
+<span class="n">example_choice_task</span> <span class="o">=</span> <span class="n">ChoiceTask</span><span class="p">(</span>
+  <span class="n">primary_table</span><span class="o">=</span><span class="n">public_transport_data</span><span class="p">,</span>
+  <span class="n">primary_table_alternatives_names</span><span class="o">=</span><span class="s1">'Options'</span><span class="p">,</span>
+  <span class="n">primary_table_target_name</span> <span class="o">=</span><span class="s1">'Chosen Mode of Transportation'</span><span class="p">,</span>
+  <span class="n">features_to_use</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Since currently skpref does not contain any discrete choice models, we can only show an example in which the problem is
+reduced to a pairwise comparison. We invite the community to build discrete choice models for skpref.</p>
+</div>
+<div class="section" id="reduction-and-aggregation-of-discrete-choices">
+<h3>Reduction and aggregation of Discrete choices<a class="headerlink" href="#reduction-and-aggregation-of-discrete-choices" title="Permalink to this headline">¶</a></h3>
+<p>If the user would want to run now a reduction to pairwise comparisons, and run a Bradley-Terry model on this discrete
+choice data, the code would look exactly the same as above for pairwise comparison models</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skpref.random_utility</span> <span class="kn">import</span> <span class="n">BradleyTerry</span>
+<span class="n">my_bt_model</span> <span class="o">=</span> <span class="n">BradleyTerry</span><span class="p">()</span>
+<span class="n">my_bt_model</span><span class="o">.</span><span class="n">fit_task</span><span class="p">(</span><span class="n">example_choice_task</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The models in skpref need to detect what type of task is being passed to the model and then perform the reduction via
+the functions available in the subset-poset vector which is generated in every task, see below for an example on the
+pairwise reduction.</p>
+<p>When skpref is expanded to contain discrete choice models also, users will be able to run fitting and prediction on both
+reduced and same-level models.</p>
+<p>Currently there are two ways to aggregate the Bradley-Terry model in skpref. One of them is to insert the learned parameters
+in the Luce formulation, the other is via the Independent Transitive method. For more information on these see the
+module documentation for the Bradley-Terry predict_proba_task method. For Bradley-Terry the default setting is
+via the Luce formulation and code for running both aggregations would look like the following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># predicting the probability of taking a car</span>
+<span class="n">agg_luce</span> <span class="o">=</span> <span class="n">my_bt_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">example_choice_task</span><span class="p">,</span> <span class="p">[</span><span class="s1">'Car'</span><span class="p">])</span>
+<span class="n">agg_indep_trans</span> <span class="o">=</span> <span class="n">my_bt_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">example_choice_task</span><span class="p">,</span> <span class="p">[</span><span class="s1">'Car'</span><span class="p">],</span>
+                                            <span class="n">aggregation_method</span><span class="o">=</span><span class="s1">'independent transitive'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setting-up-a-subsetposetvectors-for-discrete-choice">
+<h3>Setting up a SubsetPosetVectors for Discrete Choice<a class="headerlink" href="#setting-up-a-subsetposetvectors-for-discrete-choice" title="Permalink to this headline">¶</a></h3>
+<p>The way the SubsetPosetVector would represent this information is the following way.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skpref.data_processing</span> <span class="kn">import</span> <span class="n">SubsetPosetVec</span>
+<span class="n">example_pairwise_comparison_vec</span> <span class="o">=</span> <span class="n">SubsetPosetVec</span><span class="p">(</span>
+    <span class="n">top_input_data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">'bicycle'</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">'car'</span><span class="p">]),</span>
+                             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">'train'</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">'car'</span><span class="p">]),</span>
+                             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">'train'</span><span class="p">])],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">),</span>
+    <span class="n">boot_input_data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">'train'</span><span class="p">,</span> <span class="s1">'bicycle'</span><span class="p">]),</span>
+                             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">'train'</span><span class="p">,</span> <span class="s1">'bicycle'</span><span class="p">,</span> <span class="s1">'car'</span><span class="p">]),</span>
+                             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">'train'</span><span class="p">,</span> <span class="s1">'bicycle'</span><span class="p">,</span> <span class="s1">'car'</span><span class="p">]),</span>
+                             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">'train'</span><span class="p">,</span> <span class="s1">'bicycle'</span><span class="p">,</span> <span class="s1">'car'</span><span class="p">]),</span>
+                             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s1">'train'</span><span class="p">,</span> <span class="s1">'bicycle'</span><span class="p">])</span>
+                             <span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>A useful function contained in the SubsetPosetVec object is that it can be used to create data reductions, for example,
+if we wanted to reduce this discrete choice data to pairwise comparison we could use:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">example_pairwise_comparison_vec</span><span class="o">.</span><span class="n">pairwise_reducer</span><span class="p">()</span>
+<span class="go">(      alt1     alt2  alt1_top</span>
+<span class="go"> 0  bicycle    train         1</span>
+<span class="go"> 1    train      car         0</span>
+<span class="go"> 2      car  bicycle         1</span>
+<span class="go"> 3  bicycle    train         0</span>
+<span class="go"> 4      car    train         0</span>
+<span class="go"> 5      car    train         1</span>
+<span class="go"> 6  bicycle      car         0</span>
+<span class="go"> 7    train  bicycle         1,</span>
+<span class="go"> array([0, 1, 1, 2, 2, 3, 3, 4]))</span>
+</pre></div>
+</div>
+<p>Where the first element that is returned is a pandas DataFrame that represents that data as pairwise comparisons and the
+second element is a numpy array that is the index of the oringinal observation. For example rows one and two of the
+pairwise comparison table all correspond to row one in the original table (‘car’ being chosen from [‘car’, ‘train’,
+‘bicycle’] note we initialise rows by 0). Thus allowing us to use pairwise comparison models also to work with this
+discrete choice data. All of this is accomplished in the back end of the package through the Task object design.</p>
+</div>
+</div>
+</div>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="module_documentation.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Module documentation</div>
+              </div>
+              <svg><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="index.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Home</div>
+                
+              </div>
+            </a>
+        </div>
+
+        <div class="related-information">
+              Copyright &#169; 2022, István Papp, Franz Király, Ioanna Manolopoulou, Karlson Pfannschmidt, Pritha Gupta |
+          Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+          <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            | <a class="muted-link" href="_sources/README_symbolic.rst.txt"
+               rel="nofollow">
+              Show Source
+            </a>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            Contents
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Welcome to skpref</a><ul>
+<li><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+<li><a class="reference internal" href="#future-contributions">Future contributions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#models-in-the-package">Models in the package</a><ul>
+<li><a class="reference internal" href="#a-whishlist-of-models">A whishlist of models</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#novelties-in-skpref-to-the-scikit-learn-user">Novelties in skpref to the scikit-learn user</a><ul>
+<li><a class="reference internal" href="#the-task-based-interface">The task based interface</a><ul>
+<li><a class="reference internal" href="#distinction-between-decision-level-covariates-and-alternnative-level-covariates">Distinction between decision level covariates and alternnative level covariates</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#subsetposetvectors">SubsetPosetVectors</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#types-of-relations-that-can-be-modelled-in-skpref-11-01-2022">Types of relations that can be modelled in skpref (11/01/2022)</a><ul>
+<li><a class="reference internal" href="#pairwise-comparisons">Pairwise Comparisons</a><ul>
+<li><a class="reference internal" href="#setting-up-a-pairwisecomparisontask">Setting up a PairwiseComparisonTask</a></li>
+<li><a class="reference internal" href="#setting-up-a-subsetposetvectors-for-pairwise-comparisons">Setting up a SubsetPosetVectors for Pairwise Comparisons</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#discrete-choice">Discrete Choice</a><ul>
+<li><a class="reference internal" href="#setting-up-a-choicetask">Setting up a ChoiceTask</a></li>
+<li><a class="reference internal" href="#reduction-and-aggregation-of-discrete-choices">Reduction and aggregation of Discrete choices</a></li>
+<li><a class="reference internal" href="#setting-up-a-subsetposetvectors-for-discrete-choice">Setting up a SubsetPosetVectors for Discrete Choice</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    </body>
+</html>

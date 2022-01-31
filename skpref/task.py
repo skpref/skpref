@@ -295,9 +295,8 @@ class ChoiceTask(PrefTask):
     -----------
     primary_table: DataFrame
         The primary table is the one that contains the target variable and
-        covariates that vary on the target observation level. For example the
-        available methods of transportation for an individual and weather it
-        rained or not at the time of the journey.
+        decision level data (covariates that may be different across each
+        decision).
     primary_table_alternatives_names: str
         The column or attribute which corresponds to the alternatives in the
         primary table.
@@ -396,7 +395,7 @@ class PairwiseComparisonTask(ChoiceTask):
     -----------
     primary_table: str, DataFrame, scipy.io.arff
         The primary table is the one that contains the target variable and
-        covariates that vary on the target observation level. For example the
+        covariates that vary on the decision level. For example the
         available methods of transportation for an individual and weather it
         rained or not at the time of the journey.
         If str it will be the directory where the primary table sits. Otherwise

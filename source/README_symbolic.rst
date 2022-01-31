@@ -36,14 +36,31 @@ energetic brainstorming sessions with Karlson Pfannschmidt and Pritha Gupta.
 Future contributions
 ---------------------
 We welcome anyone who would like to continue working on this concept. If you would like to contribute to this package
-please reach out to Istvan Papp at istvan.papp.16@ucl.ac.uk
+please reach out to Istvan Papp at istvan.papp.16@ucl.ac.uk or to Dr. Ioanna Manolopoulou at i.manolopoulou@ucl.ac.uk.
 
 
 Models in the package
 ======================
-Currently skpref contains only implementations of the Bradley-Terry model for pairwise comparisons and the more generalised
-Luce formulation for discrete choice, which can be augmented with covariates. It achieves this by interfacing with the
-pylogit_ and choix_ packages.
+Currently skpref contains only implementations of the Bradley-Terry model for pairwise comparisons
+which can be augmented with covariates. It achieves this by interfacing with the pylogit_ and choix_ packages.
+It is also possible to reduce tasks to classification tasks and use the interface to fir any classifier available in
+scikit-learn.
+
+A whishlist of models
+----------------------
+We welcome anyone who would like to contribute to the package by interfacing an existing solution for or developing a
+solution for the following models (and more):
+
+* Thurstone
+* Plackett-Luce
+* Luce (can be achieved with further integration with pylogit)
+* Interface with cs-ranking specifically the FATE and FETA models
+* Coherency Driven model
+* Nested Logit models (can be achieved with further integration with pylogit)
+* Elimination by Aspects
+* Support Vector Machines for choice models
+* ListNet
+* Bradley-Terry abd Plackett-Luce trees
 
 Novelties in skpref to the scikit-learn user
 ===============================================
@@ -51,7 +68,7 @@ Novelties in skpref to the scikit-learn user
 The task based interface
 -------------------------
 The main object with which end users will interact and the one that is the furthest step away in intuition from the scikit-learn
-set-up is the Task object. The purpose of the Task object's main purpose is to containerise key aspects of the data that is
+set-up is the Task object. The Task object's main purpose is to containerise key aspects of the data that is
 being modelled, such as, what are the dataframes that will be used, what is the ground truth, what is the set of alternatives
 for each observation and how these all link together.
 
@@ -61,7 +78,7 @@ from both of those to classification problems, and also a reduction from Discret
 
 We justify asking end users to learn how to use the task based interface with the following:
 
-* It saves time and energy compared to having to merge normalised tables together into denormalised tables. In the future
+* It saves time and energy compared to having to merge normalised tables together into denormalised tables. In the future,
   we believe it should be possible to create computational efficiencies from using normalised tables, so we designed an
   an interface that allows for this already.
 * It allows reduction and aggregation to happen in the back-end of the code, rather than putting the onus on the user to
@@ -101,7 +118,7 @@ the features describing the alternatives in a model. However, apart from this be
 non-trivial in difficulty and different models and packages might deal with different ways of combining this data. The
 task-based set up allows flexibility on handling the data differently for different models.
 
-To allow for this in skpref all model object have a train_task and a predict_task function (and a predict_proba_task
+To allow for this in skpref all model objects have a train_task and a predict_task function (and a predict_proba_task
 function, where appropriate) to take the burden off from the user of having to create these joint tables.
 
 A task for this data would be set up in the following way:
@@ -112,7 +129,7 @@ A task for this data would be set up in the following way:
   from skpref.model_type_folder import some_type_of_model
 
   example_train_task = SomeTypeOfTask(
-    primary_table=test_example_choice_table,
+    primary_table=train_example_choice_table,
     primary_table_alternatives_names='Alternatives',
     primary_table_target_name ='Choices',
     features_to_use=['Feature 1', 'Feature 2', 'Feature 3'],
@@ -121,7 +138,7 @@ A task for this data would be set up in the following way:
   )
 
   example_test_task = SomeTypeOfTask(
-    primary_table=train_example_choice_table,
+    primary_table=test_example_choice_table,
     primary_table_alternatives_names='Alternatives',
     features_to_use=['Feature 1', 'Feature 2', 'Feature 3'],
     secondary_table=example_alternative_level_feature_table
@@ -131,10 +148,57 @@ A task for this data would be set up in the following way:
   my_initalised_model = some_type_of_model()
   my_initialised_model.fit_task(example_train_task)
   my_outcome_predictions = my_initialised_model.predict_task(example_test_task)
-  my_probabilistic_predictions = my_initialised_model.predict_proba_task(example_test_task)
+  my_probabilistic_predictions = my_initialised_model.predict_proba_task(example_test_task, outcome=['A', 'B'])
 
 Below we will show examples of pairwise comparisons and discrete choices and show how the task based interface can be used
 for setting up the models.
+
+Distinction between decision level covariates and alternnative level covariates
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In the module documentation for skpref we often refer to decision level data and alternative level data.
+
+* *Decision level data*, include the set of alternatives presented to a decision maker, and what relations they have
+  expressed over these alternatives, there may be other recordings that describe the circumstances of the decision, such
+  as the temperature on a day someone went shopping. This generally contains information that varies by decision.
+  Note that this is not data about the decision makers / processes, but rather data that describes the circumstances that
+  are unique to each decision, whereas a decision maker / process can make several decisions under different circumstances,
+  for example, shopping on different days.
+
+An example of decision level data is the table below:
+
++-------------------------------------------------------+
+|                  Decision Level data                  |
++==========+==========+============+====================+
+|  team 1  | team 2   | team 1 won | location           |
++----------+----------+------------+--------------------+
+| Viginia  | Purdue   | 1          | Richmond, Virginia |
++----------+----------+------------+--------------------+
+| Kentucky | Auburn   | 0          | Dallas, Texas      |
++----------+----------+------------+--------------------+
+| Duke     | MI State | 0          | New York, New York |
++----------+----------+------------+--------------------+
+
+* *Alternative level data*, are recordings that describe the alternatives, such as the price of a product.
+  This generally contains information that varies by alternative, but for the same alternative would be constant across
+  different decisions, for example, different shoppers facing the same price for the same product.
+
++--------------------------------------------------+
+|              Alternative Level data              |
++==========+=======================================+
+|   team   | mean points scored in previous season |
++----------+---------------------------------------+
+| Viginia  | 80                                    |
++----------+---------------------------------------+
+| Kentucky | 75                                    |
++----------+---------------------------------------+
+| Duke     | 67                                    |
++----------+---------------------------------------+
+| Purdue   | 96                                    |
++----------+---------------------------------------+
+| Auburn   | 62                                    |
++----------+---------------------------------------+
+| MI State | 85                                    |
++----------+---------------------------------------+
 
 SubsetPosetVectors
 -------------------
@@ -146,7 +210,7 @@ of an entire data set, so these numpy arrays, may include ragged-nested arrays a
 is not expected to be interacting much with SubsetPosetVectors, however, it is the internal representation of the data
 that models use and it is the data type that is returned in outcome predictions.
 
-Types of relations that can be currently modelled in skpref
+Types of relations that can be modelled in skpref (11/01/2022)
 ==================================================================================================
 In this section we discuss three types of relations that are currently supported by the infrastructure of skpref,
 pairwise comparisons, discrete choice and subset choice. The way the package currently deals with such relations is via
@@ -183,7 +247,7 @@ For the table above we would have the following set up for a PairwiseComparisonT
   example_PCTask = PairwiseComparisonTask(
     primary_table=basketball_data,
     primary_table_alternatives_names='Matchup',
-    primary_table_target_name ='Winning Team',
+    primary_table_target_name ='Winning team',
     features_to_use=None
   )
 
@@ -297,14 +361,16 @@ When skpref is expanded to contain discrete choice models also, users will be ab
 reduced and same-level models.
 
 Currently there are two ways to aggregate the Bradley-Terry model in skpref. One of them is to insert the learned parameters
-in the Luce formulation, the other is via the Independent Transitive method. For Bradley-Terry the default setting is
+in the Luce formulation, the other is via the Independent Transitive method. For more information on these see the
+module documentation for the Bradley-Terry predict_proba_task method. For Bradley-Terry the default setting is
 via the Luce formulation and code for running both aggregations would look like the following:
 
 .. code:: python
 
   # predicting the probability of taking a car
   agg_luce = my_bt_model.predict_proba(example_choice_task, ['Car'])
-  agg_indep_trans = my_bt_model.predict_proba(example_choice_task, ['Car'], aggregation_method='independent transitive')
+  agg_indep_trans = my_bt_model.predict_proba(example_choice_task, ['Car'],
+                                              aggregation_method='independent transitive')
 
 Setting up a SubsetPosetVectors for Discrete Choice
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

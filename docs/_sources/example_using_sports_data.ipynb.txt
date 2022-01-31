@@ -1,0 +1,1625 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Bradley Terry example notebook\n",
+    "What you will find in this notebook examples of using skpref:\n",
+    "- for setting up the modelling task based framework\n",
+    "- to fit a classifier that's being read in from scikit-learn on the same problem which in the background uses reduction and aggregation methods.\n",
+    "- to fit a Bradley-Terry model with and without covariates on the pairwise comparison data of basketball matches.\n",
+    "- with GridSearch"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Optionally change the theme of the notebook to dark\n",
+    "# from jupyterthemes.stylefx import set_nb_theme\n",
+    "# set_nb_theme('chesterish')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Import skpref modules\n",
+    "import sys\n",
+    "sys.path.insert(0, \"../..\")\n",
+    "from skpref.random_utility import BradleyTerry\n",
+    "from skpref.task import PairwiseComparisonTask\n",
+    "from skpref.base import ClassificationReducer\n",
+    "from skpref.model_selection import GridSearchCV\n",
+    "\n",
+    "# Import scikit-learn packages to be used in tandem with skpref architecture\n",
+    "from sklearn.linear_model import LogisticRegression\n",
+    "from sklearn.metrics import f1_score\n",
+    "\n",
+    "# Import other useful packages\n",
+    "import pandas as pd\n",
+    "import numpy as np"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Reading in the data\n",
+    "The example data set will be matches played by NBA teams, we will use the 2016 season's matches to predict the results of the 2017 matches. The dataset contains:\n",
+    "- a column for team1 and team2 indicating the two teams that have played each other\n",
+    "- season_start, which indicates which season the match belongs to\n",
+    "- team1_wins takes the value of 1 if the team in column team1 win the match, 0 if they lost (there are no ties in basketball)\n",
+    "- team_1_home takes the value of 1 if team1 was playing in their home court 0 if they were paying away (no neutral courts in the NBA)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>team1</th>\n",
+       "      <th>team2</th>\n",
+       "      <th>season_start</th>\n",
+       "      <th>team1_wins</th>\n",
+       "      <th>team_1_home</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>Toronto Raptors</td>\n",
+       "      <td>2014</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>Indiana Pacers</td>\n",
+       "      <td>2014</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>San Antonio Spurs</td>\n",
+       "      <td>2014</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>Charlotte Hornets</td>\n",
+       "      <td>2014</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>New York Knicks</td>\n",
+       "      <td>2014</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "           team1              team2  season_start  team1_wins  team_1_home\n",
+       "0  Atlanta Hawks    Toronto Raptors          2014           0            0\n",
+       "1  Atlanta Hawks     Indiana Pacers          2014           1            1\n",
+       "2  Atlanta Hawks  San Antonio Spurs          2014           0            0\n",
+       "3  Atlanta Hawks  Charlotte Hornets          2014           0            0\n",
+       "4  Atlanta Hawks    New York Knicks          2014           1            1"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "NBA_results = pd.read_csv('data/NBA_matches.csv')\n",
+    "NBA_results.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>team1</th>\n",
+       "      <th>team2</th>\n",
+       "      <th>season_start</th>\n",
+       "      <th>team1_wins</th>\n",
+       "      <th>team_1_home</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>9835</th>\n",
+       "      <td>Washington Wizards</td>\n",
+       "      <td>Houston Rockets</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9836</th>\n",
+       "      <td>Washington Wizards</td>\n",
+       "      <td>Cleveland Cavaliers</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9837</th>\n",
+       "      <td>Washington Wizards</td>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9838</th>\n",
+       "      <td>Washington Wizards</td>\n",
+       "      <td>Boston Celtics</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9839</th>\n",
+       "      <td>Washington Wizards</td>\n",
+       "      <td>Orlando Magic</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                   team1                team2  season_start  team1_wins  \\\n",
+       "9835  Washington Wizards      Houston Rockets          2017           0   \n",
+       "9836  Washington Wizards  Cleveland Cavaliers          2017           0   \n",
+       "9837  Washington Wizards        Atlanta Hawks          2017           0   \n",
+       "9838  Washington Wizards       Boston Celtics          2017           1   \n",
+       "9839  Washington Wizards        Orlando Magic          2017           0   \n",
+       "\n",
+       "      team_1_home  \n",
+       "9835            0  \n",
+       "9836            0  \n",
+       "9837            1  \n",
+       "9838            1  \n",
+       "9839            0  "
+      ]
+     },
+     "execution_count": 4,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "NBA_results.tail()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "season_split = 2016\n",
+    "train_data = NBA_results[NBA_results.season_start == season_split].copy()\n",
+    "test_data = NBA_results[NBA_results.season_start == season_split+1].copy()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We will also use team salary data as covariates in the model later with the idea being that a team that has more money to pay to their athletes has an advantage over other teams, by having a better chance to attract the top talent in the league."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>team</th>\n",
+       "      <th>season_start</th>\n",
+       "      <th>salary</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>2014</td>\n",
+       "      <td>58337671</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>2015</td>\n",
+       "      <td>71378126</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>2016</td>\n",
+       "      <td>95957250</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>99375302</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>Boston Celtics</td>\n",
+       "      <td>2014</td>\n",
+       "      <td>59418142</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "             team  season_start    salary\n",
+       "0   Atlanta Hawks          2014  58337671\n",
+       "1   Atlanta Hawks          2015  71378126\n",
+       "2   Atlanta Hawks          2016  95957250\n",
+       "3   Atlanta Hawks          2017  99375302\n",
+       "4  Boston Celtics          2014  59418142"
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "NBA_team_salary_budget = pd.read_csv('data/team_salary_budgets.csv')\n",
+    "NBA_team_salary_budget.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Setting up the tasks"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We set up the preference learning task by using the PairwiseComparisonTassk object in skpref. This is the only extra step which might be a completely new concept to seasponed scikit-learn users. Once the task is specified, say in this case a pairwise comparison task, for any models applied in skpref, whether that is a reduction via scikit-learn or a model that is not a pairwise comparison model such as a Bradley-Terry model the package will know that the problem itself is a pairwise comparison problem and can perform reduction and aggregation adequately in the background when needed.\n",
+    "\n",
+    "In this example the PairwiseComparisonTask has the following components:\n",
+    "- primary_table: the table that contains the observed preferences\n",
+    "- primary_table_alternatives_names: the column or columns that containn the alternatives, in this case both columns team1 and team2 contain alternatives\n",
+    "- primary_table_target_name: the column that indicates the result of the pairwise comparison\n",
+    "- target_column_correspondence: in the case of pairwise comparisons, when the alternatives are split across two columns, the column indicating the result usually takes the form 1/0 to show whether one of the columns, in our case team1 or team2 has been preferred. So in this column the user indicates that when the team1_wins column takes the value 1 that means that the alternative in the column team1 has won.\n",
+    "- features_to_use: indicates which columns to use as covariates"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "NBA_results_task_train_LR = PairwiseComparisonTask(\n",
+    "    primary_table=train_data,\n",
+    "    primary_table_alternatives_names=['team1', 'team2'],\n",
+    "    primary_table_target_name ='team1_wins',\n",
+    "    target_column_correspondence='team1',\n",
+    "    features_to_use=['team_1_home']\n",
+    ")\n",
+    "\n",
+    "# For the test task, it's possible to make a copy of the training task and\n",
+    "# update the primary table\n",
+    "NBA_results_task_predict_LR = PairwiseComparisonTask(\n",
+    "    primary_table=test_data,\n",
+    "    primary_table_alternatives_names=['team1', 'team2'],\n",
+    "    primary_table_target_name ='team1_wins',\n",
+    "    target_column_correspondence='team1',\n",
+    "    features_to_use=['team_1_home']\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Let's fit a reduction to logistic regression first\n",
+    "The only covariate we will use in this for now will be the team_1_home column, which should return a method that only learns what the home team advantage was on average\n",
+    "\n",
+    "$P(team1\\_wins=1) = logistic(\\alpha + \\beta_1 team\\_1\\_home)$"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "my_log_red = ClassificationReducer(LogisticRegression(solver='lbfgs'))\n",
+    "my_log_red.fit_task(NBA_results_task_train_LR)\n",
+    "preds = my_log_red.predict_task(NBA_results_task_predict_LR)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(array(['Dallas Mavericks', 'Charlotte Hornets', 'Brooklyn Nets', ...,\n",
+       "        'Washington Wizards', 'Washington Wizards', 'Orlando Magic'],\n",
+       "       dtype=object),\n",
+       " array(['Atlanta Hawks', 'Atlanta Hawks', 'Atlanta Hawks', ...,\n",
+       "        'Atlanta Hawks', 'Boston Celtics', 'Washington Wizards'],\n",
+       "       dtype=object))"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# predict_task returns a SubsetPosetVector which has the attributes\n",
+    "# top_input_data and boot_input_data corresponding to chosen and not chosen \n",
+    "# alternatives.\n",
+    "preds.top_input_data, preds.boot_input_data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>team1</th>\n",
+       "      <th>team2</th>\n",
+       "      <th>season_start</th>\n",
+       "      <th>team1_wins</th>\n",
+       "      <th>team_1_home</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>7380</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>Dallas Mavericks</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7381</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>Charlotte Hornets</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7382</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>Brooklyn Nets</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7383</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>Miami Heat</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7384</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>Chicago Bulls</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "              team1              team2  season_start  team1_wins  team_1_home\n",
+       "7380  Atlanta Hawks   Dallas Mavericks          2017           1            0\n",
+       "7381  Atlanta Hawks  Charlotte Hornets          2017           0            0\n",
+       "7382  Atlanta Hawks      Brooklyn Nets          2017           0            0\n",
+       "7383  Atlanta Hawks         Miami Heat          2017           0            0\n",
+       "7384  Atlanta Hawks      Chicago Bulls          2017           0            0"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "NBA_results_task_predict_LR.primary_table.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>team1</th>\n",
+       "      <th>team2</th>\n",
+       "      <th>season_start</th>\n",
+       "      <th>team1_wins</th>\n",
+       "      <th>team_1_home</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>9835</th>\n",
+       "      <td>Washington Wizards</td>\n",
+       "      <td>Houston Rockets</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9836</th>\n",
+       "      <td>Washington Wizards</td>\n",
+       "      <td>Cleveland Cavaliers</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9837</th>\n",
+       "      <td>Washington Wizards</td>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9838</th>\n",
+       "      <td>Washington Wizards</td>\n",
+       "      <td>Boston Celtics</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9839</th>\n",
+       "      <td>Washington Wizards</td>\n",
+       "      <td>Orlando Magic</td>\n",
+       "      <td>2017</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                   team1                team2  season_start  team1_wins  \\\n",
+       "9835  Washington Wizards      Houston Rockets          2017           0   \n",
+       "9836  Washington Wizards  Cleveland Cavaliers          2017           0   \n",
+       "9837  Washington Wizards        Atlanta Hawks          2017           0   \n",
+       "9838  Washington Wizards       Boston Celtics          2017           1   \n",
+       "9839  Washington Wizards        Orlando Magic          2017           0   \n",
+       "\n",
+       "      team_1_home  \n",
+       "9835            0  \n",
+       "9836            0  \n",
+       "9837            1  \n",
+       "9838            1  \n",
+       "9839            0  "
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "NBA_results_task_predict_LR.primary_table.tail()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'Dallas Mavericks': array([0.58319366, 0.        , 0.        , ..., 0.        , 0.        ,\n",
+       "        0.        ]),\n",
+       " 'Atlanta Hawks': array([0.41680634, 0.41680634, 0.41680634, ..., 0.41680634, 0.        ,\n",
+       "        0.        ])}"
+      ]
+     },
+     "execution_count": 12,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# All this learns so far is the home team advantage, since its the only \n",
+    "# covariate in the test_data table\n",
+    "my_log_red.predict_proba_task(NBA_results_task_predict_LR,\n",
+    "                              outcome=['Dallas Mavericks', 'Atlanta Hawks'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'team1 is preferred': array([0.41680634, 0.41680634, 0.41680634, ..., 0.58319366, 0.58319366,\n",
+       "        0.41680634]),\n",
+       " 'team2 is preferred': array([0.58319366, 0.58319366, 0.58319366, ..., 0.41680634, 0.41680634,\n",
+       "        0.58319366])}"
+      ]
+     },
+     "execution_count": 13,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "my_log_red.predict_proba_task(NBA_results_task_predict_LR,\n",
+    "                              column=['team1', 'team2'])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Now let's fit a Bradley Terry model\n",
+    "This will be defined in a slightly different task, becasue in this case we don't want to use any covariates, whereas scikit-learn logistic regression doesn't work when running with no covariates."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "NBA_results_task_train_BT = PairwiseComparisonTask(\n",
+    "    primary_table=train_data,\n",
+    "    primary_table_alternatives_names=['team1', 'team2'],\n",
+    "    primary_table_target_name ='team1_wins',\n",
+    "    target_column_correspondence='team1',\n",
+    "    features_to_use=None\n",
+    ")\n",
+    "\n",
+    "NBA_results_task_predict_BT = PairwiseComparisonTask(\n",
+    "    primary_table=test_data,\n",
+    "    primary_table_alternatives_names=['team1', 'team2'],\n",
+    "    primary_table_target_name ='team1_wins',\n",
+    "    target_column_correspondence='team1',\n",
+    "    features_to_use=None\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Fitting Bradley Terry model\n",
+    "mybt = BradleyTerry(method='BFGS', alpha=1e-5)\n",
+    "mybt.fit_task(NBA_results_task_train_BT)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>entity</th>\n",
+       "      <th>learned_strength</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>Atlanta Hawks</td>\n",
+       "      <td>0.047522</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>Boston Celtics</td>\n",
+       "      <td>0.580896</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>Brooklyn Nets</td>\n",
+       "      <td>-1.178393</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>Charlotte Hornets</td>\n",
+       "      <td>-0.278154</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>Chicago Bulls</td>\n",
+       "      <td>-0.037967</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>Cleveland Cavaliers</td>\n",
+       "      <td>0.489737</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>Dallas Mavericks</td>\n",
+       "      <td>-0.386261</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>7</th>\n",
+       "      <td>Denver Nuggets</td>\n",
+       "      <td>-0.040408</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>8</th>\n",
+       "      <td>Detroit Pistons</td>\n",
+       "      <td>-0.225709</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>9</th>\n",
+       "      <td>Golden State Warriors</td>\n",
+       "      <td>1.538386</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>10</th>\n",
+       "      <td>Houston Rockets</td>\n",
+       "      <td>0.765613</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>11</th>\n",
+       "      <td>Indiana Pacers</td>\n",
+       "      <td>-0.005751</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>12</th>\n",
+       "      <td>Los Angeles Clippers</td>\n",
+       "      <td>0.550265</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>13</th>\n",
+       "      <td>Los Angeles Lakers</td>\n",
+       "      <td>-0.773690</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>14</th>\n",
+       "      <td>Memphis Grizzlies</td>\n",
+       "      <td>0.153646</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>15</th>\n",
+       "      <td>Miami Heat</td>\n",
+       "      <td>-0.022175</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>16</th>\n",
+       "      <td>Milwaukee Bucks</td>\n",
+       "      <td>0.018291</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>17</th>\n",
+       "      <td>Minnesota Timberwolves</td>\n",
+       "      <td>-0.470415</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>18</th>\n",
+       "      <td>New Orleans Pelicans</td>\n",
+       "      <td>-0.328205</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>19</th>\n",
+       "      <td>New York Knicks</td>\n",
+       "      <td>-0.548175</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>20</th>\n",
+       "      <td>Oklahoma City Thunder</td>\n",
+       "      <td>0.344454</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>21</th>\n",
+       "      <td>Orlando Magic</td>\n",
+       "      <td>-0.655354</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>22</th>\n",
+       "      <td>Philadelphia 76ers</td>\n",
+       "      <td>-0.716305</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>23</th>\n",
+       "      <td>Phoenix Suns</td>\n",
+       "      <td>-0.888314</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>24</th>\n",
+       "      <td>Portland Trail Blazers</td>\n",
+       "      <td>0.019229</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>25</th>\n",
+       "      <td>Sacramento Kings</td>\n",
+       "      <td>-0.426973</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>26</th>\n",
+       "      <td>San Antonio Spurs</td>\n",
+       "      <td>1.115135</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>27</th>\n",
+       "      <td>Toronto Raptors</td>\n",
+       "      <td>0.462682</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>28</th>\n",
+       "      <td>Utah Jazz</td>\n",
+       "      <td>0.535025</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>29</th>\n",
+       "      <td>Washington Wizards</td>\n",
+       "      <td>0.361368</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "                    entity  learned_strength\n",
+       "0            Atlanta Hawks          0.047522\n",
+       "1           Boston Celtics          0.580896\n",
+       "2            Brooklyn Nets         -1.178393\n",
+       "3        Charlotte Hornets         -0.278154\n",
+       "4            Chicago Bulls         -0.037967\n",
+       "5      Cleveland Cavaliers          0.489737\n",
+       "6         Dallas Mavericks         -0.386261\n",
+       "7           Denver Nuggets         -0.040408\n",
+       "8          Detroit Pistons         -0.225709\n",
+       "9    Golden State Warriors          1.538386\n",
+       "10         Houston Rockets          0.765613\n",
+       "11          Indiana Pacers         -0.005751\n",
+       "12    Los Angeles Clippers          0.550265\n",
+       "13      Los Angeles Lakers         -0.773690\n",
+       "14       Memphis Grizzlies          0.153646\n",
+       "15              Miami Heat         -0.022175\n",
+       "16         Milwaukee Bucks          0.018291\n",
+       "17  Minnesota Timberwolves         -0.470415\n",
+       "18    New Orleans Pelicans         -0.328205\n",
+       "19         New York Knicks         -0.548175\n",
+       "20   Oklahoma City Thunder          0.344454\n",
+       "21           Orlando Magic         -0.655354\n",
+       "22      Philadelphia 76ers         -0.716305\n",
+       "23            Phoenix Suns         -0.888314\n",
+       "24  Portland Trail Blazers          0.019229\n",
+       "25        Sacramento Kings         -0.426973\n",
+       "26       San Antonio Spurs          1.115135\n",
+       "27         Toronto Raptors          0.462682\n",
+       "28               Utah Jazz          0.535025\n",
+       "29      Washington Wizards          0.361368"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "mybt.params_"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We can use the latent alternative strength parameters that Bradley-Terry models learn to rank the teams"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "['Golden State Warriors',\n",
+       " 'San Antonio Spurs',\n",
+       " 'Houston Rockets',\n",
+       " 'Boston Celtics',\n",
+       " 'Los Angeles Clippers',\n",
+       " 'Utah Jazz',\n",
+       " 'Cleveland Cavaliers',\n",
+       " 'Toronto Raptors',\n",
+       " 'Washington Wizards',\n",
+       " 'Oklahoma City Thunder',\n",
+       " 'Memphis Grizzlies',\n",
+       " 'Atlanta Hawks',\n",
+       " 'Portland Trail Blazers',\n",
+       " 'Milwaukee Bucks',\n",
+       " 'Indiana Pacers',\n",
+       " 'Miami Heat',\n",
+       " 'Chicago Bulls',\n",
+       " 'Denver Nuggets',\n",
+       " 'Detroit Pistons',\n",
+       " 'Charlotte Hornets',\n",
+       " 'New Orleans Pelicans',\n",
+       " 'Dallas Mavericks',\n",
+       " 'Sacramento Kings',\n",
+       " 'Minnesota Timberwolves',\n",
+       " 'New York Knicks',\n",
+       " 'Orlando Magic',\n",
+       " 'Philadelphia 76ers',\n",
+       " 'Los Angeles Lakers',\n",
+       " 'Phoenix Suns',\n",
+       " 'Brooklyn Nets']"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "mybt.rank_entities(ascending=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'Atlanta Hawks': array([0.60677663, 0.58070679, 0.77310272, ..., 0.42217622, 0.        ,\n",
+       "        0.        ]),\n",
+       " 'Washington Wizards': array([0.        , 0.        , 0.        , ..., 0.57782378, 0.44533727,\n",
+       "        0.7343335 ])}"
+      ]
+     },
+     "execution_count": 18,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# we can create the probability for each team winning in a specific observaion,\n",
+    "\n",
+    "mybt.predict_proba_task(NBA_results_task_predict_BT,\n",
+    "                        outcome=['Atlanta Hawks', 'Washington Wizards'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'team1 is preferred': array([0.60677663, 0.58070679, 0.77310272, ..., 0.57782378, 0.44533727,\n",
+       "        0.7343335 ]),\n",
+       " 'team2 is preferred': array([0.39322337, 0.41929321, 0.22689728, ..., 0.42217622, 0.55466273,\n",
+       "        0.2656665 ])}"
+      ]
+     },
+     "execution_count": 19,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "mybt.predict_proba_task(NBA_results_task_predict_BT, column=['team1', 'team2'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array(['Atlanta Hawks', 'Atlanta Hawks', 'Atlanta Hawks', ...,\n",
+       "       'Washington Wizards', 'Boston Celtics', 'Washington Wizards'],\n",
+       "      dtype=object)"
+      ]
+     },
+     "execution_count": 20,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "mybt.predict_choice_task(NBA_results_task_predict_BT)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "preds = mybt.predict_task(NBA_results_task_predict_BT)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(array(['Atlanta Hawks', 'Atlanta Hawks', 'Atlanta Hawks', ...,\n",
+       "        'Washington Wizards', 'Boston Celtics', 'Washington Wizards'],\n",
+       "       dtype=object),\n",
+       " array(['Dallas Mavericks', 'Charlotte Hornets', 'Brooklyn Nets', ...,\n",
+       "        'Atlanta Hawks', 'Washington Wizards', 'Orlando Magic'],\n",
+       "       dtype=object))"
+      ]
+     },
+     "execution_count": 22,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "preds.top_input_data, preds.boot_input_data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Run model with team salary budget"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "NBA_results_task_train = PairwiseComparisonTask(\n",
+    "    primary_table=train_data,\n",
+    "    primary_table_alternatives_names=['team1', 'team2'],\n",
+    "    primary_table_target_name ='team1_wins',\n",
+    "    target_column_correspondence='team1',\n",
+    "    features_to_use=['salary', 'team1_home'],\n",
+    "    secondary_table=NBA_team_salary_budget,\n",
+    "    secondary_to_primary_link={\n",
+    "        'team': ['team1', 'team2'],\n",
+    "        'season_start': 'season_start'\n",
+    "    })\n",
+    "\n",
+    "NBA_results_task_predict = PairwiseComparisonTask(\n",
+    "    primary_table=test_data,\n",
+    "    primary_table_alternatives_names=['team1', 'team2'],\n",
+    "    primary_table_target_name ='team1_wins',\n",
+    "    target_column_correspondence='team1',\n",
+    "    features_to_use=['salary', 'team1_home'],\n",
+    "    secondary_table=NBA_team_salary_budget,\n",
+    "    secondary_to_primary_link={\n",
+    "        'team': ['team1', 'team2'],\n",
+    "        'season_start': 'season_start'\n",
+    "    })"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Let's fit a reduction to logistic regression with the salary covariate"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "my_log_red = ClassificationReducer(LogisticRegression(solver='lbfgs'))\n",
+    "my_log_red.fit_task(NBA_results_task_train)\n",
+    "preds = my_log_red.predict_task(NBA_results_task_predict)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(array(['Atlanta Hawks', 'Charlotte Hornets', 'Atlanta Hawks', ...,\n",
+       "        'Washington Wizards', 'Washington Wizards', 'Washington Wizards'],\n",
+       "       dtype=object),\n",
+       " array(['Dallas Mavericks', 'Atlanta Hawks', 'Brooklyn Nets', ...,\n",
+       "        'Atlanta Hawks', 'Boston Celtics', 'Orlando Magic'], dtype=object))"
+      ]
+     },
+     "execution_count": 25,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "preds.top_input_data, preds.boot_input_data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'team1 is preferred': array([0.55251265, 0.43135651, 0.51319443, ..., 0.59426105, 0.53495344,\n",
+       "        0.60849633])}"
+      ]
+     },
+     "execution_count": 26,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# All this learns so far is the home team advantage, since its the only \n",
+    "# covariate in the test_data table\n",
+    "my_log_red.predict_proba_task(NBA_results_task_predict, column='team1')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Bradley Terry model with salary covariate"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array(['Golden State Warriors', 'San Antonio Spurs', 'Houston Rockets',\n",
+       "       'Utah Jazz', 'Boston Celtics', 'Oklahoma City Thunder',\n",
+       "       'Washington Wizards', 'Toronto Raptors', 'Los Angeles Clippers',\n",
+       "       'Denver Nuggets', 'Atlanta Hawks', 'Indiana Pacers',\n",
+       "       'Chicago Bulls', 'Cleveland Cavaliers', 'Memphis Grizzlies',\n",
+       "       'Miami Heat', 'Milwaukee Bucks', 'Charlotte Hornets',\n",
+       "       'Minnesota Timberwolves', 'Portland Trail Blazers',\n",
+       "       'New Orleans Pelicans', 'Sacramento Kings', 'Detroit Pistons',\n",
+       "       'Dallas Mavericks', 'Philadelphia 76ers', 'New York Knicks',\n",
+       "       'Phoenix Suns', 'Los Angeles Lakers', 'Orlando Magic',\n",
+       "       'Brooklyn Nets'], dtype=object)"
+      ]
+     },
+     "execution_count": 27,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "mybt = BradleyTerry(method='BFGS', alpha=1e-5)\n",
+    "mybt.fit_task(NBA_results_task_train)\n",
+    "mybt.rank_entities(ascending=False)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'team1 is preferred': array([0.69081236, 0.47898395, 0.74603095, ..., 0.65408203, 0.42937596,\n",
+       "        0.82114576]),\n",
+       " 'team2 is preferred': array([0.30918764, 0.52101605, 0.25396905, ..., 0.34591797, 0.57062404,\n",
+       "        0.17885424])}"
+      ]
+     },
+     "execution_count": 28,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "mybt.predict_proba_task(NBA_results_task_predict, column=['team1', 'team2'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array(['Atlanta Hawks', 'Charlotte Hornets', 'Atlanta Hawks', ...,\n",
+       "       'Washington Wizards', 'Boston Celtics', 'Washington Wizards'],\n",
+       "      dtype=object)"
+      ]
+     },
+     "execution_count": 29,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "mybt.predict_choice_task(NBA_results_task_predict)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array(['Atlanta Hawks', 'Charlotte Hornets', 'Atlanta Hawks', ...,\n",
+       "       'Washington Wizards', 'Boston Celtics', 'Washington Wizards'],\n",
+       "      dtype=object)"
+      ]
+     },
+     "execution_count": 30,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "mybt.predict_task(NBA_results_task_predict).top_input_data"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Example using GridSearchCV()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The model with the best parameters was:\n",
+      "BradleyTerry(alpha=2, method='BFGS')\n",
+      "With a score of -0.6265008194657992\n",
+      "All the trials results summarised in descending score\n",
+      "   alpha method  mean_test_score\n",
+      "1      2   BFGS        -0.626501\n",
+      "0      1   BFGS        -0.626742\n",
+      "2      4   BFGS        -0.628853\n"
+     ]
+    }
+   ],
+   "source": [
+    "to_tune = {'alpha': [1, 2, 4], 'method': ['BFGS']}\n",
+    "gs_bt = GridSearchCV(BradleyTerry(), to_tune,  cv=3, scoring='neg_log_loss')\n",
+    "gs_bt.fit_task(NBA_results_task_train)\n",
+    "gs_bt.inspect_results()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The model with the best parameters was:\n",
+      "BradleyTerry(alpha=4, method='BFGS')\n",
+      "With a score of 0.6337744652191032\n",
+      "All the trials results summarised in descending score\n",
+      "   alpha method  mean_test_score\n",
+      "2      4   BFGS         0.633774\n",
+      "1      2   BFGS         0.631136\n",
+      "0      1   BFGS         0.630085\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Showing that sklearn.metrics works also\n",
+    "to_tune = {'alpha': [1, 2, 4], 'method': ['BFGS']}\n",
+    "gs_bt = GridSearchCV(BradleyTerry(), to_tune,  cv=3, scoring=f1_score)\n",
+    "gs_bt.fit_task(NBA_results_task_train)\n",
+    "gs_bt.inspect_results()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The model with the best parameters was:\n",
+      "ClassificationReducer(model=LogisticRegression(C=4, solver='saga'))\n",
+      "With a score of -0.6865122304664264\n",
+      "All the trials results summarised in descending score\n",
+      "    model__C  model__fit_intercept model__penalty model__solver  \\\n",
+      "13       4.0                  True             l2          saga   \n",
+      "14       4.0                 False             l1          saga   \n",
+      "6        1.0                 False             l1          saga   \n",
+      "15       4.0                 False             l2          saga   \n",
+      "11       2.0                 False             l2          saga   \n",
+      "9        2.0                  True             l2          saga   \n",
+      "10       2.0                 False             l1          saga   \n",
+      "2        0.5                 False             l1          saga   \n",
+      "4        1.0                  True             l1          saga   \n",
+      "16       8.0                  True             l1          saga   \n",
+      "17       8.0                  True             l2          saga   \n",
+      "8        2.0                  True             l1          saga   \n",
+      "18       8.0                 False             l1          saga   \n",
+      "7        1.0                 False             l2          saga   \n",
+      "12       4.0                  True             l1          saga   \n",
+      "19       8.0                 False             l2          saga   \n",
+      "0        0.5                  True             l1          saga   \n",
+      "3        0.5                 False             l2          saga   \n",
+      "5        1.0                  True             l2          saga   \n",
+      "1        0.5                  True             l2          saga   \n",
+      "\n",
+      "    mean_test_score  \n",
+      "13        -0.686512  \n",
+      "14        -0.686516  \n",
+      "6         -0.686516  \n",
+      "15        -0.686517  \n",
+      "11        -0.686517  \n",
+      "9         -0.686517  \n",
+      "10        -0.686517  \n",
+      "2         -0.686517  \n",
+      "4         -0.686517  \n",
+      "16        -0.686518  \n",
+      "17        -0.686518  \n",
+      "8         -0.686518  \n",
+      "18        -0.686518  \n",
+      "7         -0.686518  \n",
+      "12        -0.686519  \n",
+      "19        -0.686519  \n",
+      "0         -0.686519  \n",
+      "3         -0.686520  \n",
+      "5         -0.686520  \n",
+      "1         -0.686521  \n"
+     ]
+    }
+   ],
+   "source": [
+    "to_tune = {'C': [0.5, 1, 2, 4, 8], 'solver': ['saga'], 'penalty': ['l1','l2'],\n",
+    "           'fit_intercept': [True, False]}\n",
+    "gs_lr = GridSearchCV(ClassificationReducer(LogisticRegression()), to_tune,\n",
+    "                     cv=3, scoring='neg_log_loss')\n",
+    "gs_lr.fit_task(NBA_results_task_train)\n",
+    "gs_lr.inspect_results()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array(['Atlanta Hawks', 'Charlotte Hornets', 'Atlanta Hawks', ...,\n",
+       "       'Washington Wizards', 'Washington Wizards', 'Washington Wizards'],\n",
+       "      dtype=object)"
+      ]
+     },
+     "execution_count": 34,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "gs_lr.predict_task(NBA_results_task_predict).top_input_data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'team1 is preferred': array([0.55254124, 0.43140708, 0.51323066, ..., 0.59429055, 0.53499504,\n",
+       "        0.60852284])}"
+      ]
+     },
+     "execution_count": 35,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "gs_lr.predict_proba_task(NBA_results_task_predict, column='team1')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "{'team1 is preferred': array([0.66884072, 0.47279872, 0.70427284, ..., 0.64116639, 0.44976495,\n",
+       "        0.78764947])}"
+      ]
+     },
+     "execution_count": 36,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "gs_bt.predict_proba_task(NBA_results_task_predict, column='team1')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array(['Golden State Warriors', 'San Antonio Spurs', 'Houston Rockets',\n",
+       "       'Utah Jazz', 'Boston Celtics', 'Oklahoma City Thunder',\n",
+       "       'Washington Wizards', 'Toronto Raptors', 'Los Angeles Clippers',\n",
+       "       'Denver Nuggets', 'Atlanta Hawks', 'Indiana Pacers',\n",
+       "       'Chicago Bulls', 'Cleveland Cavaliers', 'Memphis Grizzlies',\n",
+       "       'Miami Heat', 'Milwaukee Bucks', 'Charlotte Hornets',\n",
+       "       'Minnesota Timberwolves', 'Portland Trail Blazers',\n",
+       "       'Detroit Pistons', 'New Orleans Pelicans', 'Sacramento Kings',\n",
+       "       'Philadelphia 76ers', 'Dallas Mavericks', 'New York Knicks',\n",
+       "       'Phoenix Suns', 'Los Angeles Lakers', 'Orlando Magic',\n",
+       "       'Brooklyn Nets'], dtype=object)"
+      ]
+     },
+     "execution_count": 37,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "gs_bt.rank_entities(ascending=False)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.11"
+  },
+  "varInspector": {
+   "cols": {
+    "lenName": 16,
+    "lenType": 16,
+    "lenVar": 40
+   },
+   "kernels_config": {
+    "python": {
+     "delete_cmd_postfix": "",
+     "delete_cmd_prefix": "del ",
+     "library": "var_list.py",
+     "varRefreshCmd": "print(var_dic_list())"
+    },
+    "r": {
+     "delete_cmd_postfix": ") ",
+     "delete_cmd_prefix": "rm(",
+     "library": "var_list.r",
+     "varRefreshCmd": "cat(var_dic_list()) "
+    }
+   },
+   "types_to_exclude": [
+    "module",
+    "function",
+    "builtin_function_or_method",
+    "instance",
+    "_Feature"
+   ],
+   "window_display": false
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}

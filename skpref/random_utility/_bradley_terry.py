@@ -821,21 +821,16 @@ class BradleyTerry(GLMPairwiseComparisonModel):
             is set to 'Luce' then the code pretends that the parameters learned with
             the Bradldey-Terry method were learned with the Luce method and they
             used with the Luce formulation to create a prediction. For example,
-            if the alternatives were 'A', 'B', 'C' and for each of these alternatives
-            we learn the function f('A'), f('B'), f('C') which include their strength
+            if the alternatives were {A, B, C} and for each of these alternatives
+            we learn the function f(A), f(B), f(C) which include their strength
             parameters and potentially some covariates, the Luce prediction would
-            say the probability of choosing 'A' from {'A', 'B', 'C'} is:
-            exp(f('A')) / (exp(f('A'))+ exp(f('B')) + exp(f('C')))
+            say the probability of choosing A from {A, B, C} is
+            :math:`\\frac{e^{f(A)}}{e^{f(A)}+ e^{f(B)} + e^{f(C)}}`
 
             When set to 'indeptendent transitive' the aggregation is the following
-            the probability of choosing 'A' from {'A', 'B', 'C'}
-            (denoted as P(A>{A,B,C}) for simplicity)
-            (P(A>{A,B})*P(A>{A,C})) / ((P(A>{A,B})*P(A>{A,C})) + (P(B>{A,B})*P(B>{B,C})) + (P(C>{A,C})*P(C>{B,C})))
-
-            For more information please read (insert some reference here).
-            Also check if the aggregation method in the package works for more than three alternatives!
-            We should insert aggrregation methods into GridSearch.
-            The above would look better if we enabled LaTeX on sphinx.
+            the probability of choosing A from {A, B, C}
+            (denoted as :math:`P(A\\succ \{A,B,C\})` for simplicity) is
+            :math:`\\frac{P(A\\succ\{A,B\})P(A\\succ\{A,C\})}{P(A\\succ\{A,B\})P(A\\succ\{A,C\}) + P(B\\succ\{A,B\})P(B\\succ\{B,C\}) + P(C\\succ\{A,C\})P(C\\succ\{B,C\})}`
 
         Returns
         -------
