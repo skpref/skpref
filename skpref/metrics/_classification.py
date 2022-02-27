@@ -190,7 +190,7 @@ def f1_score(actuals: SubsetPosetVec, predicted: SubsetPosetVec) -> float:
     )
 
 
-def log_loss(actuals: SubsetPosetVec, predicted: dict, **kwargs) -> dict:
+def log_loss(actuals: SubsetPosetVec, predicted: dict, dp: int=2, **kwargs) -> dict:
     """Log Loss
 
     Calculates the mean log loss for each alternative, can provide arguments
@@ -204,20 +204,22 @@ def log_loss(actuals: SubsetPosetVec, predicted: dict, **kwargs) -> dict:
     predicted: dict
         the dictionary of predicted probability values where key is the predicted
         outcome and values are the probabilities for each row
+    dp: int, default=2
+        The number of decimal places to return
     """
     ll = {}
     for _alternative in list(predicted.keys()):
         binarized_outcome = np.where(
             actuals.top_input_data == _alternative, 1 , 0)
-        ll[str(_alternative) + '_log_loss'] = sklearn_log_loss(
+        ll[str(_alternative) + '_log_loss'] = round(sklearn_log_loss(
             binarized_outcome, predicted[_alternative], **kwargs
-        )
+        ), dp)
 
     return ll
 
 
 def log_loss_compare_with_t_test(actuals: SubsetPosetVec, predicted1: dict,
-                                 predicted2: dict) -> dict:
+                                 predicted2: dict, dp: int=2) -> dict:
     """Compares the log loss from two predictions with a paired t-test
 
     For two different probabilistic predictions calculates whether they are
@@ -236,6 +238,12 @@ def log_loss_compare_with_t_test(actuals: SubsetPosetVec, predicted1: dict,
         the dictionary of predicted probability values where key is the predicted
         outcome and values are the probabilities for each row for predictions from
         method 2
+    dp: int, default=2
+        The number of decimal places to return
+
+    Returns
+    --------
+    p values of the paired t-tests
     """
     ll_t = {}
     for _alternative in list(predicted1.keys()):
@@ -257,6 +265,6 @@ def log_loss_compare_with_t_test(actuals: SubsetPosetVec, predicted1: dict,
                 np.nan_to_num(logged2 * binarized_outcome) +
                 np.nan_to_num(logged_oneminus2 * inv_binarized_outcome))
 
-        ll_t[_alternative] = ttest_rel(final_losses1, final_losses2)
+        ll_t[_alternative] = round(ttest_rel(final_losses1, final_losses2)[1], dp)
 
     return ll_t
