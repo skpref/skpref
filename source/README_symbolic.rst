@@ -32,9 +32,9 @@ alternatives. It is a demonstration of the architectural ideas that would facili
   via the SubsetPosetVector which is explained in the next section. The interface was designed to be expanded to hold
   partial and full orders (ranks) also, and we invite the community to do so.
 * It contains architectural demos of how the package could be interfaced with the scikit-learn infrastructure, such as GridSearchCV.
-* It is designed to be used with a relational data setup, thereby inviting researchers to figure out efficiency gains in
-  numerical optimisation that the relational set-up may hold. To this end we introduce an additional type of object which
-  would be new to previous scikit-learn users, which is the Task object.
+* It is designed to be used with a relational data setup, thereby allowing for potential future efficiency gains contributions in
+  numerical optimisation that the relational set-up may hold similar to the work of `Kumar et al`_.
+  To this end we introduce an additional type of object which would be new to previous scikit-learn users, which is the Task object.
 * It has been designed in a way to facilitate reduction and aggregation, a popular technique in the field.
 
 
@@ -435,3 +435,4 @@ discrete choice data. All of this is accomplished in the back end of the package
 
 .. _pylogit: https://github.com/timothyb0912/pylogit
 .. _choix: https://github.com/lucasmaystre/choix
+.. _Kumar et al: https://dl.acm.org/doi/pdf/10.1145/2723372.2723713?casa_token=Cw9v6rgGz84AAAAA:edIkQKj3JPXSW0oruEww24OhVzUcgZUlMdz7cGAs_zsc-dcp1aHTkiWatXRQmvSedU--kONC6YZNLQ

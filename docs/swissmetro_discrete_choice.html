@@ -164,15 +164,15 @@
 <li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html">Bradley Terry example notebook</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Reading-in-the-data">Reading in the data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Setting-up-the-tasks">Setting up the tasks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Let’s-fit-a-reduction-to-logistic-regression-first">Let’s fit a reduction to logistic regression first</a></li>
-<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Let’s-fit-a-reduction-to-logistic-regression-with-the-salary-covariate">Let’s fit a reduction to logistic regression with the salary covariate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Fitting-a-Logistic-Regression">Fitting a Logistic Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Reduction-to-logistic-regression-with-covariates">Reduction to logistic regression with covariates</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Bradley-Terry-model-with-salary-covariate">Bradley Terry model with salary covariate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Example-using-GridSearchCV()">Example using GridSearchCV()</a></li>
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">We will demonstrate skpref on discrete choice data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#We-will-need-to-make-a-couple-of-changes-to-the-format-of-this-table-for-skpref-to-read-it-easier.">We will need to make a couple of changes to the format of this table for skpref to read it easier.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#We-will-use-a-subset-of-the-available-features-to-make-the-skpref-demo-easier">We will use a subset of the available features to make the skpref demo easier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Changing-the-format-of-the-tables-for-skpref">Changing the format of the tables for skpref</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Using-only-a-subset-of-the-available-features">Using only a subset of the available features</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Fit-a-logistic-regression">Fit a logistic regression</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Fit-a-Bradley-Terry-model-without-features">Fit a Bradley-Terry model without features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Fit-a-Bradley-Terry-model-without-covariates">Fit a Bradley-Terry model without covariates</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Fitting-a-Bradley-Terry-model-with-covariates">Fitting a Bradley-Terry model with covariates</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Evaluation-methods">Evaluation methods</a></li>
 </ul>
@@ -454,6 +454,15 @@ div.rendered_html tbody tr:hover {
 <div class="section" id="We-will-demonstrate-skpref-on-discrete-choice-data">
 <h1>We will demonstrate skpref on discrete choice data<a class="headerlink" href="#We-will-demonstrate-skpref-on-discrete-choice-data" title="Permalink to this headline">¶</a></h1>
 <p>We wil use the swissmetro dataset available to download on <a class="reference external" href="https://transp-or.epfl.ch/pythonbiogeme/examples_swissmetro.html">https://transp-or.epfl.ch/pythonbiogeme/examples_swissmetro.html</a> This dataset tracks 470 respondents on which transportation alternative they have taken. There are 3 options in general: train, car and swissmetro. More details on the original use of the dataset can be found here: <a class="reference external" href="http://strc.ch/2001/bierlaire1.pdf">http://strc.ch/2001/bierlaire1.pdf</a></p>
+<p>Since at the moment of writing skpref still didn’t have a discrete choice model interfaced, we will reduce the discrete choices to pairwise comparisons.</p>
+<p>In this notebook we will:</p>
+<ul class="simple">
+<li><p>Start by tranforming the original swissmetro dataset into something that skpref can handle.</p></li>
+<li><p>Fit a logistic regression using the data and the ClassificationReducer() method.</p></li>
+<li><p>Fit a Bradley-Terry model using reduction to pairwise comparisons.</p></li>
+<li><p>Show how two different aggregation methods for going from a pairwise comparison model to a discrete choice model work.</p></li>
+<li><p>Show some of the evaluation methods that can be applied using skpref</p></li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -699,15 +708,15 @@ div.rendered_html tbody tr:hover {
 </div>
 <p>Looking at the data we can see that each row represents a choice. The full explanations of variables can be found here: <a class="reference external" href="https://transp-or.epfl.ch/pythonbiogeme/examples/swissmetro/swissmetro.pdf">https://transp-or.epfl.ch/pythonbiogeme/examples/swissmetro/swissmetro.pdf</a></p>
 </div>
-<div class="section" id="We-will-need-to-make-a-couple-of-changes-to-the-format-of-this-table-for-skpref-to-read-it-easier.">
-<h1>We will need to make a couple of changes to the format of this table for skpref to read it easier.<a class="headerlink" href="#We-will-need-to-make-a-couple-of-changes-to-the-format-of-this-table-for-skpref-to-read-it-easier." title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Changing-the-format-of-the-tables-for-skpref">
+<h1>Changing the format of the tables for skpref<a class="headerlink" href="#Changing-the-format-of-the-tables-for-skpref" title="Permalink to this headline">¶</a></h1>
 <ol class="arabic simple">
 <li><p>In this table the availability of alternatives is marked by TRAIN_AV, CAR_AV, SM_AV which indicate with 1 if the alternative is available and 0 otherwise. We need to convert these to a column that contains a list of alternatives for each row.</p></li>
 <li><p>The choices are indicated by the CHOICE column, which contains 0 for unknown (we will dropping these), 1 for Train, 2 for Swissmetro and 3 for a Car usage. We need to name these explicitly. We could just create a list of alternatives called 1,2,3 in step 1 which would bypass step 2, however, we prefer the clarity of having the alternatives named explicitly.</p></li>
 </ol>
 </div>
-<div class="section" id="We-will-use-a-subset-of-the-available-features-to-make-the-skpref-demo-easier">
-<h1>We will use a subset of the available features to make the skpref demo easier<a class="headerlink" href="#We-will-use-a-subset-of-the-available-features-to-make-the-skpref-demo-easier" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Using-only-a-subset-of-the-available-features">
+<h1>Using only a subset of the available features<a class="headerlink" href="#Using-only-a-subset-of-the-available-features" title="Permalink to this headline">¶</a></h1>
 <p>Under normal circumstances we would use one-hot encoding on a lot of the binary features before training a serious model, however, to make the demo simple, we will only use the travel time and cost features. Users can of course do whatever feature transformations they like before fitting a model. To build a classifier based on travel time and costs, we first need to split some columns from the swissmetro dataset into a secondary table.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -931,7 +940,7 @@ array([list(['Train', 'Car', 'Swiss Metro']),
 </div>
 <div class="section" id="Fit-a-logistic-regression">
 <h1>Fit a logistic regression<a class="headerlink" href="#Fit-a-logistic-regression" title="Permalink to this headline">¶</a></h1>
-<p>This will fit a logistic regression with the following formulation for observation <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(a \in \{\text{Car, Train, Swiss Metro}\}\)</span>:</p>
+<p>This will fit a logistic regression that uses only travel time and cost as covariates, with the following formulation for observation <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(a \in \{\text{Car, Train, Swiss Metro}\}\)</span>:</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
 \[P(Y_i = a) = logit(\lambda_{\text{a}} + \beta_1 (\text{Travel Time})_a + \beta_2(\text{Cost})_a)\]</div></div>
 <p>Below we showcase how the ChoiceTask wrapper can deal with creating this reduction</p>
@@ -1013,8 +1022,8 @@ Car          [0.33 0.   0.2  ... 0.45 0.36 0.25]
 </pre></div></div>
 </div>
 </div>
-<div class="section" id="Fit-a-Bradley-Terry-model-without-features">
-<h1>Fit a Bradley-Terry model without features<a class="headerlink" href="#Fit-a-Bradley-Terry-model-without-features" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Fit-a-Bradley-Terry-model-without-covariates">
+<h1>Fit a Bradley-Terry model without covariates<a class="headerlink" href="#Fit-a-Bradley-Terry-model-without-covariates" title="Permalink to this headline">¶</a></h1>
 <p>Here we reduce the discrete choice problem to pairwise comparisons and fit a Bradley-Terry model.</p>
 <p>The way these observations are broken down are such that when alternative <span class="math notranslate nohighlight">\(a\)</span> is chosen from the set <span class="math notranslate nohighlight">\(A\)</span> then an observation is expressed in a way that we say the chosen alternative was preferred to all not-chosen alternatives, <span class="math notranslate nohighlight">\(a \succ j \forall j \in A \setminus a\)</span>. This transforms a table that looks like this:</p>
 <div class="table-wrapper"><table class="docutils align-default">
@@ -1040,7 +1049,7 @@ Car          [0.33 0.   0.2  ... 0.45 0.36 0.25]
 </tr>
 </tbody>
 </table></div>
-<p>to a table that looks like this:</p>
+<p>into a table that looks like this:</p>
 <div class="table-wrapper"><table class="docutils align-default">
 <colgroup>
 <col style="width: 31%"/>
@@ -1104,21 +1113,28 @@ Car          [0.33 0.   0.2  ... 0.45 0.36 0.25]
 <p>and fit the Bradley-Terry model to learn the latent strength parameters for each alternative (e.g. <span class="math notranslate nohighlight">\(\lambda_a\)</span> for alternative <span class="math notranslate nohighlight">\(a\)</span>):</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
 \[P(\text{Alternative 1 is chosen})_i = \frac{e^{\lambda_{\text{Alternative 1}_i}}}{e^{\lambda_{\text{Alternative 1}_i}} + e^{\lambda_{\text{Alternative 2}_i}}}\]</div></div>
-<p>Once the Bradley-Terry model is trained, predictions have to be aggregated to discrete choice. In this section we showcase two aggregation methods one we call the Luce method the other the independent transitive method.</p>
-<div class="section" id="The-Luce-method---the-default-setting-when-aggregating-a-Bradley-Terry-model">
-<h2>The Luce method - the default setting when aggregating a Bradley-Terry model<a class="headerlink" href="#The-Luce-method---the-default-setting-when-aggregating-a-Bradley-Terry-model" title="Permalink to this headline">¶</a></h2>
-<p>For alternatives <span class="math notranslate nohighlight">\(\{a, b, c\}\)</span> when we fir the Bradley-Terry model we learn the function <span class="math notranslate nohighlight">\(f(a), f(b), f(c)\)</span> which include their strength parameters and potentially some covariates, in the econometrics literature this would be known as finding out the utility of each alternative. In the simplest case the utility equations only contain the strength parameters of the alternatives (e.g. <span class="math notranslate nohighlight">\(\lambda_a\)</span> for alternative <span class="math notranslate nohighlight">\(a\)</span>). The Luce aggregation method would say the probability of
-choosing <span class="math notranslate nohighlight">\(a\)</span> from <span class="math notranslate nohighlight">\(\{a, b, c\}\)</span> is</p>
+<p>We can see that the Bradley-Terry probabilities begin to take into account the other alternatives that are offered to the decision makers, in contrast with logistic regression, which assumes that the probability of taking Swissmetro is the same whether a decision maker has a car as an alternative, a train or both. Once the Bradley-Terry model is trained, predictions have to be aggregated to discrete choice. In this section we showcase two aggregation methods one we call the Luce method the other
+the independent transitive method.</p>
+<div class="section" id="The-Luce-method-(the-default-setting-when-aggregating-a-Bradley-Terry-model)">
+<h2>The Luce method (the default setting when aggregating a Bradley-Terry model)<a class="headerlink" href="#The-Luce-method-(the-default-setting-when-aggregating-a-Bradley-Terry-model)" title="Permalink to this headline">¶</a></h2>
+<p>For alternatives <span class="math notranslate nohighlight">\(\{a, b, c\}\)</span> when we fit the Bradley-Terry model we learn the function <span class="math notranslate nohighlight">\(f(a), f(b), f(c)\)</span> which include their strength parameters and potentially some covariates, in the econometrics literature this would be known as finding out the utility of each alternative. In the simplest case the utility equations only contain the strength parameters of the alternatives (e.g. <span class="math notranslate nohighlight">\(\lambda_a\)</span> for alternative <span class="math notranslate nohighlight">\(a\)</span>). The Luce aggregation method would predict the
+probability of choosing <span class="math notranslate nohighlight">\(a\)</span> from <span class="math notranslate nohighlight">\(\{a, b, c\}\)</span> as:</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
 \[\frac{e^{f(a)}}{e^{f(a)}+ e^{f(b)} + e^{f(c)}}\]</div></div>
 <p>.</p>
 </div>
 <div class="section" id="The-independent-transitive-aggregation-method">
 <h2>The independent transitive aggregation method<a class="headerlink" href="#The-independent-transitive-aggregation-method" title="Permalink to this headline">¶</a></h2>
-<p>Let’s denote the probability of chosing <span class="math notranslate nohighlight">\(a\)</span> from <span class="math notranslate nohighlight">\(\{a, b, c\}\)</span> as <span class="math notranslate nohighlight">\(P(a\succ \{a,b,c\})\)</span>. Suppose that we have a probabilistic pairwise comparison predictor (such as Bradley-Terry) that can provide us with the probability of preferring one over any two alternatives <span class="math notranslate nohighlight">\(P(i \succ \{i, j\})\)</span>.</p>
-<p>The idependent transitive aggregation method works defines the probability of chosing <span class="math notranslate nohighlight">\(a\)</span> from <span class="math notranslate nohighlight">\(\{a, b, c\}\)</span> as:</p>
+<p>Let’s denote the probability of chosing <span class="math notranslate nohighlight">\(a\)</span> from <span class="math notranslate nohighlight">\(\{a, b, c\}\)</span> as <span class="math notranslate nohighlight">\(P(a\succ \{a,b,c\})\)</span>. Suppose that we have a probabilistic pairwise comparison predictor (such as Bradley-Terry) that can provide us with the probability of preferring one over any two alternatives <span class="math notranslate nohighlight">\(P(i \succ \{i, j\}) \forall i,j \in \{a, b, c\}\)</span>.</p>
+<p>The independent transitive method stems from the following logic:</p>
+<ol class="arabic simple">
+<li><p>For <span class="math notranslate nohighlight">\(a\)</span> to be chosen from <span class="math notranslate nohighlight">\(\{a, b, c\}\)</span>, <span class="math notranslate nohighlight">\(a\)</span> would have to be preferred to <span class="math notranslate nohighlight">\(b\)</span> and <span class="math notranslate nohighlight">\(c\)</span>, that is <span class="math notranslate nohighlight">\(a\succ\{a,b\} \cap a\succ\{a,c\}\)</span></p></li>
+<li><p>Assuming that <span class="math notranslate nohighlight">\(a\)</span> being preferred to <span class="math notranslate nohighlight">\(c\)</span> is independent from <span class="math notranslate nohighlight">\(a\)</span> being preferred to <span class="math notranslate nohighlight">\(b\)</span>, the probability of <span class="math notranslate nohighlight">\(a\)</span> being preferred to <span class="math notranslate nohighlight">\(b\)</span> and <span class="math notranslate nohighlight">\(c\)</span> is: <span class="math notranslate nohighlight">\(P(a\succ\{a,b\} \cap a\succ\{a,c\}) = P(a\succ\{a,b\})P(a\succ\{a,c\})\)</span></p></li>
+<li><p>In this three-alternative aggregation example, only 2 other things can happen in addition to <span class="math notranslate nohighlight">\(a\)</span> being chosen, <span class="math notranslate nohighlight">\(b\)</span> can be chosen or <span class="math notranslate nohighlight">\(c\)</span> can be chosen. Each of which can be expressed as we have expressed the probability of <span class="math notranslate nohighlight">\(a\)</span> being chosen in bullet 2.</p></li>
+<li><p>By dividing the probability of <span class="math notranslate nohighlight">\(a\)</span> being chosen by all the three different possible outcomes (<span class="math notranslate nohighlight">\(a\)</span> is chosen, <span class="math notranslate nohighlight">\(b\)</span> is chosen or <span class="math notranslate nohighlight">\(c\)</span> is chosen), we arrive to the final equation of the probability that <span class="math notranslate nohighlight">\(a\)</span> is chosen from <span class="math notranslate nohighlight">\(\{a, b, c\}\)</span>:</p></li>
+</ol>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
-\[\frac{P(a\succ\{a,b\})P(A\succ\{a,c\})}{P(a\succ\{a,b\})P(a\succ\{a,c\}) + P(B\succ\{a,b\})P(b\succ\{b,c\}) + P(c\succ\{a,c\})P(c\succ\{b,c\})}\]</div></div>
+\[\frac{P(a\succ\{a,b\})P(a\succ\{a,c\})}{P(a\succ\{a,b\})P(a\succ\{a,c\}) + P(b\succ\{a,b\})P(b\succ\{b,c\}) + P(c\succ\{a,c\})P(c\succ\{b,c\})}\]</div></div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
@@ -1556,11 +1572,11 @@ The t-test for H0: Generic aggregation = random probability {'Swiss Metro': 0.0,
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">We will demonstrate skpref on discrete choice data</a></li>
-<li><a class="reference internal" href="#We-will-need-to-make-a-couple-of-changes-to-the-format-of-this-table-for-skpref-to-read-it-easier.">We will need to make a couple of changes to the format of this table for skpref to read it easier.</a></li>
-<li><a class="reference internal" href="#We-will-use-a-subset-of-the-available-features-to-make-the-skpref-demo-easier">We will use a subset of the available features to make the skpref demo easier</a></li>
+<li><a class="reference internal" href="#Changing-the-format-of-the-tables-for-skpref">Changing the format of the tables for skpref</a></li>
+<li><a class="reference internal" href="#Using-only-a-subset-of-the-available-features">Using only a subset of the available features</a></li>
 <li><a class="reference internal" href="#Fit-a-logistic-regression">Fit a logistic regression</a></li>
-<li><a class="reference internal" href="#Fit-a-Bradley-Terry-model-without-features">Fit a Bradley-Terry model without features</a><ul>
-<li><a class="reference internal" href="#The-Luce-method---the-default-setting-when-aggregating-a-Bradley-Terry-model">The Luce method - the default setting when aggregating a Bradley-Terry model</a></li>
+<li><a class="reference internal" href="#Fit-a-Bradley-Terry-model-without-covariates">Fit a Bradley-Terry model without covariates</a><ul>
+<li><a class="reference internal" href="#The-Luce-method-(the-default-setting-when-aggregating-a-Bradley-Terry-model)">The Luce method (the default setting when aggregating a Bradley-Terry model)</a></li>
 <li><a class="reference internal" href="#The-independent-transitive-aggregation-method">The independent transitive aggregation method</a></li>
 </ul>
 </li>

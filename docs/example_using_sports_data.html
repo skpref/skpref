@@ -164,13 +164,17 @@
 <li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Bradley Terry example notebook</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Reading-in-the-data">Reading in the data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Setting-up-the-tasks">Setting up the tasks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Let’s-fit-a-reduction-to-logistic-regression-first">Let’s fit a reduction to logistic regression first</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#Let’s-fit-a-reduction-to-logistic-regression-with-the-salary-covariate">Let’s fit a reduction to logistic regression with the salary covariate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Fitting-a-Logistic-Regression">Fitting a Logistic Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Reduction-to-logistic-regression-with-covariates">Reduction to logistic regression with covariates</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Bradley-Terry-model-with-salary-covariate">Bradley Terry model with salary covariate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#Example-using-GridSearchCV()">Example using GridSearchCV()</a></li>
 <li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html">We will demonstrate skpref on discrete choice data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#We-will-need-to-make-a-couple-of-changes-to-the-format-of-this-table-for-skpref-to-read-it-easier.">We will need to make a couple of changes to the format of this table for skpref to read it easier.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#We-will-use-a-subset-of-the-available-features-to-make-the-skpref-demo-easier">We will use a subset of the available features to make the skpref demo easier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#Changing-the-format-of-the-tables-for-skpref">Changing the format of the tables for skpref</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#Using-only-a-subset-of-the-available-features">Using only a subset of the available features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#Fit-a-logistic-regression">Fit a logistic regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#Fit-a-Bradley-Terry-model-without-covariates">Fit a Bradley-Terry model without covariates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#Fitting-a-Bradley-Terry-model-with-covariates">Fitting a Bradley-Terry model with covariates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#Evaluation-methods">Evaluation methods</a></li>
 </ul>
 </li>
 </ul>
@@ -752,7 +756,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="section" id="Setting-up-the-tasks">
 <h1>Setting up the tasks<a class="headerlink" href="#Setting-up-the-tasks" title="Permalink to this headline">¶</a></h1>
-<p>We set up the preference learning task by using the PairwiseComparisonTask object in skpref. This is the only extra step which might be a completely new concept to seasoned scikit-learn users. Once the task is specified, say in this case a pairwise comparison task, for any models applied in skpref, whether that is a reduction via scikit-learn or even a model that is not a pairwise comparison model the package will know that the problem itself is a pairwise comparison problem and can perform
+<p>We set up the preference learning task by using the PairwiseComparisonTask object in skpref. This is the only extra step which might be a completely new concept to seasoned scikit-learn users. Once the task is specified, say in this case a pairwise comparison task, for any models applied in skpref, whether that is a reduction via scikit-learn or even a model that is not a pairwise comparison model, the package will know that the problem itself is a pairwise comparison problem and can perform
 reduction and aggregation adequately in the background when needed.</p>
 <p>In this example the PairwiseComparisonTask has the following components:</p>
 <ul class="simple">
@@ -787,8 +791,8 @@ reduction and aggregation adequately in the background when needed.</p>
 </div>
 </div>
 </div>
-<div class="section" id="Let’s-fit-a-reduction-to-logistic-regression-first">
-<h1>Let’s fit a reduction to logistic regression first<a class="headerlink" href="#Let’s-fit-a-reduction-to-logistic-regression-first" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Fitting-a-Logistic-Regression">
+<h1>Fitting a Logistic Regression<a class="headerlink" href="#Fitting-a-Logistic-Regression" title="Permalink to this headline">¶</a></h1>
 <p>The only covariate we will use in this for now will be the team_1_home column, which should return a method that only learns what the home team advantage was on average, which is the equivalent to fitting a logistic regression where whether team1 is playing home or not is the only covariate.</p>
 <p><span class="math notranslate nohighlight">\(P(\texttt{team1}\_\texttt{wins}=1) = logit(\alpha + \beta_1 \texttt{team}\_\texttt{1}\_\texttt{home})\)</span></p>
 <div class="nbinput nblast docutils container">
@@ -1033,13 +1037,13 @@ team1 is preferred  [0.42 0.42 0.42 ... 0.58 0.58 0.42]
 team2 is preferred  [0.58 0.58 0.58 ... 0.42 0.42 0.58]
 </pre></div></div>
 </div>
-<div class="section" id="Now-let’s-fit-a-Bradley-Terry-model">
-<h2>Now let’s fit a Bradley Terry model<a class="headerlink" href="#Now-let’s-fit-a-Bradley-Terry-model" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="Fitting-a-Bradley-Terry-model">
+<h2>Fitting a Bradley Terry model<a class="headerlink" href="#Fitting-a-Bradley-Terry-model" title="Permalink to this headline">¶</a></h2>
 <p>As we can see in the example above the logistic regression approach does not learn different probabilities for a team winning or losing based on which other team they are playing. The Dallas Mavericks could be playing against the strongest or weakest team in the league and their estimated probability of winning would be the same. The difference between the Bradley-Terry model and logistic regression is that Bradley-Terry learns a function that can estimate whether each team will win or lose
 given the other team they are playing.</p>
 <p>The task we will use for Bradley-Terry will be defined in a slightly different way, because in the first demo we won’t use any covariates, therefore we define features_to_use=None</p>
 <p>In the Bradley-Terry model each team gets a latent strength parameter <span class="math notranslate nohighlight">\(\lambda_{\text{team}}\)</span>, for example <span class="math notranslate nohighlight">\(\lambda_{\text{Atlanta Hawks}}\)</span>.</p>
-<p>The Bradley-Terry model learns these strength parameters to maximise the likelihood according to the following formulation:</p>
+<p>The Bradley-Terry model learns these strength parameters to maximise the likelihood according to the following formulation for observation <span class="math notranslate nohighlight">\(i\)</span>:</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
 \[P(\texttt{team1}\_\texttt{wins}=1)_i= \frac{e^{\lambda_{\texttt{team1}_i}}}{e^{\lambda_{\texttt{team1}_i}} + e^{\lambda_{\texttt{team2}_i}}}\]</div></div>
 <div class="nbinput nblast docutils container">
@@ -1402,8 +1406,8 @@ array(['Atlanta Hawks', 'Atlanta Hawks', 'Atlanta Hawks', ...,
 </pre></div></div>
 </div>
 </div>
-<div class="section" id="Run-model-with-team-salary-budget">
-<h2>Run model with team salary budget<a class="headerlink" href="#Run-model-with-team-salary-budget" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="Augmenting-the-models-with-covariates">
+<h2>Augmenting the models with covariates<a class="headerlink" href="#Augmenting-the-models-with-covariates" title="Permalink to this headline">¶</a></h2>
 <p>In this section we will start introducing more covariates in the models above, we will introduce one additional covariate which is the team salary budget. We can also see how we can define a single task which we can use to run different models in skpref.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
@@ -1437,8 +1441,8 @@ array(['Atlanta Hawks', 'Atlanta Hawks', 'Atlanta Hawks', ...,
 </div>
 </div>
 </div>
-<div class="section" id="Let’s-fit-a-reduction-to-logistic-regression-with-the-salary-covariate">
-<h1>Let’s fit a reduction to logistic regression with the salary covariate<a class="headerlink" href="#Let’s-fit-a-reduction-to-logistic-regression-with-the-salary-covariate" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="Reduction-to-logistic-regression-with-covariates">
+<h1>Reduction to logistic regression with covariates<a class="headerlink" href="#Reduction-to-logistic-regression-with-covariates" title="Permalink to this headline">¶</a></h1>
 <p>Here we fit a logistic regression on three covariates, whether team 1 is playing home or not, team1’s salary budget and team2’s salary budget. <span class="math notranslate nohighlight">\(P(\texttt{team1}\_\texttt{wins}=1) = logit(\alpha + \beta_1 \texttt{team}\_\texttt{1}\_\texttt{home} + \beta_2 \texttt{team1}\_\texttt{salary} + \beta_3 \texttt{team2}\_\texttt{salary})\)</span></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
@@ -2064,12 +2068,12 @@ array(['Golden State Warriors', 'San Antonio Spurs', 'Houston Rockets',
 <li><a class="reference internal" href="#">Bradley Terry example notebook</a></li>
 <li><a class="reference internal" href="#Reading-in-the-data">Reading in the data</a></li>
 <li><a class="reference internal" href="#Setting-up-the-tasks">Setting up the tasks</a></li>
-<li><a class="reference internal" href="#Let’s-fit-a-reduction-to-logistic-regression-first">Let’s fit a reduction to logistic regression first</a><ul>
-<li><a class="reference internal" href="#Now-let’s-fit-a-Bradley-Terry-model">Now let’s fit a Bradley Terry model</a></li>
-<li><a class="reference internal" href="#Run-model-with-team-salary-budget">Run model with team salary budget</a></li>
+<li><a class="reference internal" href="#Fitting-a-Logistic-Regression">Fitting a Logistic Regression</a><ul>
+<li><a class="reference internal" href="#Fitting-a-Bradley-Terry-model">Fitting a Bradley Terry model</a></li>
+<li><a class="reference internal" href="#Augmenting-the-models-with-covariates">Augmenting the models with covariates</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#Let’s-fit-a-reduction-to-logistic-regression-with-the-salary-covariate">Let’s fit a reduction to logistic regression with the salary covariate</a></li>
+<li><a class="reference internal" href="#Reduction-to-logistic-regression-with-covariates">Reduction to logistic regression with covariates</a></li>
 <li><a class="reference internal" href="#Bradley-Terry-model-with-salary-covariate">Bradley Terry model with salary covariate</a></li>
 <li><a class="reference internal" href="#Example-using-GridSearchCV()">Example using GridSearchCV()</a></li>
 </ul>

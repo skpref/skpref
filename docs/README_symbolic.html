@@ -164,13 +164,17 @@
 <li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html">Bradley Terry example notebook</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Reading-in-the-data">Reading in the data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Setting-up-the-tasks">Setting up the tasks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Let’s-fit-a-reduction-to-logistic-regression-first">Let’s fit a reduction to logistic regression first</a></li>
-<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Let’s-fit-a-reduction-to-logistic-regression-with-the-salary-covariate">Let’s fit a reduction to logistic regression with the salary covariate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Fitting-a-Logistic-Regression">Fitting a Logistic Regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Reduction-to-logistic-regression-with-covariates">Reduction to logistic regression with covariates</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Bradley-Terry-model-with-salary-covariate">Bradley Terry model with salary covariate</a></li>
 <li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Example-using-GridSearchCV()">Example using GridSearchCV()</a></li>
 <li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html">We will demonstrate skpref on discrete choice data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#We-will-need-to-make-a-couple-of-changes-to-the-format-of-this-table-for-skpref-to-read-it-easier.">We will need to make a couple of changes to the format of this table for skpref to read it easier.</a></li>
-<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#We-will-use-a-subset-of-the-available-features-to-make-the-skpref-demo-easier">We will use a subset of the available features to make the skpref demo easier</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#Changing-the-format-of-the-tables-for-skpref">Changing the format of the tables for skpref</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#Using-only-a-subset-of-the-available-features">Using only a subset of the available features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#Fit-a-logistic-regression">Fit a logistic regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#Fit-a-Bradley-Terry-model-without-covariates">Fit a Bradley-Terry model without covariates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#Fitting-a-Bradley-Terry-model-with-covariates">Fitting a Bradley-Terry model with covariates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#Evaluation-methods">Evaluation methods</a></li>
 </ul>
 </li>
 </ul>
@@ -229,9 +233,9 @@ alternatives. It is a demonstration of the architectural ideas that would facili
 via the SubsetPosetVector which is explained in the next section. The interface was designed to be expanded to hold
 partial and full orders (ranks) also, and we invite the community to do so.</p></li>
 <li><p>It contains architectural demos of how the package could be interfaced with the scikit-learn infrastructure, such as GridSearchCV.</p></li>
-<li><p>It is designed to be used with a relational data setup, thereby inviting researchers to figure out efficiency gains in
-numerical optimisation that the relational set-up may hold. To this end we introduce an additional type of object which
-would be new to previous scikit-learn users, which is the Task object.</p></li>
+<li><p>It is designed to be used with a relational data setup, thereby allowing for potential future efficiency gains contributions in
+numerical optimisation that the relational set-up may hold similar to the work of <a class="reference external" href="https://dl.acm.org/doi/pdf/10.1145/2723372.2723713?casa_token=Cw9v6rgGz84AAAAA:edIkQKj3JPXSW0oruEww24OhVzUcgZUlMdz7cGAs_zsc-dcp1aHTkiWatXRQmvSedU--kONC6YZNLQ">Kumar et al</a>.
+To this end we introduce an additional type of object which would be new to previous scikit-learn users, which is the Task object.</p></li>
 <li><p>It has been designed in a way to facilitate reduction and aggregation, a popular technique in the field.</p></li>
 </ul>
 <div class="section" id="acknowledgements">
