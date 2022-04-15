@@ -4,31 +4,43 @@
 Welcome to skpref
 =====================
 
-Skpref is a python package that aims to create an infrastructure for supervsied preference models. The long-term vision
+Skpref is a python package that aims to create an infrastructure for supervised preference models. The long-term vision
 of this repository is that it becomes a comprehensive supervised machine learning interface for practitioners, that has
 the familiar interface and many developer principles of the popular package scikit-learn, but designed in a way to better
 suit preference models.
 
 A preference contains the following components:
 
-* A set of alternatives. This can be anything ranging from, products in a store, options of transportation, homes to rent and many more.
-* A question over the set of alternatives, which can be: "Which products would you rather buy from this list of products?", "Which house would you rather rent", "Would you take a cab or a bus?", "Which team has won the match?", "Which box is the heaviest?" or "How would you rank these three things?".
-* A relation expressed over the set of alternatives for a given question. This can have many forms for example to the question "Which products would you rather buy?" the relation can be a choice in the form of a selection of a subset of the alternatives. Or to the question "Which Sushi was the best tasting?" a relation expressed could be fully ranked order of all the Sushis that were tried from best to worst. Currently skpref has been developed with the following applications in mind: pairwise comparisons (choose one of two, or tie, e.g. football match results), discrete choices (choose one of many, e.g. choice of method of transportation), subset choices (choose many from many, e.g. shopping in at a grocery store). We believe it could be expandable to partial orders (ranking with ties e.g. start rating system) and full orders (full ranks).
-* A deciding process or choice maker. Someone, something or a process that is presented the set of alternatives and generates a relation over this set of alternatives based on the question asked over the set of alternatives.
+* Alternatives (options to choose from). This can be anything ranging from, products in a store, options of transportation, homes to rent and many more.
+* A question over the set of alternatives, which can be: "Which products would you rather buy from this list of products?",
+  "Which house would you rather rent", "Would you take a cab or a bus?", "Which team has won the match?",
+  "Which box is the heaviest?" or "How would you rank these three things?".
+* A relation expressed over the set of alternatives for a given question. This can have many forms for example relating to the question
+  "Which products would you rather buy?" the relation can be a choice in the form of a selection of a subset of the alternatives.
+  Or relating to the question "Which Sushi was the best tasting?" a relation expressed could be fully ranked order of all the
+  Sushis that were tried from best to worst. Currently skpref has been developed with the following applications in mind:
+  pairwise comparisons (choose one of two, or tie, e.g. football match results), discrete choices (choose one of many, e.g.
+  choice of method of transportation), subset choices (choose many from many, e.g. shopping in at a grocery store). It
+  could be expandable to partial orders (ranking with ties e.g. start rating system) and full orders (full ranks).
+* A deciding process or choice maker. Someone, something or a process that is presented the set of alternatives and
+  generates a relation over this set of alternatives based on the question asked over the set of alternatives.
 
-skpref is designed to hold supervised  learning models where the ground truth is the relation expressed over the set of
-alternatives. In its current form, it is a demonstration of the architectural ideas that in our opinion would facilitate
-these kinds of models:
+skpref is designed to make use of supervised  learning models where the ground truth is the relation expressed over the set of
+alternatives. It is a demonstration of the architectural ideas that would facilitate these kinds of models:
 
-* The user has the ability to express relations of: pairwise comparison, discrete choice and subset choice. This is done via the SubsetPosetVector which is explained in the next section. The interface was designed to be expanded to hold partial and full orders (ranks) also, and we invite the community to do so.
-* It contains architectural demos of how the package could be interfaced with the scikit-learn infrastructure, such as GridSearchCV
-* It is designed to be used with a relational data set up thereby inviting researchers to figure out efficiency gains in numerical optimisation that the relational set-up may hold. To do this there's an additional type of object which would be new to previous scikit-learn users, which is the Task object.
-* It has been designed in a way to facilitate reduction and aggregation a popular technique in the field.
+* The user has the ability to express relations of: pairwise comparison, discrete choice and subset choice. This is done
+  via the SubsetPosetVector which is explained in the next section. The interface was designed to be expanded to hold
+  partial and full orders (ranks) also, and we invite the community to do so.
+* It contains architectural demos of how the package could be interfaced with the scikit-learn infrastructure, such as GridSearchCV.
+* It is designed to be used with a relational data setup, thereby inviting researchers to figure out efficiency gains in
+  numerical optimisation that the relational set-up may hold. To this end we introduce an additional type of object which
+  would be new to previous scikit-learn users, which is the Task object.
+* It has been designed in a way to facilitate reduction and aggregation, a popular technique in the field.
 
 
 Acknowledgements
 -------------------
-Although the current state of the package is a humble demo of the original conceptualisation. Even this could not have
+Although the current state of the package is a humble demo of the original conceptualisation, even this could not have
 been possible without the tireless guidance and brilliant ideas of Dr. Franz Kiraly and Dr. Ioanna Manolopoulou and the
 energetic brainstorming sessions with Karlson Pfannschmidt and Pritha Gupta.
 
@@ -36,14 +48,14 @@ energetic brainstorming sessions with Karlson Pfannschmidt and Pritha Gupta.
 Future contributions
 ---------------------
 We welcome anyone who would like to continue working on this concept. If you would like to contribute to this package
-please reach out to Istvan Papp at istvan.papp.16@ucl.ac.uk or to Dr. Ioanna Manolopoulou at i.manolopoulou@ucl.ac.uk.
+please reach out to Istvan Papp at istvan.p.g@gmail.com or to Dr. Ioanna Manolopoulou at i.manolopoulou@ucl.ac.uk.
 
 
 Models in the package
 ======================
 Currently skpref contains only implementations of the Bradley-Terry model for pairwise comparisons
 which can be augmented with covariates. It achieves this by interfacing with the pylogit_ and choix_ packages.
-It is also possible to reduce tasks to classification tasks and use the interface to fir any classifier available in
+It is also possible to reduce tasks to classification tasks and use the interface to fit any classifier available in
 scikit-learn.
 
 A wishlist of models
@@ -68,7 +80,7 @@ Novelties in skpref to the scikit-learn user
 The task based interface
 -------------------------
 The main object with which end users will interact and the one that is the furthest step away in intuition from the scikit-learn
-set-up is the Task object. The Task object's main purpose is to containerise key aspects of the data that is
+setup is the Task object. The Task object's main purpose is to containerise key aspects of the data that is
 being modelled, such as, what are the dataframes that will be used, what is the ground truth, what is the set of alternatives
 for each observation and how these all link together.
 
@@ -76,11 +88,12 @@ Tasks are specific to relations expressed, therefore, at the moment skpref has a
 a ChoiceTask and a ClassificationReducer. Between these the interface covers Pairwise Comparisons, Discrete Choice and reductions
 from both of those to classification problems, and also a reduction from Discrete Choice to Pairwise Comparisons.
 
-We justify asking end users to learn how to use the task based interface with the following:
+Although this architecture requires users to familiarise themselves with the task-based interface, doing so has a number
+of significant gains:
 
 * It saves time and energy compared to having to merge normalised tables together into denormalised tables. In the future,
   we believe it should be possible to create computational efficiencies from using normalised tables, so we designed an
-  an interface that allows for this already.
+  interface that would seamlessly allow this integration.
 * It allows reduction and aggregation to happen in the back-end of the code, rather than putting the onus on the user to
   create data transformations that may not be trivial.
 
@@ -113,15 +126,15 @@ and the other features that describe each alternative:
 |     'C'     | 7         |     4     | 10        |
 +-------------+-----------+-----------+-----------+
 
-Without the task based set up a user would have to combine the choice table with the alternative table to be able to use
-the features describing the alternatives in a model. However, apart from this being a repetitive task, it might even be
+Without the task based setup a user would have to hard-code the merging of the choice table with the alternative table
+to use the features that describe the alternatives in model. Apart from this being a repetitive task, it might even be
 non-trivial in difficulty and different models and packages might deal with different ways of combining this data. The
-task-based set up allows flexibility on handling the data differently for different models.
+task-based setup allows flexibility on handling the data differently for different models.
 
-To allow for this in skpref all model objects have a train_task and a predict_task function (and a predict_proba_task
+To allow for this in skpref all model objects have a train_task and a predict_task function (and a :code:`predict_proba_task`
 function, where appropriate) to take the burden off from the user of having to create these joint tables.
 
-A task for this data would be set up in the following way:
+A task for this data would be setup in the following way:
 
 .. code:: python
 
@@ -178,8 +191,8 @@ An example of decision level data is the table below:
 | Duke     | MI State | 0          | New York, New York |
 +----------+----------+------------+--------------------+
 
-* *Alternative level data*, are recordings that describe the alternatives, such as the price of a product.
-  This generally contains information that varies by alternative, but for the same alternative would be constant across
+* *Alternative level data*, are records that describe each of the options, such as the price of a product.
+  This generally contains information that varies by each option, but for the same option would be constant across
   different decisions, for example, different shoppers facing the same price for the same product.
 
 +--------------------------------------------------+
@@ -202,17 +215,17 @@ An example of decision level data is the table below:
 
 SubsetPosetVectors
 -------------------
-Understanding SubsetPosetVectors will be useful for those who are considering becoming future developers in for the skpref
+Understanding SubsetPosetVectors will be useful for those who are considering becoming future developers for the skpref
 package. A SubsetPosetVector is an object that has been designed to contain relations where the nature of the relation is to select
 a subset of the list of alternatives. As such it contains two numpy arrays :code:`top_input_data` and :code:`boot_input_data`
 to indicate the alternatives chosen and not chosen respectively. Each SubsetPosetVector represents the choices and discards
-of an entire data set, so these numpy arrays, may include ragged-nested arrays also, we expand on these in below. The end user
+of an entire data set, so these numpy arrays may include ragged-nested arrays also (we expand on these in below). The end user
 is not expected to be interacting much with SubsetPosetVectors, however, it is the internal representation of the data
 that models use and it is the data type that is returned in outcome predictions.
 
 Types of relations that can be modelled in skpref (11/01/2022)
 ==================================================================================================
-In this section we discuss three types of relations that are currently supported by the infrastructure of skpref,
+In this section we discuss three types of relations that are currently supported by the infrastructure of skpref:
 pairwise comparisons, discrete choice and subset choice. The way the package currently deals with such relations is via
 the SubsetPosetVector. Below are more detailed descriptions of these types of relations, and examples of how the
 SubsetPosetVector represents these. We do not expect end users to use SubsetPosetVectors to read in their data, as the main
@@ -221,7 +234,7 @@ of relations the SubsetPosetVector supports.
 
 Pairwise Comparisons
 ---------------------
-For Pairwise comparisons only two alternatives are presented to decision makers or decision processes, examples could be
+For Pairwise comparisons only two alternatives are presented to decision makers or decision processes; examples could be
 football matches, where there are only two teams playing at a time and either one team wins or there's a draw. As another example,
 consider the table below which contains made up examples of US college basketball matches. In the first column we identify
 the winning team, and in the second column we identify the two teams that played. The defining characteristic of pairwise
@@ -239,7 +252,7 @@ comparisons is that the number of alternatives presented is always two.
 
 Setting up a PairwiseComparisonTask
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-For the table above we would have the following set up for a PairwiseComparisonTask
+For the table above we would have the following setup for a PairwiseComparisonTask
 
 .. code:: python
 
@@ -254,7 +267,7 @@ For the table above we would have the following set up for a PairwiseComparisonT
 The PairwiseComparisonTask automatically sets up the SubsetPosetVector which in this case would be stored in the object
 :code:`example_PCTask.subset_vec`.
 
-Note that pairwise comparison tasks also often follow the below data structure
+Note that pairwise comparison tasks also often follow the below data structure,
 
 +------------+-------------+------------+
 |   Team 1   | Team 2      | Team 1 won |
@@ -266,7 +279,7 @@ Note that pairwise comparison tasks also often follow the below data structure
 | 'MI State' | 'Duke'      | 1          |
 +------------+-------------+------------+
 
-In which case the PairwiseComparisonTask can be set up this way:
+in which case the PairwiseComparisonTask can be setup this way:
 
 .. code:: python
 
@@ -279,7 +292,7 @@ In which case the PairwiseComparisonTask can be set up this way:
     features_to_use=None
   )
 
-Now that the PairwiseComparisonTask is set up, it is possible to fit a model, say a Bradley-Terry model:
+Now that the PairwiseComparisonTask is setup, it is possible to fit a model, say a Bradley-Terry model:
 
 .. code:: python
 
@@ -306,7 +319,8 @@ The way the SubsetPosetVector would represent this information is the following 
 Discrete Choice
 ----------------
 In a discrete choice the deciding process or decision maker only chooses one and only one alternative from the set of alternatives.
-It is used widely for modelling choices made in transportation, where an individual can naturally be only taking one mode
+The set of alternatives however can be more than two (as opposed to a pairwise comparison where the choice set is always strictly two).
+On example in where it is used widely for modelling choices made in transportation, where an individual can naturally be only taking one mode
 of transportation at a time (it is rare to see someone riding a bike whilst driving a car). Below we show an example of this data
 where each row is a commuting decision, the first column is the mode of transport taken, and the second column is the available options.
 
@@ -326,7 +340,7 @@ where each row is a commuting decision, the first column is the mode of transpor
 
 Setting up a ChoiceTask
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-For the table above we would have the following set up for a ChoiceTask
+For the table above we would have the following setup for a ChoiceTask
 
 .. code:: python
 
@@ -345,7 +359,7 @@ Reduction and aggregation of Discrete choices
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If the user would want to run now a reduction to pairwise comparisons, and run a Bradley-Terry model on this discrete
-choice data, the code would look exactly the same as above for pairwise comparison models
+choice data, the code would look exactly the same as above for pairwise comparison models.
 
 .. code:: python
 
@@ -362,7 +376,7 @@ reduced and same-level models.
 
 Currently there are two ways to aggregate the Bradley-Terry model in skpref. One of them is to insert the learned parameters
 in the Luce formulation, the other is via the Independent Transitive method. For more information on these see the
-module documentation for the Bradley-Terry predict_proba_task method. For Bradley-Terry the default setting is
+module documentation for the Bradley-Terry :code:`predict_proba_task` method. For Bradley-Terry the default setting is
 via the Luce formulation and code for running both aggregations would look like the following:
 
 .. code:: python
@@ -409,7 +423,7 @@ if we wanted to reduce this discrete choice data to pairwise comparison we could
    array([0, 1, 1, 2, 2, 3, 3, 4]))
 
 Where the first element that is returned is a pandas DataFrame that represents that data as pairwise comparisons and the
-second element is a numpy array that is the index of the oringinal observation. For example rows one and two of the
+second element is a numpy array that is the index of the oringinal observation. For example, rows one and two of the
 pairwise comparison table all correspond to row one in the original table ('car' being chosen from ['car', 'train',
 'bicycle'] note we initialise rows by 0). Thus allowing us to use pairwise comparison models also to work with this
 discrete choice data. All of this is accomplished in the back end of the package through the Task object design.

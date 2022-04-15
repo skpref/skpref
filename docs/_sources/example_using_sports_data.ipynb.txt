@@ -6,10 +6,11 @@
    "source": [
     "# Bradley Terry example notebook\n",
     "What you will find in this notebook examples of using skpref:\n",
-    "- for setting up the modelling task based framework\n",
-    "- to fit a classifier that's being read in from scikit-learn on the same problem which in the background uses reduction and aggregation methods.\n",
-    "- to fit a Bradley-Terry model with and without covariates on the pairwise comparison data of basketball matches.\n",
-    "- with GridSearch"
+    "\n",
+    "* for setting up the modelling task based framework\n",
+    "* to fit a classifier that's being read in from scikit-learn on the same problem which in the background uses reduction and aggregation methods.\n",
+    "* to fit a Bradley-Terry model with and without covariates on the pairwise comparison data of basketball matches.\n",
+    "* for applying the GridSearch technique for model selection"
    ]
   },
   {
@@ -52,7 +53,8 @@
    "metadata": {},
    "source": [
     "# Reading in the data\n",
-    "The example data set will be matches played by NBA teams, we will use the 2016 season's matches to predict the results of the 2017 matches. The dataset contains:\n",
+    "The example dataset will be matches played by NBA teams, we will use the 2016 season's matches to predict the results of the 2017 matches. The dataset contains:\n",
+    "\n",
     "- a column for team1 and team2 indicating the two teams that have played each other\n",
     "- season_start, which indicates which season the match belongs to\n",
     "- team1_wins takes the value of 1 if the team in column team1 win the match, 0 if they lost (there are no ties in basketball)\n",
@@ -274,7 +276,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "We will also use team salary data as covariates in the model later with the idea being that a team that has more money to pay to their athletes has an advantage over other teams, by having a better chance to attract the top talent in the league."
+    "We will also use team salary data as covariates in the model later, with the idea being that a team that has more money to pay to their athletes has an advantage over other teams, by having a better chance to attract the top talent in the league."
    ]
   },
   {
@@ -373,11 +375,12 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "We set up the preference learning task by using the PairwiseComparisonTassk object in skpref. This is the only extra step which might be a completely new concept to seasponed scikit-learn users. Once the task is specified, say in this case a pairwise comparison task, for any models applied in skpref, whether that is a reduction via scikit-learn or a model that is not a pairwise comparison model such as a Bradley-Terry model the package will know that the problem itself is a pairwise comparison problem and can perform reduction and aggregation adequately in the background when needed.\n",
+    "We set up the preference learning task by using the PairwiseComparisonTask object in skpref. This is the only extra step which might be a completely new concept to seasoned scikit-learn users. Once the task is specified, say in this case a pairwise comparison task, for any models applied in skpref, whether that is a reduction via scikit-learn or even a model that is not a pairwise comparison model the package will know that the problem itself is a pairwise comparison problem and can perform reduction and aggregation adequately in the background when needed.\n",
     "\n",
     "In this example the PairwiseComparisonTask has the following components:\n",
+    "\n",
     "- primary_table: the table that contains the observed preferences\n",
-    "- primary_table_alternatives_names: the column or columns that containn the alternatives, in this case both columns team1 and team2 contain alternatives\n",
+    "- primary_table_alternatives_names: the column or columns that contain the alternatives, in this case both columns team1 and team2 contain alternatives\n",
     "- primary_table_target_name: the column that indicates the result of the pairwise comparison\n",
     "- target_column_correspondence: in the case of pairwise comparisons, when the alternatives are split across two columns, the column indicating the result usually takes the form 1/0 to show whether one of the columns, in our case team1 or team2 has been preferred. So in this column the user indicates that when the team1_wins column takes the value 1 that means that the alternative in the column team1 has won.\n",
     "- features_to_use: indicates which columns to use as covariates"
@@ -413,9 +416,9 @@
    "metadata": {},
    "source": [
     "# Let's fit a reduction to logistic regression first\n",
-    "The only covariate we will use in this for now will be the team_1_home column, which should return a method that only learns what the home team advantage was on average\n",
+    "The only covariate we will use in this for now will be the team_1_home column, which should return a method that only learns what the home team advantage was on average, which is the equivalent to fitting a logistic regression where whether team1 is playing home or not is the only covariate.\n",
     "\n",
-    "$P(team1\\_wins=1) = logistic(\\alpha + \\beta_1 team\\_1\\_home)$"
+    "$P(\\texttt{team1}\\_\\texttt{wins}=1) = logit(\\alpha + \\beta_1 \\texttt{team}\\_\\texttt{1}\\_\\texttt{home})$"
    ]
   },
   {
@@ -704,7 +707,14 @@
    "metadata": {},
    "source": [
     "## Now let's fit a Bradley Terry model\n",
-    "This will be defined in a slightly different task, becasue in this case we don't want to use any covariates, whereas scikit-learn logistic regression doesn't work when running with no covariates."
+    "As we can see in the example above the logistic regression approach does not learn different probabilities for a team winning or losing based on which other team they are playing. The Dallas Mavericks could be playing against the strongest or weakest team in the league and their estimated probability of winning would be the same. The difference between the Bradley-Terry model and logistic regression is that Bradley-Terry learns a function that can estimate whether each team will win or lose given the other team they are playing.\n",
+    "\n",
+    "The task we will use for Bradley-Terry will be defined in a slightly different way, because in the first demo we won't use any covariates, therefore we define features_to_use=None\n",
+    "\n",
+    "In the Bradley-Terry model each team gets a latent strength parameter $\\lambda_{\\text{team}}$, for example $\\lambda_{\\text{Atlanta Hawks}}$.\n",
+    "\n",
+    "The Bradley-Terry model learns these strength parameters to maximise the likelihood according to the following formulation:\n",
+    "$$P(\\texttt{team1}\\_\\texttt{wins}=1)_i= \\frac{e^{\\lambda_{\\texttt{team1}_i}}}{e^{\\lambda_{\\texttt{team1}_i}} + e^{\\lambda_{\\texttt{team2}_i}}}$$"
    ]
   },
   {
@@ -975,7 +985,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "We can use the latent alternative strength parameters that Bradley-Terry models learn to rank the teams"
+    "We can use the latent alternative strength parameters that Bradley-Terry models learn to rank the teams, either by sorting the mybt.params_ DataFrame by the learned_strength parameter, or by running the rank_entities function"
    ]
   },
   {
@@ -1130,7 +1140,8 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "## Run model with team salary budget"
+    "## Run model with team salary budget\n",
+    "In this section we will start introducing more covariates in the models above, we will introduce one additional covariate which is the team salary budget. We can also see how we can define a single task which we can use to run different models in skpref."
    ]
   },
   {
@@ -1168,7 +1179,9 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# Let's fit a reduction to logistic regression with the salary covariate"
+    "# Let's fit a reduction to logistic regression with the salary covariate\n",
+    "Here we fit a logistic regression on three covariates, whether team 1 is playing home or not, team1's salary budget and team2's salary budget.\n",
+    "$P(\\texttt{team1}\\_\\texttt{wins}=1) = logit(\\alpha + \\beta_1 \\texttt{team}\\_\\texttt{1}\\_\\texttt{home} + \\beta_2 \\texttt{team1}\\_\\texttt{salary} + \\beta_3 \\texttt{team2}\\_\\texttt{salary})$"
    ]
   },
   {
@@ -1189,6 +1202,274 @@
    "outputs": [
     {
      "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>team1_wins</th>\n",
+       "      <th>team_1_home</th>\n",
+       "      <th>salary_team1</th>\n",
+       "      <th>salary_team2</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>99375302</td>\n",
+       "      <td>85753772</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>99375302</td>\n",
+       "      <td>117228164</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>99375302</td>\n",
+       "      <td>95964560</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>99375302</td>\n",
+       "      <td>129458084</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>99375302</td>\n",
+       "      <td>89524016</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>99375302</td>\n",
+       "      <td>107015203</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>99375302</td>\n",
+       "      <td>115375243</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   team1_wins  team_1_home  salary_team1  salary_team2\n",
+       "0           1            0      99375302      85753772\n",
+       "1           0            0      99375302     117228164\n",
+       "2           0            0      99375302      95964560\n",
+       "3           0            0      99375302     129458084\n",
+       "4           0            0      99375302      89524016\n",
+       "5           0            1      99375302     107015203\n",
+       "6           0            1      99375302     115375243"
+      ]
+     },
+     "execution_count": 25,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# We can investigate the internal table that was fed into LogisticRegression.fit()\n",
+    "my_log_red.model_input.head(7)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[ 5.35210228e-15,  1.54775613e-08, -1.54775613e-08]])"
+      ]
+     },
+     "execution_count": 26,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# We can also investigate the coefficients which were learned\n",
+    "my_log_red.model.coef_ "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "We can see that the coefficients learned for $\\beta_2$ and $\\beta_3$ are very similar to each other, just opposite signs. ClassificationReducer allows users the option to take the difference in features directly rather than split them out, effectively learning the following model:\n",
+    "$P(\\texttt{team1}\\_\\texttt{wins}=1) = logit(\\alpha + \\beta_1 \\texttt{team}\\_\\texttt{1}\\_\\texttt{home} + \\beta_2 (\\texttt{team1}\\_\\texttt{salary} - \\texttt{team2}\\_\\texttt{salary}))$"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "my_log_red = ClassificationReducer(\n",
+    "    LogisticRegression(solver='lbfgs'),\n",
+    "    take_feature_diff_for_pairwise_comparison=True\n",
+    ")\n",
+    "my_log_red.fit_task(NBA_results_task_train)\n",
+    "preds = my_log_red.predict_task(NBA_results_task_predict)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>team1_wins</th>\n",
+       "      <th>team_1_home</th>\n",
+       "      <th>salary_diff</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>13621530</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>-17852862</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>3410742</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>-30082782</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>9851286</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>5</th>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>-7639901</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>6</th>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>-15999941</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   team1_wins  team_1_home  salary_diff\n",
+       "0           1            0     13621530\n",
+       "1           0            0    -17852862\n",
+       "2           0            0      3410742\n",
+       "3           0            0    -30082782\n",
+       "4           0            0      9851286\n",
+       "5           0            1     -7639901\n",
+       "6           0            1    -15999941"
+      ]
+     },
+     "execution_count": 28,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "my_log_red.model_input.head(7)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[2.67602286e-15, 1.54775613e-08]])"
+      ]
+     },
+     "execution_count": 29,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "my_log_red.model.coef_"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
       "text/plain": [
        "(array(['Atlanta Hawks', 'Charlotte Hornets', 'Atlanta Hawks', ...,\n",
        "        'Washington Wizards', 'Washington Wizards', 'Washington Wizards'],\n",
@@ -1197,7 +1478,7 @@
        "        'Atlanta Hawks', 'Boston Celtics', 'Orlando Magic'], dtype=object))"
       ]
      },
-     "execution_count": 25,
+     "execution_count": 30,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -1208,7 +1489,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 26,
+   "execution_count": 31,
    "metadata": {},
    "outputs": [
     {
@@ -1232,12 +1513,16 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# Bradley Terry model with salary covariate"
+    "# Bradley Terry model with salary covariate\n",
+    "\n",
+    "Here we augment the initial Bradley-Terry model to learn the following relationship:\n",
+    "\n",
+    "$$P(\\texttt{team1}\\_\\texttt{wins}=1)_i= \\frac{e^{(\\lambda_{\\texttt{team1}_i} + \\beta_1 \\texttt{team1}\\_\\texttt{salary}_i)}}{e^{(\\lambda_{\\texttt{team1}_i} + \\beta_1 \\texttt{team1}\\_\\texttt{salary}_i)} + e^{(\\lambda_{\\texttt{team2}_i}+ \\beta_1 \\texttt{team2}\\_\\texttt{salary}_i)}}$$"
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 27,
+   "execution_count": 32,
    "metadata": {},
    "outputs": [
     {
@@ -1256,7 +1541,7 @@
        "       'Brooklyn Nets'], dtype=object)"
       ]
      },
-     "execution_count": 27,
+     "execution_count": 32,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -1269,7 +1554,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 28,
+   "execution_count": 33,
    "metadata": {},
    "outputs": [
     {
@@ -1287,7 +1572,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 29,
+   "execution_count": 34,
    "metadata": {},
    "outputs": [
     {
@@ -1298,7 +1583,7 @@
        "      dtype=object)"
       ]
      },
-     "execution_count": 29,
+     "execution_count": 34,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -1309,7 +1594,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 30,
+   "execution_count": 35,
    "metadata": {},
    "outputs": [
     {
@@ -1320,7 +1605,7 @@
        "      dtype=object)"
       ]
      },
-     "execution_count": 30,
+     "execution_count": 35,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -1333,12 +1618,13 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# Example using GridSearchCV()"
+    "# Example using GridSearchCV()\n",
+    "The models we have fitted above also have hyperparameters, such as the method of gradient descent or regularisation. To  optimise the hyperparameter selection, we can use GridSearchCV(). GridSearchCV() tries out a series of hyperparameter combinations and runs a k-fold cross-validation on an accuracy metric determined by the user to check which ones have performed best."
    ]
   },
   {
    "cell_type": "code",
-   "execution_count": 31,
+   "execution_count": 36,
    "metadata": {},
    "outputs": [
     {
@@ -1365,7 +1651,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 32,
+   "execution_count": 37,
    "metadata": {},
    "outputs": [
     {
@@ -1393,7 +1679,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 33,
+   "execution_count": 38,
    "metadata": {},
    "outputs": [
     {
@@ -1401,53 +1687,52 @@
      "output_type": "stream",
      "text": [
       "The model with the best parameters was:\n",
-      "ClassificationReducer(model=LogisticRegression(C=2, fit_intercept=False,\n",
-      "                                               penalty='l1', solver='saga'))\n",
-      "With a score of -0.6865147893796834\n",
+      "ClassificationReducer(model=LogisticRegression(C=1, solver='saga'))\n",
+      "With a score of -0.6864987580029042\n",
       "All the trials results summarised in descending score\n",
       "    model__C  model__fit_intercept model__penalty model__solver  \\\n",
-      "10       2.0                 False             l1          saga   \n",
       "5        1.0                  True             l2          saga   \n",
-      "1        0.5                  True             l2          saga   \n",
-      "19       8.0                 False             l2          saga   \n",
-      "4        1.0                  True             l1          saga   \n",
       "18       8.0                 False             l1          saga   \n",
-      "13       4.0                  True             l2          saga   \n",
-      "6        1.0                 False             l1          saga   \n",
-      "2        0.5                 False             l1          saga   \n",
-      "7        1.0                 False             l2          saga   \n",
       "0        0.5                  True             l1          saga   \n",
-      "11       2.0                 False             l2          saga   \n",
-      "15       4.0                 False             l2          saga   \n",
-      "3        0.5                 False             l2          saga   \n",
-      "17       8.0                  True             l2          saga   \n",
-      "8        2.0                  True             l1          saga   \n",
-      "12       4.0                  True             l1          saga   \n",
-      "9        2.0                  True             l2          saga   \n",
+      "13       4.0                  True             l2          saga   \n",
+      "4        1.0                  True             l1          saga   \n",
       "16       8.0                  True             l1          saga   \n",
+      "2        0.5                 False             l1          saga   \n",
+      "10       2.0                 False             l1          saga   \n",
+      "7        1.0                 False             l2          saga   \n",
       "14       4.0                 False             l1          saga   \n",
+      "12       4.0                  True             l1          saga   \n",
+      "15       4.0                 False             l2          saga   \n",
+      "17       8.0                  True             l2          saga   \n",
+      "19       8.0                 False             l2          saga   \n",
+      "1        0.5                  True             l2          saga   \n",
+      "8        2.0                  True             l1          saga   \n",
+      "3        0.5                 False             l2          saga   \n",
+      "11       2.0                 False             l2          saga   \n",
+      "6        1.0                 False             l1          saga   \n",
+      "9        2.0                  True             l2          saga   \n",
       "\n",
       "    mean_test_score  \n",
-      "10        -0.686515  \n",
-      "5         -0.686515  \n",
-      "1         -0.686516  \n",
-      "19        -0.686516  \n",
-      "4         -0.686517  \n",
-      "18        -0.686517  \n",
+      "5         -0.686499  \n",
+      "18        -0.686516  \n",
+      "0         -0.686516  \n",
       "13        -0.686517  \n",
-      "6         -0.686517  \n",
+      "4         -0.686517  \n",
+      "16        -0.686517  \n",
       "2         -0.686517  \n",
-      "7         -0.686517  \n",
-      "0         -0.686518  \n",
-      "11        -0.686518  \n",
+      "10        -0.686518  \n",
+      "7         -0.686518  \n",
+      "14        -0.686518  \n",
+      "12        -0.686518  \n",
       "15        -0.686518  \n",
-      "3         -0.686519  \n",
       "17        -0.686519  \n",
+      "19        -0.686519  \n",
+      "1         -0.686519  \n",
       "8         -0.686519  \n",
-      "12        -0.686519  \n",
-      "9         -0.686519  \n",
-      "16        -0.686520  \n",
-      "14        -0.686521  \n"
+      "3         -0.686519  \n",
+      "11        -0.686519  \n",
+      "6         -0.686519  \n",
+      "9         -0.686519  \n"
      ]
     }
    ],
@@ -1462,7 +1747,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 34,
+   "execution_count": 39,
    "metadata": {},
    "outputs": [
     {
@@ -1473,7 +1758,7 @@
        "      dtype=object)"
       ]
      },
-     "execution_count": 34,
+     "execution_count": 39,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -1484,7 +1769,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 35,
+   "execution_count": 40,
    "metadata": {},
    "outputs": [
     {
@@ -1501,7 +1786,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 36,
+   "execution_count": 41,
    "metadata": {},
    "outputs": [
     {
@@ -1518,7 +1803,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 37,
+   "execution_count": 42,
    "metadata": {},
    "outputs": [
     {
@@ -1537,7 +1822,7 @@
        "       'Brooklyn Nets'], dtype=object)"
       ]
      },
-     "execution_count": 37,
+     "execution_count": 42,
      "metadata": {},
      "output_type": "execute_result"
     }

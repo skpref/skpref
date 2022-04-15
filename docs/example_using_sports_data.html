@@ -449,7 +449,13 @@ div.rendered_html tbody tr:hover {
 </style>
 <div class="section" id="Bradley-Terry-example-notebook">
 <h1>Bradley Terry example notebook<a class="headerlink" href="#Bradley-Terry-example-notebook" title="Permalink to this headline">¶</a></h1>
-<p>What you will find in this notebook examples of using skpref: - for setting up the modelling task based framework - to fit a classifier that’s being read in from scikit-learn on the same problem which in the background uses reduction and aggregation methods. - to fit a Bradley-Terry model with and without covariates on the pairwise comparison data of basketball matches. - with GridSearch</p>
+<p>What you will find in this notebook examples of using skpref:</p>
+<ul class="simple">
+<li><p>for setting up the modelling task based framework</p></li>
+<li><p>to fit a classifier that’s being read in from scikit-learn on the same problem which in the background uses reduction and aggregation methods.</p></li>
+<li><p>to fit a Bradley-Terry model with and without covariates on the pairwise comparison data of basketball matches.</p></li>
+<li><p>for applying the GridSearch technique for model selection</p></li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -486,8 +492,13 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="section" id="Reading-in-the-data">
 <h1>Reading in the data<a class="headerlink" href="#Reading-in-the-data" title="Permalink to this headline">¶</a></h1>
-<p>The example data set will be matches played by NBA teams, we will use the 2016 season’s matches to predict the results of the 2017 matches. The dataset contains: - a column for team1 and team2 indicating the two teams that have played each other - season_start, which indicates which season the match belongs to - team1_wins takes the value of 1 if the team in column team1 win the match, 0 if they lost (there are no ties in basketball) - team_1_home takes the value of 1 if team1 was playing in
-their home court 0 if they were paying away (no neutral courts in the NBA)</p>
+<p>The example dataset will be matches played by NBA teams, we will use the 2016 season’s matches to predict the results of the 2017 matches. The dataset contains:</p>
+<ul class="simple">
+<li><p>a column for team1 and team2 indicating the two teams that have played each other</p></li>
+<li><p>season_start, which indicates which season the match belongs to</p></li>
+<li><p>team1_wins takes the value of 1 if the team in column team1 win the match, 0 if they lost (there are no ties in basketball)</p></li>
+<li><p>team_1_home takes the value of 1 if team1 was playing in their home court 0 if they were paying away (no neutral courts in the NBA)</p></li>
+</ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -665,7 +676,7 @@ their home court 0 if they were paying away (no neutral courts in the NBA)</p>
 </pre></div>
 </div>
 </div>
-<p>We will also use team salary data as covariates in the model later with the idea being that a team that has more money to pay to their athletes has an advantage over other teams, by having a better chance to attract the top talent in the league.</p>
+<p>We will also use team salary data as covariates in the model later, with the idea being that a team that has more money to pay to their athletes has an advantage over other teams, by having a better chance to attract the top talent in the league.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
@@ -741,10 +752,16 @@ their home court 0 if they were paying away (no neutral courts in the NBA)</p>
 </div>
 <div class="section" id="Setting-up-the-tasks">
 <h1>Setting up the tasks<a class="headerlink" href="#Setting-up-the-tasks" title="Permalink to this headline">¶</a></h1>
-<p>We set up the preference learning task by using the PairwiseComparisonTassk object in skpref. This is the only extra step which might be a completely new concept to seasponed scikit-learn users. Once the task is specified, say in this case a pairwise comparison task, for any models applied in skpref, whether that is a reduction via scikit-learn or a model that is not a pairwise comparison model such as a Bradley-Terry model the package will know that the problem itself is a pairwise comparison
-problem and can perform reduction and aggregation adequately in the background when needed.</p>
-<p>In this example the PairwiseComparisonTask has the following components: - primary_table: the table that contains the observed preferences - primary_table_alternatives_names: the column or columns that containn the alternatives, in this case both columns team1 and team2 contain alternatives - primary_table_target_name: the column that indicates the result of the pairwise comparison - target_column_correspondence: in the case of pairwise comparisons, when the alternatives are split across two
-columns, the column indicating the result usually takes the form 1/0 to show whether one of the columns, in our case team1 or team2 has been preferred. So in this column the user indicates that when the team1_wins column takes the value 1 that means that the alternative in the column team1 has won. - features_to_use: indicates which columns to use as covariates</p>
+<p>We set up the preference learning task by using the PairwiseComparisonTask object in skpref. This is the only extra step which might be a completely new concept to seasoned scikit-learn users. Once the task is specified, say in this case a pairwise comparison task, for any models applied in skpref, whether that is a reduction via scikit-learn or even a model that is not a pairwise comparison model the package will know that the problem itself is a pairwise comparison problem and can perform
+reduction and aggregation adequately in the background when needed.</p>
+<p>In this example the PairwiseComparisonTask has the following components:</p>
+<ul class="simple">
+<li><p>primary_table: the table that contains the observed preferences</p></li>
+<li><p>primary_table_alternatives_names: the column or columns that contain the alternatives, in this case both columns team1 and team2 contain alternatives</p></li>
+<li><p>primary_table_target_name: the column that indicates the result of the pairwise comparison</p></li>
+<li><p>target_column_correspondence: in the case of pairwise comparisons, when the alternatives are split across two columns, the column indicating the result usually takes the form 1/0 to show whether one of the columns, in our case team1 or team2 has been preferred. So in this column the user indicates that when the team1_wins column takes the value 1 that means that the alternative in the column team1 has won.</p></li>
+<li><p>features_to_use: indicates which columns to use as covariates</p></li>
+</ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
@@ -772,8 +789,8 @@ columns, the column indicating the result usually takes the form 1/0 to show whe
 </div>
 <div class="section" id="Let’s-fit-a-reduction-to-logistic-regression-first">
 <h1>Let’s fit a reduction to logistic regression first<a class="headerlink" href="#Let’s-fit-a-reduction-to-logistic-regression-first" title="Permalink to this headline">¶</a></h1>
-<p>The only covariate we will use in this for now will be the team_1_home column, which should return a method that only learns what the home team advantage was on average</p>
-<p><span class="math notranslate nohighlight">\(P(team1\_wins=1) = logistic(\alpha + \beta_1 team\_1\_home)\)</span></p>
+<p>The only covariate we will use in this for now will be the team_1_home column, which should return a method that only learns what the home team advantage was on average, which is the equivalent to fitting a logistic regression where whether team1 is playing home or not is the only covariate.</p>
+<p><span class="math notranslate nohighlight">\(P(\texttt{team1}\_\texttt{wins}=1) = logit(\alpha + \beta_1 \texttt{team}\_\texttt{1}\_\texttt{home})\)</span></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
@@ -1018,7 +1035,13 @@ team2 is preferred  [0.58 0.58 0.58 ... 0.42 0.42 0.58]
 </div>
 <div class="section" id="Now-let’s-fit-a-Bradley-Terry-model">
 <h2>Now let’s fit a Bradley Terry model<a class="headerlink" href="#Now-let’s-fit-a-Bradley-Terry-model" title="Permalink to this headline">¶</a></h2>
-<p>This will be defined in a slightly different task, becasue in this case we don’t want to use any covariates, whereas scikit-learn logistic regression doesn’t work when running with no covariates.</p>
+<p>As we can see in the example above the logistic regression approach does not learn different probabilities for a team winning or losing based on which other team they are playing. The Dallas Mavericks could be playing against the strongest or weakest team in the league and their estimated probability of winning would be the same. The difference between the Bradley-Terry model and logistic regression is that Bradley-Terry learns a function that can estimate whether each team will win or lose
+given the other team they are playing.</p>
+<p>The task we will use for Bradley-Terry will be defined in a slightly different way, because in the first demo we won’t use any covariates, therefore we define features_to_use=None</p>
+<p>In the Bradley-Terry model each team gets a latent strength parameter <span class="math notranslate nohighlight">\(\lambda_{\text{team}}\)</span>, for example <span class="math notranslate nohighlight">\(\lambda_{\text{Atlanta Hawks}}\)</span>.</p>
+<p>The Bradley-Terry model learns these strength parameters to maximise the likelihood according to the following formulation:</p>
+<div class="math-wrapper"><div class="math notranslate nohighlight">
+\[P(\texttt{team1}\_\texttt{wins}=1)_i= \frac{e^{\lambda_{\texttt{team1}_i}}}{e^{\lambda_{\texttt{team1}_i}} + e^{\lambda_{\texttt{team2}_i}}}\]</div></div>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
@@ -1241,7 +1264,7 @@ team2 is preferred  [0.58 0.58 0.58 ... 0.42 0.42 0.58]
 </table></div>
 </div></div>
 </div>
-<p>We can use the latent alternative strength parameters that Bradley-Terry models learn to rank the teams</p>
+<p>We can use the latent alternative strength parameters that Bradley-Terry models learn to rank the teams, either by sorting the mybt.params_ DataFrame by the learned_strength parameter, or by running the rank_entities function</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
@@ -1381,6 +1404,7 @@ array(['Atlanta Hawks', 'Atlanta Hawks', 'Atlanta Hawks', ...,
 </div>
 <div class="section" id="Run-model-with-team-salary-budget">
 <h2>Run model with team salary budget<a class="headerlink" href="#Run-model-with-team-salary-budget" title="Permalink to this headline">¶</a></h2>
+<p>In this section we will start introducing more covariates in the models above, we will introduce one additional covariate which is the team salary budget. We can also see how we can define a single task which we can use to run different models in skpref.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
@@ -1415,6 +1439,7 @@ array(['Atlanta Hawks', 'Atlanta Hawks', 'Atlanta Hawks', ...,
 </div>
 <div class="section" id="Let’s-fit-a-reduction-to-logistic-regression-with-the-salary-covariate">
 <h1>Let’s fit a reduction to logistic regression with the salary covariate<a class="headerlink" href="#Let’s-fit-a-reduction-to-logistic-regression-with-the-salary-covariate" title="Permalink to this headline">¶</a></h1>
+<p>Here we fit a logistic regression on three covariates, whether team 1 is playing home or not, team1’s salary budget and team2’s salary budget. <span class="math notranslate nohighlight">\(P(\texttt{team1}\_\texttt{wins}=1) = logit(\alpha + \beta_1 \texttt{team}\_\texttt{1}\_\texttt{home} + \beta_2 \texttt{team1}\_\texttt{salary} + \beta_3 \texttt{team2}\_\texttt{salary})\)</span></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
@@ -1429,12 +1454,236 @@ array(['Atlanta Hawks', 'Atlanta Hawks', 'Atlanta Hawks', ...,
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">preds</span><span class="o">.</span><span class="n">top_input_data</span><span class="p">,</span> <span class="n">preds</span><span class="o">.</span><span class="n">boot_input_data</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># We can investigate the internal table that was fed into LogisticRegression.fit()</span>
+<span class="n">my_log_red</span><span class="o">.</span><span class="n">model_input</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<div class="table-wrapper"><table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>team1_wins</th>
+<th>team_1_home</th>
+<th>salary_team1</th>
+<th>salary_team2</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>1</td>
+<td>0</td>
+<td>99375302</td>
+<td>85753772</td>
+</tr>
+<tr>
+<th>1</th>
+<td>0</td>
+<td>0</td>
+<td>99375302</td>
+<td>117228164</td>
+</tr>
+<tr>
+<th>2</th>
+<td>0</td>
+<td>0</td>
+<td>99375302</td>
+<td>95964560</td>
+</tr>
+<tr>
+<th>3</th>
+<td>0</td>
+<td>0</td>
+<td>99375302</td>
+<td>129458084</td>
+</tr>
+<tr>
+<th>4</th>
+<td>0</td>
+<td>0</td>
+<td>99375302</td>
+<td>89524016</td>
+</tr>
+<tr>
+<th>5</th>
+<td>0</td>
+<td>1</td>
+<td>99375302</td>
+<td>107015203</td>
+</tr>
+<tr>
+<th>6</th>
+<td>0</td>
+<td>1</td>
+<td>99375302</td>
+<td>115375243</td>
+</tr>
+</tbody>
+</table></div>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># We can also investigate the coefficients which were learned</span>
+<span class="n">my_log_red</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">coef_</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([[ 5.35210228e-15,  1.54775613e-08, -1.54775613e-08]])
+</pre></div></div>
+</div>
+<p>We can see that the coefficients learned for <span class="math notranslate nohighlight">\(\beta_2\)</span> and <span class="math notranslate nohighlight">\(\beta_3\)</span> are very similar to each other, just opposite signs. ClassificationReducer allows users the option to take the difference in features directly rather than split them out, effectively learning the following model: <span class="math notranslate nohighlight">\(P(\texttt{team1}\_\texttt{wins}=1) = logit(\alpha + \beta_1 \texttt{team}\_\texttt{1}\_\texttt{home} + \beta_2 (\texttt{team1}\_\texttt{salary} - \texttt{team2}\_\texttt{salary}))\)</span></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_log_red</span> <span class="o">=</span> <span class="n">ClassificationReducer</span><span class="p">(</span>
+    <span class="n">LogisticRegression</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s1">'lbfgs'</span><span class="p">),</span>
+    <span class="n">take_feature_diff_for_pairwise_comparison</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+<span class="n">my_log_red</span><span class="o">.</span><span class="n">fit_task</span><span class="p">(</span><span class="n">NBA_results_task_train</span><span class="p">)</span>
+<span class="n">preds</span> <span class="o">=</span> <span class="n">my_log_red</span><span class="o">.</span><span class="n">predict_task</span><span class="p">(</span><span class="n">NBA_results_task_predict</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_log_red</span><span class="o">.</span><span class="n">model_input</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<div class="table-wrapper"><table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>team1_wins</th>
+<th>team_1_home</th>
+<th>salary_diff</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>1</td>
+<td>0</td>
+<td>13621530</td>
+</tr>
+<tr>
+<th>1</th>
+<td>0</td>
+<td>0</td>
+<td>-17852862</td>
+</tr>
+<tr>
+<th>2</th>
+<td>0</td>
+<td>0</td>
+<td>3410742</td>
+</tr>
+<tr>
+<th>3</th>
+<td>0</td>
+<td>0</td>
+<td>-30082782</td>
+</tr>
+<tr>
+<th>4</th>
+<td>0</td>
+<td>0</td>
+<td>9851286</td>
+</tr>
+<tr>
+<th>5</th>
+<td>0</td>
+<td>1</td>
+<td>-7639901</td>
+</tr>
+<tr>
+<th>6</th>
+<td>0</td>
+<td>1</td>
+<td>-15999941</td>
+</tr>
+</tbody>
+</table></div>
+</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_log_red</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">coef_</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([[2.67602286e-15, 1.54775613e-08]])
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">preds</span><span class="o">.</span><span class="n">top_input_data</span><span class="p">,</span> <span class="n">preds</span><span class="o">.</span><span class="n">boot_input_data</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1447,7 +1696,7 @@ array(['Atlanta Hawks', 'Atlanta Hawks', 'Atlanta Hawks', ...,
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># All this learns so far is the home team advantage, since its the only</span>
@@ -1470,8 +1719,11 @@ team1 is preferred  [0.55 0.43 0.51 ... 0.59 0.53 0.61]
 </div>
 <div class="section" id="Bradley-Terry-model-with-salary-covariate">
 <h1>Bradley Terry model with salary covariate<a class="headerlink" href="#Bradley-Terry-model-with-salary-covariate" title="Permalink to this headline">¶</a></h1>
+<p>Here we augment the initial Bradley-Terry model to learn the following relationship:</p>
+<div class="math-wrapper"><div class="math notranslate nohighlight">
+\[P(\texttt{team1}\_\texttt{wins}=1)_i= \frac{e^{(\lambda_{\texttt{team1}_i} + \beta_1 \texttt{team1}\_\texttt{salary}_i)}}{e^{(\lambda_{\texttt{team1}_i} + \beta_1 \texttt{team1}\_\texttt{salary}_i)} + e^{(\lambda_{\texttt{team2}_i}+ \beta_1 \texttt{team2}\_\texttt{salary}_i)}}\]</div></div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mybt</span> <span class="o">=</span> <span class="n">BradleyTerry</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">'BFGS'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
@@ -1481,7 +1733,7 @@ team1 is preferred  [0.55 0.43 0.51 ... 0.59 0.53 0.61]
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1500,7 +1752,7 @@ array(['Golden State Warriors', 'San Antonio Spurs', 'Houston Rockets',
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nice_print_results</span><span class="p">(</span><span class="n">mybt</span><span class="o">.</span><span class="n">predict_proba_task</span><span class="p">(</span><span class="n">NBA_results_task_predict</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="p">[</span><span class="s1">'team1'</span><span class="p">,</span> <span class="s1">'team2'</span><span class="p">]))</span>
@@ -1517,7 +1769,7 @@ team2 is preferred  [0.31 0.52 0.25 ... 0.35 0.57 0.18]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mybt</span><span class="o">.</span><span class="n">predict_choice_task</span><span class="p">(</span><span class="n">NBA_results_task_predict</span><span class="p">)</span>
@@ -1525,7 +1777,7 @@ team2 is preferred  [0.31 0.52 0.25 ... 0.35 0.57 0.18]
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1536,7 +1788,7 @@ array(['Atlanta Hawks', 'Charlotte Hornets', 'Atlanta Hawks', ...,
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mybt</span><span class="o">.</span><span class="n">predict_task</span><span class="p">(</span><span class="n">NBA_results_task_predict</span><span class="p">)</span><span class="o">.</span><span class="n">top_input_data</span>
@@ -1544,7 +1796,7 @@ array(['Atlanta Hawks', 'Charlotte Hornets', 'Atlanta Hawks', ...,
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1557,8 +1809,9 @@ array(['Atlanta Hawks', 'Charlotte Hornets', 'Atlanta Hawks', ...,
 </div>
 <div class="section" id="Example-using-GridSearchCV()">
 <h1>Example using GridSearchCV()<a class="headerlink" href="#Example-using-GridSearchCV()" title="Permalink to this headline">¶</a></h1>
+<p>The models we have fitted above also have hyperparameters, such as the method of gradient descent or regularisation. To optimise the hyperparameter selection, we can use GridSearchCV(). GridSearchCV() tries out a series of hyperparameter combinations and runs a k-fold cross-validation on an accuracy metric determined by the user to check which ones have performed best.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">to_tune</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'alpha'</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="s1">'method'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'BFGS'</span><span class="p">]}</span>
@@ -1584,7 +1837,7 @@ All the trials results summarised in descending score
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Showing that sklearn.metrics works also</span>
@@ -1611,7 +1864,7 @@ All the trials results summarised in descending score
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">to_tune</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'C'</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="s1">'solver'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'saga'</span><span class="p">],</span> <span class="s1">'penalty'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'l1'</span><span class="p">,</span><span class="s1">'l2'</span><span class="p">],</span>
@@ -1629,57 +1882,56 @@ All the trials results summarised in descending score
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 The model with the best parameters was:
-ClassificationReducer(model=LogisticRegression(C=2, fit_intercept=False,
-                                               penalty='l1', solver='saga'))
-With a score of -0.6865147893796834
+ClassificationReducer(model=LogisticRegression(C=1, solver='saga'))
+With a score of -0.6864987580029042
 All the trials results summarised in descending score
     model__C  model__fit_intercept model__penalty model__solver  \
-10       2.0                 False             l1          saga
 5        1.0                  True             l2          saga
-1        0.5                  True             l2          saga
-19       8.0                 False             l2          saga
-4        1.0                  True             l1          saga
 18       8.0                 False             l1          saga
-13       4.0                  True             l2          saga
-6        1.0                 False             l1          saga
-2        0.5                 False             l1          saga
-7        1.0                 False             l2          saga
 0        0.5                  True             l1          saga
-11       2.0                 False             l2          saga
-15       4.0                 False             l2          saga
-3        0.5                 False             l2          saga
-17       8.0                  True             l2          saga
-8        2.0                  True             l1          saga
-12       4.0                  True             l1          saga
-9        2.0                  True             l2          saga
+13       4.0                  True             l2          saga
+4        1.0                  True             l1          saga
 16       8.0                  True             l1          saga
+2        0.5                 False             l1          saga
+10       2.0                 False             l1          saga
+7        1.0                 False             l2          saga
 14       4.0                 False             l1          saga
+12       4.0                  True             l1          saga
+15       4.0                 False             l2          saga
+17       8.0                  True             l2          saga
+19       8.0                 False             l2          saga
+1        0.5                  True             l2          saga
+8        2.0                  True             l1          saga
+3        0.5                 False             l2          saga
+11       2.0                 False             l2          saga
+6        1.0                 False             l1          saga
+9        2.0                  True             l2          saga
 
     mean_test_score
-10        -0.686515
-5         -0.686515
-1         -0.686516
-19        -0.686516
-4         -0.686517
-18        -0.686517
+5         -0.686499
+18        -0.686516
+0         -0.686516
 13        -0.686517
-6         -0.686517
+4         -0.686517
+16        -0.686517
 2         -0.686517
-7         -0.686517
-0         -0.686518
-11        -0.686518
+10        -0.686518
+7         -0.686518
+14        -0.686518
+12        -0.686518
 15        -0.686518
-3         -0.686519
 17        -0.686519
+19        -0.686519
+1         -0.686519
 8         -0.686519
-12        -0.686519
+3         -0.686519
+11        -0.686519
+6         -0.686519
 9         -0.686519
-16        -0.686520
-14        -0.686521
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gs_lr</span><span class="o">.</span><span class="n">predict_task</span><span class="p">(</span><span class="n">NBA_results_task_predict</span><span class="p">)</span><span class="o">.</span><span class="n">top_input_data</span>
@@ -1687,7 +1939,7 @@ All the trials results summarised in descending score
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1698,7 +1950,7 @@ array(['Atlanta Hawks', 'Charlotte Hornets', 'Atlanta Hawks', ...,
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[35]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nice_print_results</span><span class="p">(</span><span class="n">gs_lr</span><span class="o">.</span><span class="n">predict_proba_task</span><span class="p">(</span><span class="n">NBA_results_task_predict</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s1">'team1'</span><span class="p">))</span>
@@ -1714,7 +1966,7 @@ team1 is preferred  [0.55 0.43 0.51 ... 0.59 0.53 0.61]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nice_print_results</span><span class="p">(</span><span class="n">gs_bt</span><span class="o">.</span><span class="n">predict_proba_task</span><span class="p">(</span><span class="n">NBA_results_task_predict</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s1">'team1'</span><span class="p">))</span>
@@ -1730,7 +1982,7 @@ team1 is preferred  [0.67 0.47 0.7  ... 0.64 0.45 0.79]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gs_bt</span><span class="o">.</span><span class="n">rank_entities</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -1738,7 +1990,7 @@ team1 is preferred  [0.67 0.47 0.7  ... 0.64 0.45 0.79]
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="output_area docutils container">

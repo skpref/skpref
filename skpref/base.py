@@ -621,6 +621,63 @@ class ClassificationReducer(ProbabilisticModel):
     follow the scikit-learn structure of objects that have fit and predict
     methods.
 
+    Parameters
+    ----------
+    model: scikit-learn type model that user would like to fit
+    take_feature_diff_for_pairwise_comparison: bool, default = False
+
+        Assume we have a pairwise comparison with an alternative level table:
+
+        .. list-table:: Assume an alternative level table of the format
+           :widths: 25 25 25
+           :header-rows: 1
+
+           * - alternative 1
+             - alternative 2
+             - alt1_chosen
+
+           * -
+             -
+             -
+
+        .. list-table:: Assume an alternative level table of the format
+           :widths: 25 25
+           :header-rows: 1
+
+           * - alternative
+             - feature
+
+           * -
+             -
+
+        There are two options for users to use these features:
+
+        .. list-table:: Option 1: default setting, keeps the features separate
+                for both entities and learns separate parameters on them
+           :widths: 30 30 25
+           :header-rows: 1
+
+           * - feauture alt 1
+             - feature alt 2
+             - alt1_chosen
+
+           * -
+             -
+             -
+
+        .. list-table:: Option 2: when take_feature_diff_for_pairwise_comparison
+              is set to  True then it creates one covariate which is the
+              difference between the values of for the two alternatives in the
+              pairwise comparison
+           :widths: 60 25
+           :header-rows: 1
+
+           * - feauture alt 1 - feature alt 2
+             - alt1_chosen
+
+           * -
+             -
+
     Example
     --------
     >>> import sys
@@ -642,41 +699,19 @@ class ClassificationReducer(ProbabilisticModel):
     ... target_column_correspondence='team1', features_to_use=['team_1_home'])
     >>> my_log_red = ClassificationReducer(LogisticRegression(solver='lbfgs'))
     >>> my_log_red.fit_task(NBA_results_task_train)
+
     """
-    def __init__(self, model):
+
+    def __init__(self, model, take_feature_diff_for_pairwise_comparison: bool = False):
         self.model = model
         self.obs_col = None
         self.keep_pairwise_format = True
         self.alternative = None
         self.model_type = "Classifier"
+        self.take_feature_diff_for_pairwise_comparison = take_feature_diff_for_pairwise_comparison
 
-    def task_unpacker(self, task: PrefTask, keep_pairwise_format: bool = True,
-                      take_feautre_diff: bool = False) -> dict:
+    def task_unpacker(self, task: PrefTask, keep_pairwise_format: bool = True) -> dict:
         """
-        If we have a pairwise comparison task there are two options:
-        * If we allow for the data to be kept as is, in the format of
-            | alternative 1 | alternative 2 | alt1_chosen |
-            |---------------|---------------|-------------|
-
-          Assume a secondary table of the form:
-            | alternative | feature  |
-            |-------------|----------|
-
-          I would like to allow for two options, one is to create a final table
-          as:
-
-            Option 1
-
-            | feauture alt 1| feature alt 2 | alt1_chosen |
-            |---------------|---------------|-------------|
-
-            Option 2
-
-            | feauture alt 1 - feature alt 2 | alt1_chosen |
-            |--------------------------------|-------------|
-
-            For aggregation these features are recreated and then prediction is
-            given
 
         * We can break down the table into individual observations like so in
           long format:
@@ -697,10 +732,6 @@ class ClassificationReducer(ProbabilisticModel):
         keep_pairwise_format: bool default is True
             This will control whether to keep pairwise format for a pairwise task
             it is only relevant for a PairwiseComparisonTask.
-
-        take_feautre_diff: bool default is False
-            This will take the difference in features like described in Option 2
-            above
 
         Returns
         -------
@@ -777,7 +808,7 @@ class ClassificationReducer(ProbabilisticModel):
                 ).drop(drop_cols, axis=1, errors='ignore')
 
                 # Create the table like it is in Option 2
-                if take_feautre_diff:
+                if self.take_feature_diff_for_pairwise_comparison:
                     for root_col in initialise_cols:
                         model_input[root_col + '_diff'] = model_input[
                             root_col + '_' +
@@ -856,6 +887,8 @@ class ClassificationReducer(ProbabilisticModel):
 
             model_input.drop(['observation', 'alternative'],
                              axis=1, inplace=True)
+
+        self.model_input = model_input
 
         return {'df_comb': model_input,
                 'target': task.primary_table_target_name,
