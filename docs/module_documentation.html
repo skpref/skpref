@@ -1,0 +1,1090 @@
+<!doctype html>
+<html class="no-js">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Jupyter Notebook Examples" href="jupyter_notebook_examples.html" /><link rel="prev" title="Welcome to skpref" href="README_symbolic.html" />
+
+    <meta name="generator" content="sphinx-4.3.2, furo 2022.01.02"/>
+        <title>Module documentation - skpref 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=df49af52631e7917044a9c21a57f7b83170a6dd0" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=fade93df149f7c5fedb3ff897f799dc7d283b420" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  
+  }
+  body[data-theme="dark"] {
+    --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+  }
+  @media (prefers-color-scheme: dark) {
+    body:not([data-theme="light"]) {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+  }
+</style></head>
+  <body>
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" />
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="10" y1="12" x2="20" y2="12" />
+      <line x1="6" y1="18" x2="20" y2="18" />
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">skpref 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  
+  <span class="sidebar-brand-text">skpref 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="README_symbolic.html">Welcome to skpref</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README_symbolic.html#models-in-the-package">Models in the package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README_symbolic.html#novelties-in-skpref-to-the-scikit-learn-user">Novelties in skpref to the scikit-learn user</a></li>
+<li class="toctree-l1"><a class="reference internal" href="README_symbolic.html#types-of-relations-that-can-be-modelled-in-skpref-11-01-2022">Types of relations that can be modelled in skpref (11/01/2022)</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Module documentation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="jupyter_notebook_examples.html">Jupyter Notebook Examples</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html">Bradley Terry example notebook</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Reading-in-the-data">Reading in the data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Setting-up-the-tasks">Setting up the tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Let’s-fit-a-reduction-to-logistic-regression-first">Let’s fit a reduction to logistic regression first</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Let’s-fit-a-reduction-to-logistic-regression-with-the-salary-covariate">Let’s fit a reduction to logistic regression with the salary covariate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Bradley-Terry-model-with-salary-covariate">Bradley Terry model with salary covariate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="example_using_sports_data.html#Example-using-GridSearchCV()">Example using GridSearchCV()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html">We will demonstrate skpref on discrete choice data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#We-will-need-to-make-a-couple-of-changes-to-the-format-of-this-table-for-skpref-to-read-it-easier.">We will need to make a couple of changes to the format of this table for skpref to read it easier.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="swissmetro_discrete_choice.html#We-will-use-a-subset-of-the-available-features-to-make-the-skpref-demo-easier">We will use a subset of the available features to make the skpref demo easier</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <div class="section" id="module-documentation">
+<h1>Module documentation<a class="headerlink" href="#module-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="tasks">
+<h2>Tasks<a class="headerlink" href="#tasks" title="Permalink to this headline">¶</a></h2>
+<div class="table-wrapper"><table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%"/>
+<col style="width: 90%"/>
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skpref.task.ChoiceTask" title="skpref.task.ChoiceTask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.task.ChoiceTask</span></code></a></p></td>
+<td><p>Task for discrete and subset choice models</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skpref.task.PairwiseComparisonTask" title="skpref.task.PairwiseComparisonTask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.task.PairwiseComparisonTask</span></code></a></p></td>
+<td><p>Task for choice based models</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="section" id="models">
+<h2>Models<a class="headerlink" href="#models" title="Permalink to this headline">¶</a></h2>
+<div class="table-wrapper"><table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%"/>
+<col style="width: 90%"/>
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skpref.base.Model" title="skpref.base.Model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.base.Model</span></code></a></p></td>
+<td><p>Base Class for all models</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skpref.random_utility.BradleyTerry" title="skpref.random_utility.BradleyTerry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.random_utility.BradleyTerry</span></code></a></p></td>
+<td><p>Bradley Terry model</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skpref.base.ClassificationReducer" title="skpref.base.ClassificationReducer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.base.ClassificationReducer</span></code></a></p></td>
+<td><p>Allows users to fit scikit-learn classifiers as predictors</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="section" id="model-selection">
+<h2>Model Selection<a class="headerlink" href="#model-selection" title="Permalink to this headline">¶</a></h2>
+<div class="table-wrapper"><table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%"/>
+<col style="width: 90%"/>
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skpref.model_selection.GridSearchCV" title="skpref.model_selection.GridSearchCV"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.model_selection.GridSearchCV</span></code></a></p></td>
+<td><p>An adaption of scikit-learn's GridSearchCV into a choice model interface.</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="section" id="metrics">
+<h2>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h2>
+<div class="table-wrapper"><table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%"/>
+<col style="width: 90%"/>
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skpref.metrics.true_positives" title="skpref.metrics.true_positives"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.metrics.true_positives</span></code></a></p></td>
+<td><p>True positive count</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skpref.metrics.true_negatives" title="skpref.metrics.true_negatives"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.metrics.true_negatives</span></code></a></p></td>
+<td><p>True negative count</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skpref.metrics.false_positives" title="skpref.metrics.false_positives"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.metrics.false_positives</span></code></a></p></td>
+<td><p>False positive count</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skpref.metrics.false_negatives" title="skpref.metrics.false_negatives"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.metrics.false_negatives</span></code></a></p></td>
+<td><p>False negative count</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skpref.metrics.accuracy" title="skpref.metrics.accuracy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.metrics.accuracy</span></code></a></p></td>
+<td><p>Accuracy</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skpref.metrics.recall" title="skpref.metrics.recall"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.metrics.recall</span></code></a></p></td>
+<td><p>Recall</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skpref.metrics.f1_score" title="skpref.metrics.f1_score"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.metrics.f1_score</span></code></a></p></td>
+<td><p>F1 Score</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#skpref.metrics.log_loss" title="skpref.metrics.log_loss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.metrics.log_loss</span></code></a></p></td>
+<td><p>Log Loss</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#skpref.metrics.log_loss_compare_with_t_test" title="skpref.metrics.log_loss_compare_with_t_test"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skpref.metrics.log_loss_compare_with_t_test</span></code></a></p></td>
+<td><p>Compares the log loss from two predictions with a paired t-test</p></td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<div class="section" id="id1">
+<h2>Tasks<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-skpref.task">
+<span id="choicetask"></span><h3>ChoiceTask<a class="headerlink" href="#module-skpref.task" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="skpref.task.ChoiceTask">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skpref.task.</span></span><span class="sig-name descname"><span class="pre">ChoiceTask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primary_table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_table_alternatives_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_table_target_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_to_primary_link</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">entity_slot_type_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_type_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_to_use</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skpref.task.ChoiceTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Task for discrete and subset choice models</p>
+<dl class="simple">
+<dt>primary_table: DataFrame</dt><dd><p>The primary table is the one that contains the target variable and
+decision level data (covariates that may be different across each
+decision).</p>
+</dd>
+<dt>primary_table_alternatives_names: str</dt><dd><p>The column or attribute which corresponds to the alternatives in the
+primary table.</p>
+</dd>
+<dt>primary_table_target_name: str, default=None</dt><dd><p>The column name or attribute which corresponds to the ground truth</p>
+</dd>
+<dt>secondary_table: DataFrame, default=None</dt><dd><p>The secondary table that usually contains information about the
+alternatives in the primary table. For example the cleanliness perception
+of public transportation.</p>
+</dd>
+<dt>secondary_to_primary_link: dict, default:None</dt><dd><p>How to link the primary and secondary tables together. The key in the
+dictionary will correspond to the field in the secondary table and the
+value for each key will be the field in the primary table</p>
+</dd>
+<dt>entity_slot_type_kwargs: dict of PosetType args</dt><dd><p>arguments to tell about the PosetType of the entity slot type</p>
+</dd>
+<dt>target_type_kwargs: dict of PosetType args</dt><dd><p>arguments to tell about the PosetType of the entity slot type</p>
+</dd>
+<dt>features_to_use: list of strings, default = ‘all’</dt><dd><p>Column names of the features to use, by default the task will try to use
+every column as features. If the user wants to use a model that doesn’t
+use any features then it should be set to None</p>
+</dd>
+</dl>
+</dd></dl>
+</div>
+<div class="section" id="module-0">
+<span id="pairwisecomparisontask"></span><h3>PairwiseComparisonTask<a class="headerlink" href="#module-0" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="skpref.task.PairwiseComparisonTask">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skpref.task.</span></span><span class="sig-name descname"><span class="pre">PairwiseComparisonTask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primary_table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_table_alternatives_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_table_target_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_column_correspondence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_table</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">secondary_to_primary_link</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_type_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">features_to_use</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skpref.task.PairwiseComparisonTask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Task for choice based models</p>
+<dl class="simple">
+<dt>primary_table: str, DataFrame, scipy.io.arff</dt><dd><p>The primary table is the one that contains the target variable and
+covariates that vary on the decision level. For example the
+available methods of transportation for an individual and weather it
+rained or not at the time of the journey.
+If str it will be the directory where the primary table sits. Otherwise
+will also read in pandas DataFrames and scipy.io.arff</p>
+</dd>
+<dt>primary_table_alternatives_names: str</dt><dd><p>The column or attribute which corresponds to the alternatives in the
+primary table.</p>
+</dd>
+<dt>primary_table_target_name: str</dt><dd><p>The column name or attribute which corresponds to the ground truth</p>
+</dd>
+<dt>secondary_table: str, DataFrame, scipy.io.arff, default=None</dt><dd><p>The secondary table that usually contains information about the
+alternatives in the primary table. For example the cleanliness perception
+of public transportation.
+If str it will be the directory where the primary table sits. Otherwise
+will also read in pandas DataFrames and scipy.io.arff</p>
+</dd>
+<dt>secondary_to_primary_link: dict, default:None</dt><dd><p>How to link the primary and secondary tables together. The key in the
+dictionary will correspond to the field in the secondary table and the
+value for each key will be the field in the primary table</p>
+</dd>
+<dt>target_type_kwargs: dict of PosetType args</dt><dd><p>arguments to tell about the PosetType of the entity slot type</p>
+</dd>
+<dt>features_to_use: list of strings, default = ‘all’</dt><dd><p>Column names of the features to use, by default the task will try to use
+every column as features. If the user wants to use a model that doesn’t
+use any features then it should be set to None</p>
+</dd>
+<dt>target_column_correspondence: str, default=None</dt><dd><p>If the choice is a pairwise comparison and the target is not the name
+of an entity but a {1,0} variable that corresponds to one of the entities
+being chosen in one of the columns, then this should be the name of the
+column for which when the target variable is 1 then that column’s entity
+has been chosen. i.e. there is a column with home team another one with
+away team and target is 1 when home team wins.</p>
+</dd>
+</dl>
+</dd></dl>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>Models<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h2>
+<p>All models inherit from base.models the fit_task and predict_task methods. This helps maintain consistency within the
+package for how reduction and aggregation is treated.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="skpref.base.Model">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skpref.base.</span></span><span class="sig-name descname"><span class="pre">Model</span></span><a class="headerlink" href="#skpref.base.Model" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base Class for all models</p>
+<p>Every model will have a fit and predict method. This is defined on the level
+in the model object e.g. BradleyTerry.
+Sometimes models will be fit on different tasks than their original design,
+for example a pairwise comparison model might be fit on a choice data that
+isn’t pairwise comparison. Pairwise comparison models will assume a
+different data structure to choice models. For example a pairwise comparison
+dataset might have the following format:</p>
+<p>Table 1: pairwise comparison table</p>
+<div class="table-wrapper"><table class="docutils align-default">
+<colgroup>
+<col style="width: 36%"/>
+<col style="width: 36%"/>
+<col style="width: 29%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>option 1</p></th>
+<th class="head"><p>option 2</p></th>
+<th class="head"><p>choice</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Alt A</p></td>
+<td><p>Alt B</p></td>
+<td><p>Alt B</p></td>
+</tr>
+</tbody>
+</table></div>
+<p>A choice dataset might have this format:</p>
+<p>Table 2: choice table</p>
+<div class="table-wrapper"><table class="docutils align-default">
+<colgroup>
+<col style="width: 54%"/>
+<col style="width: 46%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>options_presented</p></th>
+<th class="head"><p>options_chosen</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>[A, B, C]</p></td>
+<td><p>[A, C]</p></td>
+</tr>
+</tbody>
+</table></div>
+<p>So pairwise comparison models and choice models would deal with different
+input data. But the user might want to run the choice task as if it were a
+pairwise comparison task which would have to look like table 1.</p>
+<p>The task_unpackers will be methods whose job it would be to translate any
+dataset type into the format that is required by the model, for example all
+pairwise comparison models will have a task_unpacker that leaves the data
+as is if it looks like table 1 and changes the data into something like
+table 1 when it looks like table 2.</p>
+<p>The task_packers will be used to predict the data on the right level. For
+example if a pairwise comparison model is used to predict a choice then the
+task_packer will be what aggregates the data up to something like table 2.</p>
+<p>The fit_task function will be simply a wrapper that returns
+model.fit(task_unpacker(data)) and the predict_task function will be one that
+returns task_packer(model.preidct(data)) for every model.</p>
+<p>This architecture is defined at the highest level and is fixed.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="skpref.base.Model.fit_task">
+<span class="sig-name descname"><span class="pre">fit_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.task.PrefTask</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#skpref.base.Model.fit_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits the model using the details given in the task</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task</strong> (<em>PrefTask</em>) – The task that has been set up by the user</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="skpref.base.Model.predict_task">
+<span class="sig-name descname"><span class="pre">predict_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.task.PrefTask</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">skpref.data_processing.PosetVector</span></span></span><a class="headerlink" href="#skpref.base.Model.predict_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predicts outcomes using a task</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task</strong> (<em>PrefTask</em>) – The task that has been set up by the user</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>PosetVector of the predicted preferences</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+<div class="section" id="bradleyterry">
+<h3>BradleyTerry<a class="headerlink" href="#bradleyterry" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="skpref.random_utility.BradleyTerry">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skpref.random_utility.</span></span><span class="sig-name descname"><span class="pre">BradleyTerry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Newton-CG'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skpref.random_utility.BradleyTerry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bradley Terry model</p>
+<p>Class which fits a Bradley Terry Model based on the choix package
+hyperparamters can be recognised from the opt_pairwise function in choix</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">alpha</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>, the function returns the maximum a-posteriori (MAP)
+estimate under an isotropic Gaussian prior with variance <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">/</span> <span class="pre">alpha</span></code>.</p>
+<p>When covariates are used then model is fit via pylogit package.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<em>float</em>) – Regularization strength</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Optimization method. Either “BFGS” or “Newton-CG”</p></li>
+<li><p><strong>initial_params</strong> (<em>array_like</em>) – Parameters used to initialize the iterative procedure</p></li>
+<li><p><strong>max_iter</strong> (<em>int</em>) – Maximum number of iterations allowed</p></li>
+<li><p><strong>tol</strong> (<em>float</em>) – Tolerance for termination (method-specific)</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">".."</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skpref.random_utility</span> <span class="kn">import</span> <span class="n">BradleyTerry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skpref.task</span> <span class="kn">import</span> <span class="n">PairwiseComparisonTask</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using product choice data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># using basketball match data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">NBA_file_loc</span> <span class="o">=</span> <span class="s1">'skpref/examples/data/NBA_matches.csv'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">NBA_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">NBA_file_loc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">season_split</span> <span class="o">=</span> <span class="mi">2016</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">train_data</span> <span class="o">=</span> <span class="n">NBA_results</span><span class="p">[</span><span class="n">NBA_results</span><span class="o">.</span><span class="n">season_start</span> <span class="o">==</span> <span class="n">season_split</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">NBA_results_task_train</span> <span class="o">=</span> <span class="n">PairwiseComparisonTask</span><span class="p">(</span>
+<span class="gp">... </span><span class="n">primary_table</span><span class="o">=</span><span class="n">train_data</span><span class="p">,</span>
+<span class="gp">... </span><span class="n">primary_table_alternatives_names</span><span class="o">=</span><span class="p">[</span><span class="s1">'team1'</span><span class="p">,</span> <span class="s1">'team2'</span><span class="p">],</span>
+<span class="gp">... </span><span class="n">primary_table_target_name</span> <span class="o">=</span><span class="s1">'team1_wins'</span><span class="p">,</span>
+<span class="gp">... </span><span class="n">target_column_correspondence</span><span class="o">=</span><span class="s1">'team1'</span><span class="p">,</span> <span class="n">features_to_use</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mybt</span> <span class="o">=</span> <span class="n">BradleyTerry</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">'BFGS'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mybt</span><span class="o">.</span><span class="n">fit_task</span><span class="p">(</span><span class="n">NBA_results_task_train</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="skpref.random_utility.BradleyTerry.predict_choice_task">
+<span class="sig-name descname"><span class="pre">predict_choice_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skpref.random_utility.BradleyTerry.predict_choice_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predicts the probability that the corresponding entity will win in the
+task.</p>
+<p>task: ChoiceTask type</p>
+<p>predict_choice</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="skpref.random_utility.BradleyTerry.predict_proba_task">
+<span class="sig-name descname"><span class="pre">predict_proba_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.task.PrefTask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">skpref.data_processing.PosetVector</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">skpref.data_processing.PosetVector</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aggregation_method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Luce'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#skpref.random_utility.BradleyTerry.predict_proba_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predicts the probability of specified outcomes for a specific task</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task</strong> (<em>PrefTask</em>) – The task for which predictions should be made</p></li>
+<li><p><strong>outcome</strong> (<em>List</em>) – The outcome for which predictions should be made, for example if
+the alternatives are ‘Car’, ‘Train’, ‘Bicycle’ then the user can
+ask for probabilities of [‘Car’, ‘Train] if they’re only interested
+in the probability of choosing ‘Car’ or ‘Train’</p></li>
+<li><p><strong>column</strong> (<em>str</em>) – Can also take a column name for which predictions should be made,
+probably more useful in pairwise comparison set ups, where team1
+is in one column and team2 in another.</p></li>
+<li><p><strong>aggregation_method</strong> (<em>str</em><em>, </em><em>default is 'Luce'</em>) – <p>This can be set to ‘Luce’ or ‘independent transitive’. When the method
+is set to ‘Luce’ then the code pretends that the parameters learned with
+the Bradldey-Terry method were learned with the Luce method and they
+used with the Luce formulation to create a prediction. For example,
+if the alternatives were {A, B, C} and for each of these alternatives
+we learn the function f(A), f(B), f(C) which include their strength
+parameters and potentially some covariates, the Luce prediction would
+say the probability of choosing A from {A, B, C} is
+<span class="math notranslate nohighlight">\(\frac{e^{f(A)}}{e^{f(A)}+ e^{f(B)} + e^{f(C)}}\)</span></p>
+<p>When set to ‘indeptendent transitive’ the aggregation is the following
+the probability of choosing A from {A, B, C}
+(denoted as <span class="math notranslate nohighlight">\(P(A\succ \{A,B,C\})\)</span> for simplicity) is
+<span class="math notranslate nohighlight">\(\frac{P(A\succ\{A,B\})P(A\succ\{A,C\})}{P(A\succ\{A,B\})P(A\succ\{A,C\}) + P(B\succ\{A,B\})P(B\succ\{B,C\}) + P(C\succ\{A,C\})P(C\succ\{B,C\})}\)</span></p>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A dictionary with the alternatives being the keys and for each key there’s         a numpy array of floats which reflects the probability with which that         alternative will be selected. When the alternative is not in the list of         choices for a specific row the value will be 0. When a column is given         instead of an outcome then the keys are the column name.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="skpref.random_utility.BradleyTerry.rank_entities">
+<span class="sig-name descname"><span class="pre">rank_entities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ascending</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skpref.random_utility.BradleyTerry.rank_entities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs the ranked order of entities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ascending</strong> (<em>Boolean</em><em>, </em><em>default=True</em>) – When True the weakest entity will be first in the list,
+when False the strongest entity will be first in the list.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>rank</strong> – The ranks of the entities.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray, shape (n_ents)</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</div>
+<div class="section" id="classificationreducer">
+<h3>ClassificationReducer<a class="headerlink" href="#classificationreducer" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="skpref.base.ClassificationReducer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skpref.base.</span></span><span class="sig-name descname"><span class="pre">ClassificationReducer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">take_feature_diff_for_pairwise_comparison</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skpref.base.ClassificationReducer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows users to fit scikit-learn classifiers as predictors</p>
+<p>This is an object that allows users to model tasks using models that
+follow the scikit-learn structure of objects that have fit and predict
+methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>scikit-learn type model that user would like to fit</em>) – </p></li>
+<li><p><strong>take_feature_diff_for_pairwise_comparison</strong> (<em>bool</em><em>, </em><em>default = False</em>) – <p>Assume we have a pairwise comparison with an alternative level table:</p>
+<div class="table-wrapper"><table class="colwidths-given docutils align-default" id="id5">
+<caption><span class="caption-text">Assume an alternative level table of the format</span><a class="headerlink" href="#id5" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+<col style="width: 33%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>alternative 1</p></th>
+<th class="head"><p>alternative 2</p></th>
+<th class="head"><p>alt1_chosen</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<div class="table-wrapper"><table class="colwidths-given docutils align-default" id="id6">
+<caption><span class="caption-text">Assume an alternative level table of the format</span><a class="headerlink" href="#id6" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 50%"/>
+<col style="width: 50%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>alternative</p></th>
+<th class="head"><p>feature</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>There are two options for users to use these features:</p>
+<div class="table-wrapper"><table class="colwidths-given docutils align-default" id="id7">
+<caption><span class="caption-text">Option 1: default setting, keeps the features separate
+     for both entities and learns separate parameters on them</span><a class="headerlink" href="#id7" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 35%"/>
+<col style="width: 35%"/>
+<col style="width: 29%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>feauture alt 1</p></th>
+<th class="head"><p>feature alt 2</p></th>
+<th class="head"><p>alt1_chosen</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<div class="table-wrapper"><table class="colwidths-given docutils align-default" id="id8">
+<caption><span class="caption-text">Option 2: when take_feature_diff_for_pairwise_comparison
+   is set to  True then it creates one covariate which is the
+   difference between the values of for the two alternatives in the
+   pairwise comparison</span><a class="headerlink" href="#id8" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 71%"/>
+<col style="width: 29%"/>
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>feauture alt 1 - feature alt 2</p></th>
+<th class="head"><p>alt1_chosen</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">".."</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skpref.base</span> <span class="kn">import</span> <span class="n">ClassificationReducer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skpref.task</span> <span class="kn">import</span> <span class="n">PairwiseComparisonTask</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using product choice data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># using basketball match data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">NBA_file_loc</span> <span class="o">=</span> <span class="s1">'skpref/examples/data/NBA_matches.csv'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">NBA_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">NBA_file_loc</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">season_split</span> <span class="o">=</span> <span class="mi">2016</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">train_data</span> <span class="o">=</span> <span class="n">NBA_results</span><span class="p">[</span><span class="n">NBA_results</span><span class="o">.</span><span class="n">season_start</span> <span class="o">==</span> <span class="n">season_split</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">NBA_results_task_train</span> <span class="o">=</span> <span class="n">PairwiseComparisonTask</span><span class="p">(</span>
+<span class="gp">... </span><span class="n">primary_table</span><span class="o">=</span><span class="n">train_data</span><span class="p">,</span>
+<span class="gp">... </span><span class="n">primary_table_alternatives_names</span><span class="o">=</span><span class="p">[</span><span class="s1">'team1'</span><span class="p">,</span> <span class="s1">'team2'</span><span class="p">],</span>
+<span class="gp">... </span><span class="n">primary_table_target_name</span> <span class="o">=</span><span class="s1">'team1_wins'</span><span class="p">,</span>
+<span class="gp">... </span><span class="n">target_column_correspondence</span><span class="o">=</span><span class="s1">'team1'</span><span class="p">,</span> <span class="n">features_to_use</span><span class="o">=</span><span class="p">[</span><span class="s1">'team_1_home'</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_log_red</span> <span class="o">=</span> <span class="n">ClassificationReducer</span><span class="p">(</span><span class="n">LogisticRegression</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="s1">'lbfgs'</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">my_log_red</span><span class="o">.</span><span class="n">fit_task</span><span class="p">(</span><span class="n">NBA_results_task_train</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="skpref.base.ClassificationReducer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">take_feature_diff_for_pairwise_comparison</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skpref.base.ClassificationReducer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+</dd></dl>
+</div>
+</div>
+<div class="section" id="id3">
+<h2>Model Selection<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="gridsearchcv">
+<h3>GridSearchCV<a class="headerlink" href="#gridsearchcv" title="Permalink to this headline">¶</a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="skpref.model_selection.GridSearchCV">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">skpref.model_selection.</span></span><span class="sig-name descname"><span class="pre">GridSearchCV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scoring</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skpref.model_selection.GridSearchCV" title="Permalink to this definition">¶</a></dt>
+<dd><p>An adaption of scikit-learn’s GridSearchCV into a choice model interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>estimator</strong> (<em>estimator object.</em>) – This is assumed to implement the scikit-learn estimator interface.
+Either estimator needs to provide a <code class="docutils literal notranslate"><span class="pre">score</span></code> function,
+or <code class="docutils literal notranslate"><span class="pre">scoring</span></code> must be passed.</p></li>
+<li><p><strong>param_grid</strong> (<em>dict</em><em> or </em><em>list of dictionaries</em>) – Dictionary with parameters names (string) as keys and lists of
+parameter settings to try as values, or a list of such
+dictionaries, in which case the grids spanned by each dictionary
+in the list are explored. This enables searching over any sequence
+of parameter settings.</p></li>
+<li><p><strong>kwargs</strong> (<em>args</em>) – all arguments that GridSearchCV takes from scikit-learn</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pickle</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">".."</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skpref.random_utility</span> <span class="kn">import</span> <span class="n">BradleyTerry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">skpref.task</span> <span class="kn">import</span> <span class="n">ChoiceTask</span><span class="p">,</span> <span class="n">PairwiseComparisonTask</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Using product choice data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># using basketball match data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">NBA_file_loc</span> <span class="o">=</span> <span class="s1">'skpref/examples/data/'</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">NBA_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">NBA_file_loc</span> <span class="o">+</span> <span class="s1">'NBA_matches.csv'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">NBA_team_salary_budget</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">NBA_file_loc</span>
+<span class="gp">... </span>    <span class="o">+</span> <span class="s1">'team_salary_budgets.csv'</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">season_split</span> <span class="o">=</span> <span class="mi">2016</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">train_data</span> <span class="o">=</span> <span class="n">NBA_results</span><span class="p">[</span><span class="n">NBA_results</span><span class="o">.</span><span class="n">season_start</span> <span class="o">==</span> <span class="n">season_split</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">NBA_results_task_train</span> <span class="o">=</span> <span class="n">PairwiseComparisonTask</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">primary_table</span><span class="o">=</span><span class="n">train_data</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">primary_table_alternatives_names</span><span class="o">=</span><span class="p">[</span><span class="s1">'team1'</span><span class="p">,</span> <span class="s1">'team2'</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">primary_table_target_name</span> <span class="o">=</span><span class="s1">'team1_wins'</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">target_column_correspondence</span><span class="o">=</span><span class="s1">'team1'</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">features_to_use</span><span class="o">=</span><span class="p">[</span><span class="s1">'salary'</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">secondary_table</span><span class="o">=</span><span class="n">NBA_team_salary_budget</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">secondary_to_primary_link</span><span class="o">=</span><span class="p">{</span><span class="s1">'team'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'team1'</span><span class="p">,</span> <span class="s1">'team2'</span><span class="p">],</span>
+<span class="gp">... </span>                               <span class="s1">'season_start'</span><span class="p">:</span> <span class="s1">'season_start'</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">to_tune</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'alpha'</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="s1">'method'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'BFGS'</span><span class="p">]}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gs_bt</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">BradleyTerry</span><span class="p">(),</span> <span class="n">to_tune</span><span class="p">,</span>  <span class="n">cv</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gs_bt</span><span class="o">.</span><span class="n">fit_task</span><span class="p">(</span><span class="n">NBA_results_task_train</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="skpref.model_selection.GridSearchCV.fit_task">
+<span class="sig-name descname"><span class="pre">fit_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.task.PrefTask</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skpref.model_selection.GridSearchCV.fit_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fits the grid search based on a task</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task</strong> (<em>PrefTask</em>) – The task for which the GridSearch should be run</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="skpref.model_selection.GridSearchCV.inspect_results">
+<span class="sig-name descname"><span class="pre">inspect_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#skpref.model_selection.GridSearchCV.inspect_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the results of the grid-search in a user-friendly way.</p>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="skpref.model_selection.GridSearchCV.predict_choice_task">
+<span class="sig-name descname"><span class="pre">predict_choice_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skpref.model_selection.GridSearchCV.predict_choice_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predicts the probability that the corresponding entity will win in the
+task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task</strong> (<em>ChoiceTask type</em>) – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>predict_choice</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="skpref.model_selection.GridSearchCV.predict_proba_task">
+<span class="sig-name descname"><span class="pre">predict_proba_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.task.PrefTask</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outcome</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">skpref.data_processing.PosetVector</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">skpref.data_processing.PosetVector</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skpref.model_selection.GridSearchCV.predict_proba_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Predicts the probability of specified outcomes for a specific task</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task</strong> (<em>PrefTask</em>) – The task for which predictions should be made</p></li>
+<li><p><strong>outcome</strong> (<em>List</em>) – The outcome for which predictions should be made, for example if
+the alternatives are ‘Car’, ‘Train’, ‘Bicycle’ then the user can
+ask for probabilities of [‘Car’, ‘Train] if they’re only interested
+in the probability of choosing ‘Car’ or ‘Train’</p></li>
+<li><p><strong>column</strong> (<em>str</em>) – Can also take a column name for which predictions should be made,
+probably more useful in pairwise comparison set ups, where team1
+is in one column and team2 in another.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>A dictionary with the alternatives being the keys and for each key there’s         a numpy array of floats which reflects the probability with which that         alternative will be selected. When the alternative is not in the list of         choices for a specific row the value will be 0. When a column is given         instead of an outcome then the keys are the column name.</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="skpref.model_selection.GridSearchCV.predict_task">
+<span class="sig-name descname"><span class="pre">predict_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skpref.model_selection.GridSearchCV.predict_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates predictions for a task</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>task</strong> (<em>PrefTask</em>) – The task for which predictions should be made</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="skpref.model_selection.GridSearchCV.rank_entities">
+<span class="sig-name descname"><span class="pre">rank_entities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ascending</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#skpref.model_selection.GridSearchCV.rank_entities" title="Permalink to this definition">¶</a></dt>
+<dd><p>Outputs the ranked order of entities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>ascending</strong> (<em>Boolean</em><em>, </em><em>default=True</em>) – When True the weakest entity will be first in the list,
+when False the strongest entity will be first in the list.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>rank</strong> – The ranks of the entities.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ndarray, shape (n_ents)</p>
+</dd>
+</dl>
+</dd></dl>
+</dd></dl>
+</div>
+</div>
+<div class="section" id="id4">
+<h2>Metrics<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="skpref.metrics.true_positives">
+<span class="sig-prename descclassname"><span class="pre">skpref.metrics.</span></span><span class="sig-name descname"><span class="pre">true_positives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actuals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#skpref.metrics.true_positives" title="Permalink to this definition">¶</a></dt>
+<dd><p>True positive count</p>
+<p>The number of alternatives predicted to be chosen and were actually chosen
+(tp)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actuals</strong> (<em>SubsetPosetVector</em>) – the true values</p></li>
+<li><p><strong>predicted</strong> (<em>SubsetPosetVector</em>) – the predicted values</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="skpref.metrics.true_negatives">
+<span class="sig-prename descclassname"><span class="pre">skpref.metrics.</span></span><span class="sig-name descname"><span class="pre">true_negatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actuals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#skpref.metrics.true_negatives" title="Permalink to this definition">¶</a></dt>
+<dd><p>True negative count</p>
+<p>The number of alternatives predicted to be bot chosen and were actually not
+chosen (tn)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actuals</strong> (<em>SubsetPosetVector</em>) – the true values</p></li>
+<li><p><strong>predicted</strong> (<em>SubsetPosetVector</em>) – the predicted values</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="skpref.metrics.false_positives">
+<span class="sig-prename descclassname"><span class="pre">skpref.metrics.</span></span><span class="sig-name descname"><span class="pre">false_positives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actuals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#skpref.metrics.false_positives" title="Permalink to this definition">¶</a></dt>
+<dd><p>False positive count</p>
+<p>The number of alternatives predicted to be chosen and were actually not
+chosen (fp)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actuals</strong> (<em>SubsetPosetVector</em>) – the true values</p></li>
+<li><p><strong>predicted</strong> (<em>SubsetPosetVector</em>) – the predicted values</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="skpref.metrics.false_negatives">
+<span class="sig-prename descclassname"><span class="pre">skpref.metrics.</span></span><span class="sig-name descname"><span class="pre">false_negatives</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actuals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#skpref.metrics.false_negatives" title="Permalink to this definition">¶</a></dt>
+<dd><p>False negative count</p>
+<p>The number of alternatives predicted to be not chosen and were actually
+chosen (fn)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actuals</strong> (<em>SubsetPosetVector</em>) – the true values</p></li>
+<li><p><strong>predicted</strong> (<em>SubsetPosetVector</em>) – the predicted values</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="skpref.metrics.accuracy">
+<span class="sig-prename descclassname"><span class="pre">skpref.metrics.</span></span><span class="sig-name descname"><span class="pre">accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actuals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#skpref.metrics.accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accuracy</p>
+<p>The percentage of alternatives correctly identified:
+(tp + tn) / (tp+fp+tn+fn)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actuals</strong> (<em>SubsetPosetVector</em>) – the true values</p></li>
+<li><p><strong>predicted</strong> (<em>SubsetPosetVector</em>) – the predicted values</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="skpref.metrics.recall">
+<span class="sig-prename descclassname"><span class="pre">skpref.metrics.</span></span><span class="sig-name descname"><span class="pre">recall</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actuals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#skpref.metrics.recall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recall</p>
+<p>The percentage of chosen alternatives identified correctly by the predictions
+tp / (tp + fn)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actuals</strong> (<em>SubsetPosetVector</em>) – the true values</p></li>
+<li><p><strong>predicted</strong> (<em>SubsetPosetVector</em>) – the predicted values</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="skpref.metrics.f1_score">
+<span class="sig-prename descclassname"><span class="pre">skpref.metrics.</span></span><span class="sig-name descname"><span class="pre">f1_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actuals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#skpref.metrics.f1_score" title="Permalink to this definition">¶</a></dt>
+<dd><p>F1 Score</p>
+<p>The harmonic mean between precision and recall
+(2 x precision x recall) / (precision + recall)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actuals</strong> (<em>SubsetPosetVector</em>) – the true values</p></li>
+<li><p><strong>predicted</strong> (<em>SubsetPosetVector</em>) – the predicted values</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="skpref.metrics.log_loss">
+<span class="sig-prename descclassname"><span class="pre">skpref.metrics.</span></span><span class="sig-name descname"><span class="pre">log_loss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actuals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#skpref.metrics.log_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log Loss</p>
+<p>Calculates the mean log loss for each alternative, can provide arguments
+as in scikit-learn log loss</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actuals</strong> (<em>SubsetPosetVector</em>) – the true values</p></li>
+<li><p><strong>predicted</strong> (<em>dict</em>) – the dictionary of predicted probability values where key is the predicted
+outcome and values are the probabilities for each row</p></li>
+<li><p><strong>dp</strong> (<em>int</em><em>, </em><em>default=2</em>) – The number of decimal places to return</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="skpref.metrics.log_loss_compare_with_t_test">
+<span class="sig-prename descclassname"><span class="pre">skpref.metrics.</span></span><span class="sig-name descname"><span class="pre">log_loss_compare_with_t_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actuals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">skpref.data_processing.SubsetPosetVec</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted1</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">predicted2</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">→</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#skpref.metrics.log_loss_compare_with_t_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares the log loss from two predictions with a paired t-test</p>
+<p>For two different probabilistic predictions calculates whether they are
+significantly different with a paired t-test.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>actuals</strong> (<em>SubsetPosetVec</em>) – the true values</p></li>
+<li><p><strong>predicted1</strong> (<em>dict</em>) – the dictionary of predicted probability values where key is the predicted
+outcome and values are the probabilities for each row for predictions from
+method 1</p></li>
+<li><p><strong>predicted2</strong> (<em>dict</em>) – the dictionary of predicted probability values where key is the predicted
+outcome and values are the probabilities for each row for predictions from
+method 2</p></li>
+<li><p><strong>dp</strong> (<em>int</em><em>, </em><em>default=2</em>) – The number of decimal places to return</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>p values of the paired t-tests</p>
+</dd>
+</dl>
+</dd></dl>
+</div>
+</div>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="jupyter_notebook_examples.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Jupyter Notebook Examples</div>
+              </div>
+              <svg><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="README_symbolic.html">
+              <svg><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Welcome to skpref</div>
+                
+              </div>
+            </a>
+        </div>
+
+        <div class="related-information">
+              Copyright &#169; 2022, István Papp, Franz Király, Ioanna Manolopoulou, Karlson Pfannschmidt, Pritha Gupta |
+          Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+          <a href="https://github.com/pradyunsg/furo">Furo theme</a>.
+            | <a class="muted-link" href="_sources/module_documentation.rst.txt"
+               rel="nofollow">
+              Show Source
+            </a>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            Contents
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Module documentation</a><ul>
+<li><a class="reference internal" href="#tasks">Tasks</a></li>
+<li><a class="reference internal" href="#models">Models</a></li>
+<li><a class="reference internal" href="#model-selection">Model Selection</a></li>
+<li><a class="reference internal" href="#metrics">Metrics</a></li>
+<li><a class="reference internal" href="#id1">Tasks</a><ul>
+<li><a class="reference internal" href="#module-skpref.task">ChoiceTask</a></li>
+<li><a class="reference internal" href="#module-0">PairwiseComparisonTask</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id2">Models</a><ul>
+<li><a class="reference internal" href="#bradleyterry">BradleyTerry</a></li>
+<li><a class="reference internal" href="#classificationreducer">ClassificationReducer</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id3">Model Selection</a><ul>
+<li><a class="reference internal" href="#gridsearchcv">GridSearchCV</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id4">Metrics</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    </body>
+</html>

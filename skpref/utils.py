@@ -41,3 +41,18 @@ def aggregate_full_probability_predictions_to_discrete_choice(
 
     return SubsetPosetVec(top_input_data=np.array(top, dtype=object),
                           boot_input_data=np.array(boot, dtype=object))
+
+
+def nice_print_results(results: dict, dp: int = 2) -> None:
+    """
+    Prints a dictionary where the values are numpy arrays in a nicer format
+
+    Parameters
+    ----------
+    results (dict): A dictionary where the values are numpy arrays
+    dp (int): Decimal places to round np array to
+    """
+
+    padding = np.max([len (keystring) for keystring in results.keys()]) + 1
+    for i in results.keys():
+        print(f'{i: <{padding}}', np.around(results[i], dp))

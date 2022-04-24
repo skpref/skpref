@@ -102,3 +102,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+
+skpref/istvan_test_notebooks/
+
+skpref/examples/example_using_choice_data.ipynb

@@ -9,8 +9,8 @@ from skpref.data_processing import PosetVector, SubsetPosetVec
 
 
 class Model(BaseEstimator):
-    """
-    Base Class for all models
+    """Base Class for all models
+
     Every model will have a fit and predict method. This is defined on the level
     in the model object e.g. BradleyTerry.
     Sometimes models will be fit on different tasks than their original design,
@@ -21,17 +21,21 @@ class Model(BaseEstimator):
 
     Table 1: pairwise comparison table
 
-    |option1|option2|choice|
-    |-------|-------|------|
-    |Alt A  | Alt B |Alt B |
+    +----------+----------+--------+
+    | option 1 | option 2 | choice |
+    +==========+==========+========+
+    |   Alt A  | Alt B    | Alt B  |
+    +----------+----------+--------+
 
     A choice dataset might have this format:
 
     Table 2: choice table
 
-    |options_presented| options_chosen|
-    |-----------------|---------------|
-    |[A,B,C]          |[A,C]          |
+    +-------------------+----------------+
+    | options_presented | options_chosen |
+    +===================+================+
+    |     [A, B, C]     | [A, C]         |
+    +-------------------+----------------+
 
     So pairwise comparison models and choice models would deal with different
     input data. But the user might want to run the choice task as if it were a
@@ -70,6 +74,15 @@ class Model(BaseEstimator):
         pass
 
     def fit_task(self, task: PrefTask) -> None:
+        """
+        Fits the model using the details given in the task
+
+        Parameters
+        ----------
+        task: PrefTask
+              The task that has been set up by the user
+
+        """
         if task.annotations['features_to_use'] is not None:
             self.task_fit_features = task.annotations['features_to_use'].copy()
         else:
@@ -94,6 +107,19 @@ class Model(BaseEstimator):
         return task_unpack_dict
 
     def predict_task(self, task: PrefTask) -> PosetVector:
+        """
+        Predicts outcomes using a task
+
+        Parameters
+        ----------
+        task: PrefTask
+              The task that has been set up by the user
+
+        Returns
+        -------
+        PosetVector of the predicted preferences
+
+        """
         predictions = self.predict(**self._prepare_data_for_prediction(task))
         return self.task_packer(predictions, task)
 
@@ -219,6 +245,34 @@ class ProbabilisticModel(Model):
             column: str = None,
             aggregation_method: str = None
     ) -> dict:
+
+        """
+        Predicts the probability of specified outcomes for a specific task
+
+        Parameters
+        ----------
+        task: PrefTask
+              The task for which predictions should be made
+
+        outcome: List
+                 The outcome for which predictions should be made, for example if
+                 the alternatives are 'Car', 'Train', 'Bicycle' then the user can
+                 ask for probabilities of ['Car', 'Train] if they're only interested
+                 in the probability of choosing 'Car' or 'Train'
+
+        column: str
+                Can also take a column name for which predictions should be made,
+                probably more useful in pairwise comparison set ups, where team1
+                is in one column and team2 in another.
+
+        Returns
+        -------
+        A dictionary with the alternatives being the keys and for each key there's
+        a numpy array of floats which reflects the probability with which that
+        alternative will be selected. When the alternative is not in the list of
+        choices for a specific row the value will be 0. When a column is given
+        instead of an outcome then the keys are the column name.
+        """
 
         if outcome is None and column is None:
             raise NameError("Please define the outcome to get the probability "
@@ -561,45 +615,103 @@ class SVMPairwiseComparisonModel(PairwiseComparisonModel):
 
 
 class ClassificationReducer(ProbabilisticModel):
-    """
-    This will be an object that allows users to model tasks using models that
+    """Allows users to fit scikit-learn classifiers as predictors
+
+    This is an object that allows users to model tasks using models that
     follow the scikit-learn structure of objects that have fit and predict
     methods.
+
+    Parameters
+    ----------
+    model: scikit-learn type model that user would like to fit
+    take_feature_diff_for_pairwise_comparison: bool, default = False
+
+        Assume we have a pairwise comparison with an alternative level table:
+
+        .. list-table:: Assume an alternative level table of the format
+           :widths: 25 25 25
+           :header-rows: 1
+
+           * - alternative 1
+             - alternative 2
+             - alt1_chosen
+
+           * -
+             -
+             -
+
+        .. list-table:: Assume an alternative level table of the format
+           :widths: 25 25
+           :header-rows: 1
+
+           * - alternative
+             - feature
+
+           * -
+             -
+
+        There are two options for users to use these features:
+
+        .. list-table:: Option 1: default setting, keeps the features separate
+                for both entities and learns separate parameters on them
+           :widths: 30 30 25
+           :header-rows: 1
+
+           * - feauture alt 1
+             - feature alt 2
+             - alt1_chosen
+
+           * -
+             -
+             -
+
+        .. list-table:: Option 2: when take_feature_diff_for_pairwise_comparison
+              is set to  True then it creates one covariate which is the
+              difference between the values of for the two alternatives in the
+              pairwise comparison
+           :widths: 60 25
+           :header-rows: 1
+
+           * - feauture alt 1 - feature alt 2
+             - alt1_chosen
+
+           * -
+             -
+
+    Example
+    --------
+    >>> import sys
+    >>> sys.path.insert(0, "..")
+    >>> from skpref.base import ClassificationReducer
+    >>> from skpref.task import PairwiseComparisonTask
+    >>> from sklearn.linear_model import LogisticRegression
+    >>> import pandas as pd
+    >>> # Using product choice data
+    >>> # using basketball match data
+    >>> NBA_file_loc = 'skpref/examples/data/NBA_matches.csv'
+    >>> NBA_results = pd.read_csv(NBA_file_loc)
+    >>> season_split = 2016
+    >>> train_data = NBA_results[NBA_results.season_start == season_split].copy()
+    >>> NBA_results_task_train = PairwiseComparisonTask(
+    ... primary_table=train_data,
+    ... primary_table_alternatives_names=['team1', 'team2'],
+    ... primary_table_target_name ='team1_wins',
+    ... target_column_correspondence='team1', features_to_use=['team_1_home'])
+    >>> my_log_red = ClassificationReducer(LogisticRegression(solver='lbfgs'))
+    >>> my_log_red.fit_task(NBA_results_task_train)
+
     """
-    def __init__(self, model):
+
+    def __init__(self, model, take_feature_diff_for_pairwise_comparison: bool = False):
         self.model = model
         self.obs_col = None
         self.keep_pairwise_format = True
         self.alternative = None
         self.model_type = "Classifier"
+        self.take_feature_diff_for_pairwise_comparison = take_feature_diff_for_pairwise_comparison
 
-    def task_unpacker(self, task: PrefTask, keep_pairwise_format: bool = True,
-                      take_feautre_diff: bool = False) -> dict:
+    def task_unpacker(self, task: PrefTask, keep_pairwise_format: bool = True) -> dict:
         """
-        If we have a pairwise comparison task there are two options:
-        * If we allow for the data to be kept as is, in the format of
-            | alternative 1 | alternative 2 | alt1_chosen |
-            |---------------|---------------|-------------|
-
-          Assume a secondary table of the form:
-            | alternative | feature  |
-            |-------------|----------|
-
-          I would like to allow for two options, one is to create a final table
-          as:
-
-            Option 1
-
-            | feauture alt 1| feature alt 2 | alt1_chosen |
-            |---------------|---------------|-------------|
-
-            Option 2
-
-            | feauture alt 1 - feature alt 2 | alt1_chosen |
-            |--------------------------------|-------------|
-
-            For aggregation these features are recreated and then prediction is
-            given
 
         * We can break down the table into individual observations like so in
           long format:
@@ -620,10 +732,6 @@ class ClassificationReducer(ProbabilisticModel):
         keep_pairwise_format: bool default is True
             This will control whether to keep pairwise format for a pairwise task
             it is only relevant for a PairwiseComparisonTask.
-
-        take_feautre_diff: bool default is False
-            This will take the difference in features like described in Option 2
-            above
 
         Returns
         -------
@@ -700,7 +808,7 @@ class ClassificationReducer(ProbabilisticModel):
                 ).drop(drop_cols, axis=1, errors='ignore')
 
                 # Create the table like it is in Option 2
-                if take_feautre_diff:
+                if self.take_feature_diff_for_pairwise_comparison:
                     for root_col in initialise_cols:
                         model_input[root_col + '_diff'] = model_input[
                             root_col + '_' +
@@ -779,6 +887,8 @@ class ClassificationReducer(ProbabilisticModel):
 
             model_input.drop(['observation', 'alternative'],
                              axis=1, inplace=True)
+
+        self.model_input = model_input
 
         return {'df_comb': model_input,
                 'target': task.primary_table_target_name,

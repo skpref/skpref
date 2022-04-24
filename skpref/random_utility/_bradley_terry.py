@@ -79,12 +79,15 @@ def generate_entity_lookup(all_unique_ents):
 
 
 class BradleyTerry(GLMPairwiseComparisonModel):
-    """
+    """Bradley Terry model
+
     Class which fits a Bradley Terry Model based on the choix package
     hyperparamters can be recognised from the opt_pairwise function in choix
 
     If ``alpha > 0``, the function returns the maximum a-posteriori (MAP)
     estimate under an isotropic Gaussian prior with variance ``1 / alpha``.
+
+    When covariates are used then model is fit via pylogit package.
 
     Parameters
     ----------
@@ -101,40 +104,15 @@ class BradleyTerry(GLMPairwiseComparisonModel):
 
     tol : float
           Tolerance for termination (method-specific)
-    Examples
-    ----------
-    # >>> from skchoice import generate_data
-    # >>> from skchoice.pairwise_model import BradleyTerry
-    # >>> from sklearn.model_selection import train_test_split
-    # >>> # Generate a simple pairwise experimental table
-    # >>> generated_data = generate_data.GenerateData(entities=10)
-    # >>> my_results = generated_data.generate_results(gen_type='full', rounds=1)
-    # >>> indexed_results = my_results.set_index(['ent_i','ent_j'])
-    # >>> train, test = train_test_split(indexed_results, test_size=0.33, random_state=42)
-    # >>> # Fit Bradley Terry model without covariates
-    # >>> bt_model = BradleyTerry()
-    # >>> bt_model.fit(train, 'result')
-    # >>> probabilities = bt_model.predict_proba(test)
 
-    >>> import pickle
+    Example
+    ----------
     >>> import sys
     >>> sys.path.insert(0, "..")
     >>> from skpref.random_utility import BradleyTerry
-    >>> from skpref.task import ChoiceTask, PairwiseComparisonTask
+    >>> from skpref.task import PairwiseComparisonTask
     >>> import pandas as pd
     >>> # Using product choice data
-    # >>> with open('skpref/examples/data/product_choices.pickle', 'rb') as handle:
-    # ...     choice_data = pickle.load(handle)
-    # >>> with open('skpref/examples/data/product_info.pickle', 'rb') as handle:
-    # ...     product_data = pickle.load(handle)
-    # >>> products_bought_train = ChoiceTask(
-    # ... choice_data[:100], 'alternatives', 'choice',
-    # ... features_to_use=['price_per_size', 'prod_size'],
-    # ... secondary_table=product_data,
-    # ... secondary_to_primary_link={"PRODUCT_ID": ['alternatives', 'choice']})
-    # >>> mybt = BradleyTerry(method='BFGS', alpha=1e-5)
-    # >>> mybt.fit_task(products_bought_train)
-
     >>> # using basketball match data
     >>> NBA_file_loc = 'skpref/examples/data/NBA_matches.csv'
     >>> NBA_results = pd.read_csv(NBA_file_loc)
@@ -149,6 +127,31 @@ class BradleyTerry(GLMPairwiseComparisonModel):
     >>> mybt.fit_task(NBA_results_task_train)
 
     """
+    # This code is a previous example, keeping it here in case some ideas seem worth revisiting
+    # >>> from skchoice import generate_data
+    # >>> from skchoice.pairwise_model import BradleyTerry
+    # >>> from sklearn.model_selection import train_test_split
+    # >>> # Generate a simple pairwise experimental table
+    # >>> generated_data = generate_data.GenerateData(entities=10)
+    # >>> my_results = generated_data.generate_results(gen_type='full', rounds=1)
+    # >>> indexed_results = my_results.set_index(['ent_i','ent_j'])
+    # >>> train, test = train_test_split(indexed_results, test_size=0.33, random_state=42)
+    # >>> # Fit Bradley Terry model without covariates
+    # >>> bt_model = BradleyTerry()
+    # >>> bt_model.fit(train, 'result')
+    # >>> probabilities = bt_model.predict_proba(test)
+    # >>> with open('skpref/examples/data/product_choices.pickle', 'rb') as handle:
+    # ...     choice_data = pickle.load(handle)
+    # >>> with open('skpref/examples/data/product_info.pickle', 'rb') as handle:
+    # ...     product_data = pickle.load(handle)
+    # >>> products_bought_train = ChoiceTask(
+    # ... choice_data[:100], 'alternatives', 'choice',
+    # ... features_to_use=['price_per_size', 'prod_size'],
+    # ... secondary_table=product_data,
+    # ... secondary_to_primary_link={"PRODUCT_ID": ['alternatives', 'choice']})
+    # >>> mybt = BradleyTerry(method='BFGS', alpha=1e-5)
+    # >>> mybt.fit_task(products_bought_train)
+
     def __init__(self, alpha=1e-6, method="Newton-CG", initial_params=None,
                  max_iter=None, tol=1e-5):
         self.alpha = alpha
@@ -158,6 +161,7 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         self.tol = tol
         self.keep_pairwise_format = True
         super(BradleyTerry, self).__init__()
+
     @staticmethod
     def replace_entities_with_lkp(df, lkp):
         """
@@ -749,6 +753,7 @@ class BradleyTerry(GLMPairwiseComparisonModel):
         """
         Predicts the probability that the corresponding entity will win in the
         task.
+
         Parameters:
         -----------
         task: ChoiceTask type
@@ -791,6 +796,50 @@ class BradleyTerry(GLMPairwiseComparisonModel):
             column: str = None,
             aggregation_method: str = 'Luce'
     ) -> dict:
+
+        """
+        Predicts the probability of specified outcomes for a specific task
+
+        Parameters
+        ----------
+        task: PrefTask
+              The task for which predictions should be made
+
+        outcome: List
+                 The outcome for which predictions should be made, for example if
+                 the alternatives are 'Car', 'Train', 'Bicycle' then the user can
+                 ask for probabilities of ['Car', 'Train] if they're only interested
+                 in the probability of choosing 'Car' or 'Train'
+
+        column: str
+                Can also take a column name for which predictions should be made,
+                probably more useful in pairwise comparison set ups, where team1
+                is in one column and team2 in another.
+
+        aggregation_method: str, default is 'Luce'
+            This can be set to 'Luce' or 'independent transitive'. When the method
+            is set to 'Luce' then the code pretends that the parameters learned with
+            the Bradldey-Terry method were learned with the Luce method and they
+            used with the Luce formulation to create a prediction. For example,
+            if the alternatives were {A, B, C} and for each of these alternatives
+            we learn the function f(A), f(B), f(C) which include their strength
+            parameters and potentially some covariates, the Luce prediction would
+            say the probability of choosing A from {A, B, C} is
+            :math:`\\frac{e^{f(A)}}{e^{f(A)}+ e^{f(B)} + e^{f(C)}}`
+
+            When set to 'indeptendent transitive' the aggregation is the following
+            the probability of choosing A from {A, B, C}
+            (denoted as :math:`P(A\\succ \{A,B,C\})` for simplicity) is
+            :math:`\\frac{P(A\\succ\{A,B\})P(A\\succ\{A,C\})}{P(A\\succ\{A,B\})P(A\\succ\{A,C\}) + P(B\\succ\{A,B\})P(B\\succ\{B,C\}) + P(C\\succ\{A,C\})P(C\\succ\{B,C\})}`
+
+        Returns
+        -------
+        A dictionary with the alternatives being the keys and for each key there's \
+        a numpy array of floats which reflects the probability with which that \
+        alternative will be selected. When the alternative is not in the list of \
+        choices for a specific row the value will be 0. When a column is given \
+        instead of an outcome then the keys are the column name.
+        """
 
         if type(task) == ChoiceTask and aggregation_method == 'Luce':
             tab = task.primary_table.copy()

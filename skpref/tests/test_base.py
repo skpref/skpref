@@ -333,10 +333,10 @@ class TestClassificationReducer(unittest.TestCase):
             secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
 
         my_model = ClassificationReducer(
-            DummyClassifier(strategy='constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1),
+            take_feature_diff_for_pairwise_comparison=True)
 
-        unpacker_dict = my_model.task_unpacker(test_task,
-                                               take_feautre_diff=True)
+        unpacker_dict = my_model.task_unpacker(test_task)
 
         correct_output_data = pd.DataFrame({
             'result': [1, 0, 0, 1],
@@ -405,10 +405,11 @@ class TestClassificationReducer(unittest.TestCase):
             secondary_to_primary_link={'ent1': ['ent1', 'ent2']})
 
         my_model = ClassificationReducer(
-            DummyClassifier(strategy='constant', constant=1))
+            DummyClassifier(strategy='constant', constant=1),
+            take_feature_diff_for_pairwise_comparison=True)
 
-        unpacker_dict = my_model.task_unpacker(test_task,
-                                               take_feautre_diff=True)
+        unpacker_dict = my_model.task_unpacker(
+            test_task)
 
         correct_output_data = pd.DataFrame({
             'feat1_diff': [1, 10, -3, 3]

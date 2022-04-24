@@ -85,7 +85,7 @@ class TestClassificationMetrics(unittest.TestCase):
                 np.array(['a', 'b'])
             ], dtype=object))
 
-        calculated = log_loss(true, preds)
+        calculated = log_loss(true, preds, dp=10)
         expected = {
             'a_log_loss': -(np.log(0.33) + np.log(0.5) + np.log(0.9))/3,
             'b_log_loss': -(np.log(1-0.33) + np.log(0.5) + np.log(0.9))/3,
