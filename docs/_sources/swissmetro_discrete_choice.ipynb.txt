@@ -15,9 +15,10 @@
     "In this notebook we will:\n",
     "\n",
     "* Start by tranforming the original swissmetro dataset into something that skpref can handle.\n",
-    "* Fit a logistic regression using the data and the ClassificationReducer() method.\n",
+    "* Fit a logistic regression using the data and the `ClassificationReducer()` method.\n",
     "* Fit a Bradley-Terry model using reduction to pairwise comparisons.\n",
     "* Show how two different aggregation methods for going from a pairwise comparison model to a discrete choice model work.\n",
+    "* Show an example using `GridSearchCV()` and how to specify aggregation methods in `GridSearchCV()`\n",
     "* Show some of the evaluation methods that can be applied using skpref"
    ]
   },
@@ -40,7 +41,8 @@
     "from sklearn.model_selection import train_test_split\n",
     "from sklearn.preprocessing import OneHotEncoder\n",
     "from copy import deepcopy\n",
-    "from sklearn.linear_model import LogisticRegression"
+    "from sklearn.linear_model import LogisticRegression\n",
+    "from skpref.model_selection import GridSearchCV"
    ]
   },
   {
@@ -307,9 +309,9 @@
     "# Changing the format of the tables for skpref\n",
     "\n",
     "\n",
-    "1) In this table the availability of alternatives is marked by TRAIN_AV, CAR_AV, SM_AV which indicate with 1 if the alternative is available and 0 otherwise. We need to convert these to a column that contains a list of alternatives for each row.\n",
+    "1) In this table the availability of alternatives is marked by `TRAIN_AV`, `CAR_AV`, `SM_AV` which indicate with 1 if the alternative is available and 0 otherwise. We need to convert these to a column that contains a list of alternatives for each row.\n",
     "\n",
-    "2) The choices are indicated by the CHOICE column, which contains 0 for unknown (we will dropping these), 1 for Train, 2 for Swissmetro and 3 for a Car usage. We need to name these explicitly. We could just create a list of alternatives called 1,2,3 in step 1 which would bypass step 2, however, we prefer the clarity of having the alternatives named explicitly.\n",
+    "2) The choices are indicated by the `CHOICE` column, which contains 0 for unknown (we will dropping these), 1 for Train, 2 for Swissmetro and 3 for a Car usage. We need to name these explicitly. We could just create a list of alternatives called 1,2,3 in step 1 which would bypass step 2, however, we prefer the clarity of having the alternatives named explicitly.\n",
     "\n",
     "# Using only a subset of the available features\n",
     "Under normal circumstances we would use one-hot encoding on a lot of the binary features before training a serious model, however, to make the demo simple, we will only use the travel time and cost features. Users can of course do whatever feature transformations they like before fitting a model.\n",
@@ -871,9 +873,9 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Swiss Metro  [0.57 0.77 0.69 ... 0.4  0.37 0.71]\n",
-      "Train        [0.11 0.23 0.07 ... 0.12 0.13 0.09]\n",
-      "Car          [0.32 0.   0.24 ... 0.49 0.5  0.2 ]\n"
+      "Swiss Metro  [0.56 0.76 0.66 ... 0.4  0.37 0.68]\n",
+      "Train        [0.12 0.24 0.09 ... 0.13 0.14 0.1 ]\n",
+      "Car          [0.32 0.   0.25 ... 0.47 0.48 0.22]\n"
      ]
     }
    ],
@@ -890,9 +892,9 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Swiss Metro  [0.63 0.77 0.75 ... 0.42 0.38 0.79]\n",
-      "Train        [0.05 0.23 0.03 ... 0.05 0.07 0.04]\n",
-      "Car          [0.32 0.   0.22 ... 0.53 0.56 0.18]\n"
+      "Swiss Metro  [0.62 0.76 0.73 ... 0.43 0.39 0.76]\n",
+      "Train        [0.06 0.24 0.03 ... 0.06 0.08 0.05]\n",
+      "Car          [0.32 0.   0.23 ... 0.51 0.53 0.19]\n"
      ]
     }
    ],
@@ -1003,24 +1005,24 @@
       "\n",
       "\n",
       "Number of Parameters                                                      5\n",
-      "Number of Observations                                                 8877\n",
-      "Null Log-Likelihood                                            -6153.067522\n",
-      "Fitted Log-Likelihood                                          -4543.689411\n",
-      "Rho-Squared                                                        0.261557\n",
-      "Rho-Bar-Squared                                                    0.260744\n",
+      "Number of Observations                                                 8874\n",
+      "Null Log-Likelihood                                             -6150.98808\n",
+      "Fitted Log-Likelihood                                          -4734.273238\n",
+      "Rho-Squared                                                        0.230323\n",
+      "Rho-Bar-Squared                                                     0.22951\n",
       "Estimation Message        Desired error not necessarily achieved due to ...\n",
       "dtype: object\n",
       "==============================\n",
       "             parameters     std_err    t_stats       p_values  robust_std_err  \\\n",
-      "Cost           0.000272    0.000032   8.543908   1.297574e-17        0.000033   \n",
-      "Travel Time   -0.013135    0.000566 -23.198029  4.766691e-119        0.000914   \n",
-      "Car            0.399463  129.099447   0.003094   9.975312e-01             NaN   \n",
-      "Swiss Metro    0.124314  129.099448   0.000963   9.992317e-01             NaN   \n",
-      "Train         -0.523777  129.099449  -0.004057   9.967629e-01             NaN   \n",
+      "Cost           0.000239    0.000030   7.927323   2.239209e-15        0.000031   \n",
+      "Travel Time   -0.011717    0.000539 -21.740280  8.537672e-105        0.001020   \n",
+      "Car            0.347770  129.099448   0.002694   9.978507e-01             NaN   \n",
+      "Swiss Metro    0.136513  129.099449   0.001057   9.991563e-01             NaN   \n",
+      "Train         -0.484282  129.099449  -0.003751   9.970070e-01             NaN   \n",
       "\n",
       "             robust_t_stats  robust_p_values  \n",
-      "Cost               8.158967     3.379010e-16  \n",
-      "Travel Time      -14.372790     7.667884e-47  \n",
+      "Cost               7.603109     2.891001e-14  \n",
+      "Travel Time      -11.491478     1.455993e-30  \n",
       "Car                     NaN              NaN  \n",
       "Swiss Metro             NaN              NaN  \n",
       "Train                   NaN              NaN  \n"
@@ -1035,8 +1037,10 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "# Evaluation methods\n",
-    "In this section we show off some of the evaluation methods available in skpref"
+    "## Fit Bradley-Terry model with GridSearch\n",
+    "The models we have fitted above also have hyperparameters, such as the method of gradient descent or regularisation. To  optimise the hyperparameter selection, we can use `GridSearchCV()`. `GridSearchCV()` tries out a series of hyperparameter combinations and runs a k-fold cross-validation on an accuracy metric determined by the user to check which ones have performed best.\n",
+    "\n",
+    "In this section we will show how aggregation works with GridSearch, it is possible to just add `aggregation_method` in the `predict_proba_task` and the ouptuts work as expected. Note in this example we have chosen a very different alpha to the models above so that there is some slight difference in the ouptuts to two decimal places, so that we can see that different parameters were learned."
    ]
   },
   {
@@ -1048,8 +1052,103 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "The F1 score of the Luce aggregation was  0.593\n",
-      "The F1 score of the generic aggregation was 0.593\n"
+      "The model with the best parameters was:\n",
+      "BradleyTerry(alpha=100, method='BFGS')\n",
+      "With a score of -0.5356138170005121\n",
+      "All the trials results summarised in descending score\n",
+      "   alpha method  mean_test_score\n",
+      "0    100   BFGS        -0.535614\n",
+      "1   1000   BFGS        -0.545660\n"
+     ]
+    }
+   ],
+   "source": [
+    "to_tune = {'alpha': [100,1000], 'method': ['BFGS']}\n",
+    "gs_bt = GridSearchCV(BradleyTerry(), to_tune,  cv=3, scoring='neg_log_loss')\n",
+    "gs_bt.fit_task(swiss_metro_train_BT_feats)\n",
+    "gs_bt.inspect_results()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Swiss Metro  [0.63 0.74 0.75 ... 0.42 0.38 0.78]\n",
+      "Train        [0.07 0.26 0.04 ... 0.08 0.09 0.06]\n",
+      "Car          [0.3  0.   0.22 ... 0.5  0.53 0.17]\n"
+     ]
+    }
+   ],
+   "source": [
+    "nice_print_results(gs_bt.predict_proba_task(\n",
+    "    swiss_metro_test,['Swiss Metro','Train', 'Car'],\n",
+    "    aggregation_method='independent transitive'))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "\n",
+      "Number of Parameters                                                      5\n",
+      "Number of Observations                                                 8874\n",
+      "Null Log-Likelihood                                             -6150.98808\n",
+      "Fitted Log-Likelihood                                          -4765.068522\n",
+      "Rho-Squared                                                        0.225317\n",
+      "Rho-Bar-Squared                                                    0.224504\n",
+      "Estimation Message        Desired error not necessarily achieved due to ...\n",
+      "dtype: object\n",
+      "==============================\n",
+      "             parameters   std_err    t_stats       p_values  robust_std_err  \\\n",
+      "Cost           0.000234  0.000030   7.813176   5.576466e-15        0.000030   \n",
+      "Travel Time   -0.012479  0.000513 -24.303950  1.780605e-130        0.000912   \n",
+      "Car            0.302333  0.045697   6.616091   3.688214e-11             NaN   \n",
+      "Swiss Metro    0.090960  0.047996   1.895185   5.806786e-02             NaN   \n",
+      "Train         -0.393294  0.048153  -8.167619   3.145352e-16             NaN   \n",
+      "\n",
+      "             robust_t_stats  robust_p_values  \n",
+      "Cost               7.711453     1.243931e-14  \n",
+      "Travel Time      -13.690371     1.159165e-42  \n",
+      "Car                     NaN              NaN  \n",
+      "Swiss Metro             NaN              NaN  \n",
+      "Train                   NaN              NaN  \n"
+     ]
+    }
+   ],
+   "source": [
+    "gs_bt.best_estimator_.bt_with_feats.print_summaries()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Evaluation methods\n",
+    "In this section we show some of the evaluation methods available in skpref, specifically how to use `log_loss` and `log_loss_compare_with_t_test`. Please see the documentation for more details on how these work."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "The F1 score of the Luce aggregation was  0.595\n",
+      "The F1 score of the generic aggregation was 0.595\n"
      ]
     }
    ],
@@ -1062,7 +1161,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 23,
+   "execution_count": 26,
    "metadata": {},
    "outputs": [
     {
@@ -1072,9 +1171,9 @@
       "The log loss for each alternative in the Logistic Regression reduction was \n",
       " {'Swiss Metro_log_loss': 0.73, 'Train_log_loss': 0.44, 'Car_log_loss': 0.57}\n",
       "The log loss for each alternative in the Luce aggregation was \n",
-      " {'Swiss Metro_log_loss': 0.71, 'Train_log_loss': 0.38, 'Car_log_loss': 0.52}\n",
+      " {'Swiss Metro_log_loss': 0.7, 'Train_log_loss': 0.38, 'Car_log_loss': 0.52}\n",
       "The log loss for each alternative in the generic aggregation was \n",
-      " {'Swiss Metro_log_loss': 0.72, 'Train_log_loss': 0.4, 'Car_log_loss': 0.53}\n",
+      " {'Swiss Metro_log_loss': 0.71, 'Train_log_loss': 0.39, 'Car_log_loss': 0.52}\n",
       "The log loss for each alternative assigning random probability was \n",
       " {'Swiss Metro_log_loss': 0.8, 'Train_log_loss': 0.5, 'Car_log_loss': 0.61}\n"
      ]
@@ -1099,16 +1198,16 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 24,
+   "execution_count": 27,
    "metadata": {},
    "outputs": [
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "The t-test for H0: Luce aggregation = Generic aggregation {'Swiss Metro': 0.01, 'Train': 0.02, 'Car': 0.04}\n",
+      "The t-test for H0: Luce aggregation = Generic aggregation {'Swiss Metro': 0.05, 'Train': 0.28, 'Car': 0.22}\n",
       "The t-test for H0: Generic aggregation = random probability {'Swiss Metro': 0.0, 'Train': 0.0, 'Car': 0.0}\n",
-      "The t-test for H0: Generic aggregation = Logistic Regression {'Swiss Metro': 0.47, 'Train': 0.02, 'Car': 0.0}\n",
+      "The t-test for H0: Generic aggregation = Logistic Regression {'Swiss Metro': 0.14, 'Train': 0.0, 'Car': 0.0}\n",
       "The t-test for H0: Generic aggregation = random probability {'Swiss Metro': 0.0, 'Train': 0.0, 'Car': 0.0}\n"
      ]
     },

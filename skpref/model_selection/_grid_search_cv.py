@@ -254,7 +254,7 @@ class GridSearchCV(object):
         """
         return self.gs.predict(df)
 
-    def predict_task(self, task):
+    def predict_task(self, task, *args, **kwargs):
         """
         Creates predictions for a task
 
@@ -265,7 +265,7 @@ class GridSearchCV(object):
 
         """
 
-        return self.best_estimator_.predict_task(task)
+        return self.best_estimator_.predict_task(task, *args, **kwargs)
 
     def predict_proba(self, df):
         """ Predicts the probability of the result = 1 in the match up.
@@ -286,7 +286,7 @@ class GridSearchCV(object):
 
     def predict_proba_task(self, task: PrefTask,
             outcome: Union[str, PosetVector, List[str], List[PosetVector]] = None,
-            column: str = None):
+            column: str = None, *args, **kwargs):
 
         """
         Predicts the probability of specified outcomes for a specific task
@@ -316,7 +316,8 @@ class GridSearchCV(object):
         instead of an outcome then the keys are the column name.
         """
 
-        return self.best_estimator_.predict_proba_task(task, outcome, column)
+        return self.best_estimator_.predict_proba_task(task, outcome, column,
+                                                       *args, **kwargs)
 
     def predict_choice(self, df):
         """ Predicts the entity that will be selected.

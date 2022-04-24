@@ -498,10 +498,10 @@ div.rendered_html tbody tr:hover {
 <h1>Reading in the data<a class="headerlink" href="#Reading-in-the-data" title="Permalink to this headline">¶</a></h1>
 <p>The example dataset will be matches played by NBA teams, we will use the 2016 season’s matches to predict the results of the 2017 matches. The dataset contains:</p>
 <ul class="simple">
-<li><p>a column for team1 and team2 indicating the two teams that have played each other</p></li>
-<li><p>season_start, which indicates which season the match belongs to</p></li>
-<li><p>team1_wins takes the value of 1 if the team in column team1 win the match, 0 if they lost (there are no ties in basketball)</p></li>
-<li><p>team_1_home takes the value of 1 if team1 was playing in their home court 0 if they were paying away (no neutral courts in the NBA)</p></li>
+<li><p>a column for <code class="docutils literal notranslate"><span class="pre">team1</span></code> and <code class="docutils literal notranslate"><span class="pre">team2</span></code> indicating the two teams that have played each other</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">season_start</span></code>, which indicates which season the match belongs to</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">team1_wins</span></code> takes the value of 1 if the team in column <code class="docutils literal notranslate"><span class="pre">team1</span></code> win the match, 0 if they lost (there are no ties in basketball)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">team_1_home</span></code> takes the value of 1 if <code class="docutils literal notranslate"><span class="pre">team1</span></code> was playing in their home court 0 if they were paying away (no neutral courts in the NBA)</p></li>
 </ul>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
@@ -756,15 +756,15 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="section" id="Setting-up-the-tasks">
 <h1>Setting up the tasks<a class="headerlink" href="#Setting-up-the-tasks" title="Permalink to this headline">¶</a></h1>
-<p>We set up the preference learning task by using the PairwiseComparisonTask object in skpref. This is the only extra step which might be a completely new concept to seasoned scikit-learn users. Once the task is specified, say in this case a pairwise comparison task, for any models applied in skpref, whether that is a reduction via scikit-learn or even a model that is not a pairwise comparison model, the package will know that the problem itself is a pairwise comparison problem and can perform
-reduction and aggregation adequately in the background when needed.</p>
-<p>In this example the PairwiseComparisonTask has the following components:</p>
+<p>We set up the preference learning task by using the <code class="docutils literal notranslate"><span class="pre">PairwiseComparisonTask</span></code> object in <code class="docutils literal notranslate"><span class="pre">skpref</span></code>. This is the only extra step which might be a completely new concept to seasoned scikit-learn users. Once the task is specified, say in this case a pairwise comparison task, for any models applied in skpref, whether that is a reduction via scikit-learn or even a model that is not a pairwise comparison model, the package will know that the problem itself is a pairwise comparison problem and can
+perform reduction and aggregation adequately in the background when needed.</p>
+<p>In this example the <code class="docutils literal notranslate"><span class="pre">PairwiseComparisonTask</span></code> has the following components:</p>
 <ul class="simple">
-<li><p>primary_table: the table that contains the observed preferences</p></li>
-<li><p>primary_table_alternatives_names: the column or columns that contain the alternatives, in this case both columns team1 and team2 contain alternatives</p></li>
-<li><p>primary_table_target_name: the column that indicates the result of the pairwise comparison</p></li>
-<li><p>target_column_correspondence: in the case of pairwise comparisons, when the alternatives are split across two columns, the column indicating the result usually takes the form 1/0 to show whether one of the columns, in our case team1 or team2 has been preferred. So in this column the user indicates that when the team1_wins column takes the value 1 that means that the alternative in the column team1 has won.</p></li>
-<li><p>features_to_use: indicates which columns to use as covariates</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">primary_table</span></code>: the table that contains the observed preferences</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">primary_table_alternatives_names</span></code>: the column or columns that contain the alternatives, in this case both columns team1 and team2 contain alternatives</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">primary_table_target_name</span></code>: the column that indicates the result of the pairwise comparison</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">target_column_correspondence</span></code>: in the case of pairwise comparisons, when the alternatives are split across two columns, the column indicating the result usually takes the form 1/0 to show whether one of the columns, in our case team1 or team2 has been preferred. So in this column the user indicates that when the team1_wins column takes the value 1 that means that the alternative in the column team1 has won.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">features_to_use</span></code>: indicates which columns to use as covariates</p></li>
 </ul>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -793,7 +793,7 @@ reduction and aggregation adequately in the background when needed.</p>
 </div>
 <div class="section" id="Fitting-a-Logistic-Regression">
 <h1>Fitting a Logistic Regression<a class="headerlink" href="#Fitting-a-Logistic-Regression" title="Permalink to this headline">¶</a></h1>
-<p>The only covariate we will use in this for now will be the team_1_home column, which should return a method that only learns what the home team advantage was on average, which is the equivalent to fitting a logistic regression where whether team1 is playing home or not is the only covariate.</p>
+<p>The only covariate we will use in this for now will be the <code class="docutils literal notranslate"><span class="pre">team_1_home</span></code> column, which should return a method that only learns what the home team advantage was on average, which is the equivalent to fitting a logistic regression where whether team1 is playing home or not is the only covariate.</p>
 <p><span class="math notranslate nohighlight">\(P(\texttt{team1}\_\texttt{wins}=1) = logit(\alpha + \beta_1 \texttt{team}\_\texttt{1}\_\texttt{home})\)</span></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -1041,7 +1041,7 @@ team2 is preferred  [0.58 0.58 0.58 ... 0.42 0.42 0.58]
 <h2>Fitting a Bradley Terry model<a class="headerlink" href="#Fitting-a-Bradley-Terry-model" title="Permalink to this headline">¶</a></h2>
 <p>As we can see in the example above the logistic regression approach does not learn different probabilities for a team winning or losing based on which other team they are playing. The Dallas Mavericks could be playing against the strongest or weakest team in the league and their estimated probability of winning would be the same. The difference between the Bradley-Terry model and logistic regression is that Bradley-Terry learns a function that can estimate whether each team will win or lose
 given the other team they are playing.</p>
-<p>The task we will use for Bradley-Terry will be defined in a slightly different way, because in the first demo we won’t use any covariates, therefore we define features_to_use=None</p>
+<p>The task we will use for Bradley-Terry will be defined in a slightly different way, because in the first demo we won’t use any covariates, therefore we define <code class="docutils literal notranslate"><span class="pre">features_to_use=None</span></code></p>
 <p>In the Bradley-Terry model each team gets a latent strength parameter <span class="math notranslate nohighlight">\(\lambda_{\text{team}}\)</span>, for example <span class="math notranslate nohighlight">\(\lambda_{\text{Atlanta Hawks}}\)</span>.</p>
 <p>The Bradley-Terry model learns these strength parameters to maximise the likelihood according to the following formulation for observation <span class="math notranslate nohighlight">\(i\)</span>:</p>
 <div class="math-wrapper"><div class="math notranslate nohighlight">
@@ -1268,7 +1268,7 @@ given the other team they are playing.</p>
 </table></div>
 </div></div>
 </div>
-<p>We can use the latent alternative strength parameters that Bradley-Terry models learn to rank the teams, either by sorting the mybt.params_ DataFrame by the learned_strength parameter, or by running the rank_entities function</p>
+<p>We can use the latent alternative strength parameters that Bradley-Terry models learn to rank the teams, either by sorting the <code class="docutils literal notranslate"><span class="pre">mybt.params_</span> <span class="pre">DataFrame</span></code> by the <code class="docutils literal notranslate"><span class="pre">learned_strength</span></code> parameter, or by running the <code class="docutils literal notranslate"><span class="pre">rank_entities</span></code> function</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
@@ -1443,7 +1443,7 @@ array(['Atlanta Hawks', 'Atlanta Hawks', 'Atlanta Hawks', ...,
 </div>
 <div class="section" id="Reduction-to-logistic-regression-with-covariates">
 <h1>Reduction to logistic regression with covariates<a class="headerlink" href="#Reduction-to-logistic-regression-with-covariates" title="Permalink to this headline">¶</a></h1>
-<p>Here we fit a logistic regression on three covariates, whether team 1 is playing home or not, team1’s salary budget and team2’s salary budget. <span class="math notranslate nohighlight">\(P(\texttt{team1}\_\texttt{wins}=1) = logit(\alpha + \beta_1 \texttt{team}\_\texttt{1}\_\texttt{home} + \beta_2 \texttt{team1}\_\texttt{salary} + \beta_3 \texttt{team2}\_\texttt{salary})\)</span></p>
+<p>Here we fit a logistic regression on three covariates, whether <code class="docutils literal notranslate"><span class="pre">team1</span></code> is playing home or not, <code class="docutils literal notranslate"><span class="pre">team1</span></code>’s salary budget and <code class="docutils literal notranslate"><span class="pre">team2</span></code>’s salary budget. <span class="math notranslate nohighlight">\(P(\texttt{team1}\_\texttt{wins}=1) = logit(\alpha + \beta_1 \texttt{team}\_\texttt{1}\_\texttt{home} + \beta_2 \texttt{team1}\_\texttt{salary} + \beta_3 \texttt{team2}\_\texttt{salary})\)</span></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
@@ -1813,7 +1813,7 @@ array(['Atlanta Hawks', 'Charlotte Hornets', 'Atlanta Hawks', ...,
 </div>
 <div class="section" id="Example-using-GridSearchCV()">
 <h1>Example using GridSearchCV()<a class="headerlink" href="#Example-using-GridSearchCV()" title="Permalink to this headline">¶</a></h1>
-<p>The models we have fitted above also have hyperparameters, such as the method of gradient descent or regularisation. To optimise the hyperparameter selection, we can use GridSearchCV(). GridSearchCV() tries out a series of hyperparameter combinations and runs a k-fold cross-validation on an accuracy metric determined by the user to check which ones have performed best.</p>
+<p>The models we have fitted above also have hyperparameters, such as the method of gradient descent or regularisation. To optimise the hyperparameter selection, we can use <code class="docutils literal notranslate"><span class="pre">GridSearchCV()</span></code>. <code class="docutils literal notranslate"><span class="pre">GridSearchCV()</span></code> tries out a series of hyperparameter combinations and runs a k-fold cross-validation on an accuracy metric determined by the user to check which ones have performed best.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
 </pre></div>
@@ -1886,52 +1886,53 @@ All the trials results summarised in descending score
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 The model with the best parameters was:
-ClassificationReducer(model=LogisticRegression(C=1, solver='saga'))
-With a score of -0.6864987580029042
+ClassificationReducer(model=LogisticRegression(C=2, fit_intercept=False,
+                                               solver='saga'))
+With a score of -0.6865144370366499
 All the trials results summarised in descending score
     model__C  model__fit_intercept model__penalty model__solver  \
-5        1.0                  True             l2          saga
-18       8.0                 False             l1          saga
-0        0.5                  True             l1          saga
-13       4.0                  True             l2          saga
-4        1.0                  True             l1          saga
-16       8.0                  True             l1          saga
+11       2.0                 False             l2          saga
 2        0.5                 False             l1          saga
-10       2.0                 False             l1          saga
-7        1.0                 False             l2          saga
-14       4.0                 False             l1          saga
-12       4.0                  True             l1          saga
+9        2.0                  True             l2          saga
+16       8.0                  True             l1          saga
 15       4.0                 False             l2          saga
+18       8.0                 False             l1          saga
+5        1.0                  True             l2          saga
+14       4.0                 False             l1          saga
+3        0.5                 False             l2          saga
 17       8.0                  True             l2          saga
-19       8.0                 False             l2          saga
 1        0.5                  True             l2          saga
 8        2.0                  True             l1          saga
-3        0.5                 False             l2          saga
-11       2.0                 False             l2          saga
+10       2.0                 False             l1          saga
+12       4.0                  True             l1          saga
+13       4.0                  True             l2          saga
+19       8.0                 False             l2          saga
 6        1.0                 False             l1          saga
-9        2.0                  True             l2          saga
+0        0.5                  True             l1          saga
+4        1.0                  True             l1          saga
+7        1.0                 False             l2          saga
 
     mean_test_score
-5         -0.686499
-18        -0.686516
-0         -0.686516
-13        -0.686517
-4         -0.686517
+11        -0.686514
+2         -0.686515
+9         -0.686515
 16        -0.686517
-2         -0.686517
-10        -0.686518
-7         -0.686518
-14        -0.686518
-12        -0.686518
-15        -0.686518
-17        -0.686519
+15        -0.686517
+18        -0.686517
+5         -0.686517
+14        -0.686517
+3         -0.686518
+17        -0.686518
+1         -0.686518
+8         -0.686518
+10        -0.686519
+12        -0.686519
+13        -0.686519
 19        -0.686519
-1         -0.686519
-8         -0.686519
-3         -0.686519
-11        -0.686519
 6         -0.686519
-9         -0.686519
+0         -0.686520
+4         -0.686520
+7         -0.686521
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">

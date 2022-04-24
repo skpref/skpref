@@ -55,10 +55,10 @@
     "# Reading in the data\n",
     "The example dataset will be matches played by NBA teams, we will use the 2016 season's matches to predict the results of the 2017 matches. The dataset contains:\n",
     "\n",
-    "- a column for team1 and team2 indicating the two teams that have played each other\n",
-    "- season_start, which indicates which season the match belongs to\n",
-    "- team1_wins takes the value of 1 if the team in column team1 win the match, 0 if they lost (there are no ties in basketball)\n",
-    "- team_1_home takes the value of 1 if team1 was playing in their home court 0 if they were paying away (no neutral courts in the NBA)"
+    "- a column for `team1` and `team2` indicating the two teams that have played each other\n",
+    "- `season_start`, which indicates which season the match belongs to\n",
+    "- `team1_wins` takes the value of 1 if the team in column `team1` win the match, 0 if they lost (there are no ties in basketball)\n",
+    "- `team_1_home` takes the value of 1 if `team1` was playing in their home court 0 if they were paying away (no neutral courts in the NBA)"
    ]
   },
   {
@@ -375,15 +375,15 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "We set up the preference learning task by using the PairwiseComparisonTask object in skpref. This is the only extra step which might be a completely new concept to seasoned scikit-learn users. Once the task is specified, say in this case a pairwise comparison task, for any models applied in skpref, whether that is a reduction via scikit-learn or even a model that is not a pairwise comparison model, the package will know that the problem itself is a pairwise comparison problem and can perform reduction and aggregation adequately in the background when needed.\n",
+    "We set up the preference learning task by using the `PairwiseComparisonTask` object in `skpref`. This is the only extra step which might be a completely new concept to seasoned scikit-learn users. Once the task is specified, say in this case a pairwise comparison task, for any models applied in skpref, whether that is a reduction via scikit-learn or even a model that is not a pairwise comparison model, the package will know that the problem itself is a pairwise comparison problem and can perform reduction and aggregation adequately in the background when needed.\n",
     "\n",
-    "In this example the PairwiseComparisonTask has the following components:\n",
+    "In this example the `PairwiseComparisonTask` has the following components:\n",
     "\n",
-    "- primary_table: the table that contains the observed preferences\n",
-    "- primary_table_alternatives_names: the column or columns that contain the alternatives, in this case both columns team1 and team2 contain alternatives\n",
-    "- primary_table_target_name: the column that indicates the result of the pairwise comparison\n",
-    "- target_column_correspondence: in the case of pairwise comparisons, when the alternatives are split across two columns, the column indicating the result usually takes the form 1/0 to show whether one of the columns, in our case team1 or team2 has been preferred. So in this column the user indicates that when the team1_wins column takes the value 1 that means that the alternative in the column team1 has won.\n",
-    "- features_to_use: indicates which columns to use as covariates"
+    "- `primary_table`: the table that contains the observed preferences\n",
+    "- `primary_table_alternatives_names`: the column or columns that contain the alternatives, in this case both columns team1 and team2 contain alternatives\n",
+    "- `primary_table_target_name`: the column that indicates the result of the pairwise comparison\n",
+    "- `target_column_correspondence`: in the case of pairwise comparisons, when the alternatives are split across two columns, the column indicating the result usually takes the form 1/0 to show whether one of the columns, in our case team1 or team2 has been preferred. So in this column the user indicates that when the team1_wins column takes the value 1 that means that the alternative in the column team1 has won.\n",
+    "- `features_to_use`: indicates which columns to use as covariates"
    ]
   },
   {
@@ -416,7 +416,7 @@
    "metadata": {},
    "source": [
     "# Fitting a Logistic Regression\n",
-    "The only covariate we will use in this for now will be the team_1_home column, which should return a method that only learns what the home team advantage was on average, which is the equivalent to fitting a logistic regression where whether team1 is playing home or not is the only covariate.\n",
+    "The only covariate we will use in this for now will be the `team_1_home` column, which should return a method that only learns what the home team advantage was on average, which is the equivalent to fitting a logistic regression where whether team1 is playing home or not is the only covariate.\n",
     "\n",
     "$P(\\texttt{team1}\\_\\texttt{wins}=1) = logit(\\alpha + \\beta_1 \\texttt{team}\\_\\texttt{1}\\_\\texttt{home})$"
    ]
@@ -709,7 +709,7 @@
     "## Fitting a Bradley Terry model\n",
     "As we can see in the example above the logistic regression approach does not learn different probabilities for a team winning or losing based on which other team they are playing. The Dallas Mavericks could be playing against the strongest or weakest team in the league and their estimated probability of winning would be the same. The difference between the Bradley-Terry model and logistic regression is that Bradley-Terry learns a function that can estimate whether each team will win or lose given the other team they are playing.\n",
     "\n",
-    "The task we will use for Bradley-Terry will be defined in a slightly different way, because in the first demo we won't use any covariates, therefore we define features_to_use=None\n",
+    "The task we will use for Bradley-Terry will be defined in a slightly different way, because in the first demo we won't use any covariates, therefore we define `features_to_use=None`\n",
     "\n",
     "In the Bradley-Terry model each team gets a latent strength parameter $\\lambda_{\\text{team}}$, for example $\\lambda_{\\text{Atlanta Hawks}}$.\n",
     "\n",
@@ -985,7 +985,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "We can use the latent alternative strength parameters that Bradley-Terry models learn to rank the teams, either by sorting the mybt.params_ DataFrame by the learned_strength parameter, or by running the rank_entities function"
+    "We can use the latent alternative strength parameters that Bradley-Terry models learn to rank the teams, either by sorting the `mybt.params_ DataFrame` by the `learned_strength` parameter, or by running the `rank_entities` function"
    ]
   },
   {
@@ -1180,7 +1180,7 @@
    "metadata": {},
    "source": [
     "# Reduction to logistic regression with covariates\n",
-    "Here we fit a logistic regression on three covariates, whether team 1 is playing home or not, team1's salary budget and team2's salary budget.\n",
+    "Here we fit a logistic regression on three covariates, whether `team1` is playing home or not, `team1`'s salary budget and `team2`'s salary budget.\n",
     "$P(\\texttt{team1}\\_\\texttt{wins}=1) = logit(\\alpha + \\beta_1 \\texttt{team}\\_\\texttt{1}\\_\\texttt{home} + \\beta_2 \\texttt{team1}\\_\\texttt{salary} + \\beta_3 \\texttt{team2}\\_\\texttt{salary})$"
    ]
   },
@@ -1619,7 +1619,7 @@
    "metadata": {},
    "source": [
     "# Example using GridSearchCV()\n",
-    "The models we have fitted above also have hyperparameters, such as the method of gradient descent or regularisation. To  optimise the hyperparameter selection, we can use GridSearchCV(). GridSearchCV() tries out a series of hyperparameter combinations and runs a k-fold cross-validation on an accuracy metric determined by the user to check which ones have performed best."
+    "The models we have fitted above also have hyperparameters, such as the method of gradient descent or regularisation. To  optimise the hyperparameter selection, we can use `GridSearchCV()`. `GridSearchCV()` tries out a series of hyperparameter combinations and runs a k-fold cross-validation on an accuracy metric determined by the user to check which ones have performed best."
    ]
   },
   {
@@ -1687,52 +1687,53 @@
      "output_type": "stream",
      "text": [
       "The model with the best parameters was:\n",
-      "ClassificationReducer(model=LogisticRegression(C=1, solver='saga'))\n",
-      "With a score of -0.6864987580029042\n",
+      "ClassificationReducer(model=LogisticRegression(C=2, fit_intercept=False,\n",
+      "                                               solver='saga'))\n",
+      "With a score of -0.6865144370366499\n",
       "All the trials results summarised in descending score\n",
       "    model__C  model__fit_intercept model__penalty model__solver  \\\n",
-      "5        1.0                  True             l2          saga   \n",
-      "18       8.0                 False             l1          saga   \n",
-      "0        0.5                  True             l1          saga   \n",
-      "13       4.0                  True             l2          saga   \n",
-      "4        1.0                  True             l1          saga   \n",
-      "16       8.0                  True             l1          saga   \n",
+      "11       2.0                 False             l2          saga   \n",
       "2        0.5                 False             l1          saga   \n",
-      "10       2.0                 False             l1          saga   \n",
-      "7        1.0                 False             l2          saga   \n",
-      "14       4.0                 False             l1          saga   \n",
-      "12       4.0                  True             l1          saga   \n",
+      "9        2.0                  True             l2          saga   \n",
+      "16       8.0                  True             l1          saga   \n",
       "15       4.0                 False             l2          saga   \n",
+      "18       8.0                 False             l1          saga   \n",
+      "5        1.0                  True             l2          saga   \n",
+      "14       4.0                 False             l1          saga   \n",
+      "3        0.5                 False             l2          saga   \n",
       "17       8.0                  True             l2          saga   \n",
-      "19       8.0                 False             l2          saga   \n",
       "1        0.5                  True             l2          saga   \n",
       "8        2.0                  True             l1          saga   \n",
-      "3        0.5                 False             l2          saga   \n",
-      "11       2.0                 False             l2          saga   \n",
+      "10       2.0                 False             l1          saga   \n",
+      "12       4.0                  True             l1          saga   \n",
+      "13       4.0                  True             l2          saga   \n",
+      "19       8.0                 False             l2          saga   \n",
       "6        1.0                 False             l1          saga   \n",
-      "9        2.0                  True             l2          saga   \n",
+      "0        0.5                  True             l1          saga   \n",
+      "4        1.0                  True             l1          saga   \n",
+      "7        1.0                 False             l2          saga   \n",
       "\n",
       "    mean_test_score  \n",
-      "5         -0.686499  \n",
-      "18        -0.686516  \n",
-      "0         -0.686516  \n",
-      "13        -0.686517  \n",
-      "4         -0.686517  \n",
+      "11        -0.686514  \n",
+      "2         -0.686515  \n",
+      "9         -0.686515  \n",
       "16        -0.686517  \n",
-      "2         -0.686517  \n",
-      "10        -0.686518  \n",
-      "7         -0.686518  \n",
-      "14        -0.686518  \n",
-      "12        -0.686518  \n",
-      "15        -0.686518  \n",
-      "17        -0.686519  \n",
+      "15        -0.686517  \n",
+      "18        -0.686517  \n",
+      "5         -0.686517  \n",
+      "14        -0.686517  \n",
+      "3         -0.686518  \n",
+      "17        -0.686518  \n",
+      "1         -0.686518  \n",
+      "8         -0.686518  \n",
+      "10        -0.686519  \n",
+      "12        -0.686519  \n",
+      "13        -0.686519  \n",
       "19        -0.686519  \n",
-      "1         -0.686519  \n",
-      "8         -0.686519  \n",
-      "3         -0.686519  \n",
-      "11        -0.686519  \n",
       "6         -0.686519  \n",
-      "9         -0.686519  \n"
+      "0         -0.686520  \n",
+      "4         -0.686520  \n",
+      "7         -0.686521  \n"
      ]
     }
    ],
