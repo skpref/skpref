@@ -1185,6 +1185,28 @@ Car          [0.35 0.   0.35 ... 0.35 0.35 0.35]
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">preds</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+{'Swiss Metro': array([0.54530381, 0.8344241 , 0.54530381, ..., 0.54530381, 0.54530381,
+        0.54530381]),
+ 'Train': array([0.10820537, 0.1655759 , 0.10820537, ..., 0.10820537, 0.10820537,
+        0.10820537]),
+ 'Car': array([0.34649083, 0.        , 0.34649083, ..., 0.34649083, 0.34649083,
+        0.34649083])}
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">choice_preds</span> <span class="o">=</span> <span class="n">my_BT_red</span><span class="o">.</span><span class="n">predict_task</span><span class="p">(</span><span class="n">swiss_metro_test_BT</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">choice_preds</span><span class="o">.</span><span class="n">top_input_data</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">choice_preds</span><span class="o">.</span><span class="n">boot_input_data</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span>
@@ -1211,7 +1233,7 @@ Car          [0.35 0.   0.35 ... 0.35 0.35 0.35]
 <div class="math-wrapper"><div class="math notranslate nohighlight">
 \[P(\text{Alternative 1 is chosen})_i = \frac{e^{\lambda_{\text{Alternative 1}_i}+ \beta_1 \text{(Travel Time)}_i + \beta_2 \text{Cost}_i}}{e^{\lambda_{\text{Alternative 1}_i} + \beta_1 \text{(Travel Time)}_i + \beta_2 \text{Cost}_i} + e^{\lambda_{\text{Alternative 2}_i}+ \beta_1 \text{(Travel Time)}_i + \beta_2 \text{Cost}_i}}\]</div></div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fit a Bradley Terry model with features</span>
@@ -1234,13 +1256,13 @@ Car          [0.35 0.   0.35 ... 0.35 0.35 0.35]
                                <span class="p">}</span>
                              <span class="p">)</span>
 
-<span class="n">my_BT_red_feats</span> <span class="o">=</span> <span class="n">BradleyTerry</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">'BFGS'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">)</span>
+<span class="n">my_BT_red_feats</span> <span class="o">=</span> <span class="n">BradleyTerry</span><span class="p">(</span><span class="n">method</span><span class="o">=</span><span class="s1">'BFGS'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_iter</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span>
 <span class="n">my_BT_red_feats</span><span class="o">.</span><span class="n">fit_task</span><span class="p">(</span><span class="n">swiss_metro_train_BT_feats</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">swiss_metro_test</span> <span class="o">=</span> <span class="n">ChoiceTask</span><span class="p">(</span><span class="n">test</span><span class="p">,</span> <span class="s1">'alternatives'</span><span class="p">,</span> <span class="s1">'chosen'</span><span class="p">,</span>
@@ -1257,7 +1279,7 @@ Car          [0.35 0.   0.35 ... 0.35 0.35 0.35]
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_BT_red_feats</span><span class="o">.</span><span class="n">predict_task</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="p">)</span><span class="o">.</span><span class="n">top_input_data</span>
@@ -1265,7 +1287,7 @@ Car          [0.35 0.   0.35 ... 0.35 0.35 0.35]
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1275,7 +1297,7 @@ array(['Swiss Metro', 'Swiss Metro', 'Swiss Metro', ..., 'Car', 'Car',
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nice_print_results</span><span class="p">(</span><span class="n">preds</span><span class="p">)</span>
@@ -1287,13 +1309,13 @@ array(['Swiss Metro', 'Swiss Metro', 'Swiss Metro', ..., 'Car', 'Car',
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Swiss Metro  [0.56 0.76 0.66 ... 0.4  0.37 0.68]
-Train        [0.12 0.24 0.09 ... 0.13 0.14 0.1 ]
-Car          [0.32 0.   0.25 ... 0.47 0.48 0.22]
+Swiss Metro  [0.56 0.75 0.67 ... 0.41 0.38 0.69]
+Train        [0.13 0.25 0.09 ... 0.14 0.15 0.11]
+Car          [0.31 0.   0.24 ... 0.45 0.47 0.21]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">ind_trans_preds</span> <span class="o">=</span> <span class="n">my_BT_red_feats</span><span class="o">.</span><span class="n">predict_proba_task</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="p">,</span>
@@ -1308,13 +1330,13 @@ Car          [0.32 0.   0.25 ... 0.47 0.48 0.22]
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Swiss Metro  [0.62 0.76 0.73 ... 0.43 0.39 0.76]
-Train        [0.06 0.24 0.03 ... 0.06 0.08 0.05]
-Car          [0.32 0.   0.23 ... 0.51 0.53 0.19]
+Swiss Metro  [0.63 0.75 0.74 ... 0.44 0.4  0.77]
+Train        [0.06 0.25 0.04 ... 0.07 0.09 0.05]
+Car          [0.31 0.   0.22 ... 0.49 0.51 0.18]
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">preds_outcome_ind_trans</span> <span class="o">=</span> <span class="n">my_BT_red_feats</span><span class="o">.</span><span class="n">predict_task</span><span class="p">(</span><span class="n">swiss_metro_test</span><span class="p">,</span>
@@ -1324,7 +1346,7 @@ Car          [0.32 0.   0.23 ... 0.51 0.53 0.19]
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dummy_secondary_table</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">'alternative'</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
@@ -1332,7 +1354,7 @@ Car          [0.32 0.   0.23 ... 0.51 0.53 0.19]
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
 </pre></div>
 </div>
 <div class="output_area rendered_html docutils container">
@@ -1389,50 +1411,69 @@ Car          [0.32 0.   0.23 ... 0.51 0.53 0.19]
 </div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_BT_red_feats</span><span class="o">.</span><span class="n">bt_with_feats</span><span class="o">.</span><span class="n">print_summaries</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_BT_red_feats</span><span class="o">.</span><span class="n">bt_with_feats</span><span class="o">.</span><span class="n">get_statsmodels_summary</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-
-
-Number of Parameters                                                      5
-Number of Observations                                                 8874
-Null Log-Likelihood                                             -6150.98808
-Fitted Log-Likelihood                                          -4734.273238
-Rho-Squared                                                        0.230323
-Rho-Bar-Squared                                                     0.22951
-Estimation Message        Desired error not necessarily achieved due to ...
-dtype: object
-==============================
-             parameters     std_err    t_stats       p_values  robust_std_err  \
-Cost           0.000239    0.000030   7.927323   2.239209e-15        0.000031
-Travel Time   -0.011717    0.000539 -21.740280  8.537672e-105        0.001020
-Car            0.347770  129.099448   0.002694   9.978507e-01             NaN
-Swiss Metro    0.136513  129.099449   0.001057   9.991563e-01             NaN
-Train         -0.484282  129.099449  -0.003751   9.970070e-01             NaN
-
-             robust_t_stats  robust_p_values
-Cost               7.603109     2.891001e-14
-Travel Time      -11.491478     1.455993e-30
-Car                     NaN              NaN
-Swiss Metro             NaN              NaN
-Train                   NaN              NaN
-</pre></div></div>
+<div class="output_area rendered_html docutils container">
+<div class="table-wrapper"><table class="simpletable">
+<caption>Multinomial Logit Model Regression Results</caption>
+<tr>
+<th>Dep. Variable:</th> <td>CHOICE</td> <th>  No. Observations:  </th> <td>8,878</td>
+</tr>
+<tr>
+<th>Model:</th> <td>Multinomial Logit Model</td> <th>  Df Residuals:      </th> <td>8,873</td>
+</tr>
+<tr>
+<th>Method:</th> <td>MLE</td> <th>  Df Model:          </th> <td>5</td>
+</tr>
+<tr>
+<th>Date:</th> <td>Wed, 01 Mar 2023</td> <th>  Pseudo R-squ.:     </th> <td>0.226</td>
+</tr>
+<tr>
+<th>Time:</th> <td>16:11:21</td> <th>  Pseudo R-bar-squ.: </th> <td>0.225</td>
+</tr>
+<tr>
+<th>AIC:</th> <td>9,534.703</td> <th>  Log-Likelihood:    </th> <td>-4,762.351</td>
+</tr>
+<tr>
+<th>BIC:</th> <td>9,570.159</td> <th>  LL-Null:           </th> <td>-6,153.761</td>
+</tr>
+</table></div>
+<div class="table-wrapper"><table class="simpletable">
+<tr>
+<td></td> <th>coef</th> <th>std err</th> <th>z</th> <th>P&gt;|z|</th> <th>[0.025</th> <th>0.975]</th>
+</tr>
+<tr>
+<th>Cost</th> <td>    0.0003</td> <td> 3.11e-05</td> <td>    8.763</td> <td> 0.000</td> <td>    0.000</td> <td>    0.000</td>
+</tr>
+<tr>
+<th>Travel Time</th> <td>   -0.0116</td> <td>    0.001</td> <td>  -22.819</td> <td> 0.000</td> <td>   -0.013</td> <td>   -0.011</td>
+</tr>
+<tr>
+<th>Car</th> <td>    0.3031</td> <td>    0.046</td> <td>    6.635</td> <td> 0.000</td> <td>    0.214</td> <td>    0.393</td>
+</tr>
+<tr>
+<th>Swiss Metro</th> <td>    0.1378</td> <td>    0.048</td> <td>    2.870</td> <td> 0.004</td> <td>    0.044</td> <td>    0.232</td>
+</tr>
+<tr>
+<th>Train</th> <td>   -0.4409</td> <td>    0.048</td> <td>   -9.159</td> <td> 0.000</td> <td>   -0.535</td> <td>   -0.347</td>
+</tr>
+</table></div></div>
 </div>
 <div class="section" id="Fit-Bradley-Terry-model-with-GridSearch">
 <h2>Fit Bradley-Terry model with GridSearch<a class="headerlink" href="#Fit-Bradley-Terry-model-with-GridSearch" title="Permalink to this headline">¶</a></h2>
 <p>The models we have fitted above also have hyperparameters, such as the method of gradient descent or regularisation. To optimise the hyperparameter selection, we can use <code class="docutils literal notranslate"><span class="pre">GridSearchCV()</span></code>. <code class="docutils literal notranslate"><span class="pre">GridSearchCV()</span></code> tries out a series of hyperparameter combinations and runs a k-fold cross-validation on an accuracy metric determined by the user to check which ones have performed best.</p>
 <p>In this section we will show how aggregation works with GridSearch, it is possible to just add <code class="docutils literal notranslate"><span class="pre">aggregation_method</span></code> in the <code class="docutils literal notranslate"><span class="pre">predict_proba_task</span></code> and the ouptuts work as expected. Note in this example we have chosen a very different alpha to the models above so that there is some slight difference in the ouptuts to two decimal places, so that we can see that different parameters were learned.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">to_tune</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'alpha'</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="mi">1000</span><span class="p">],</span> <span class="s1">'method'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'BFGS'</span><span class="p">]}</span>
@@ -1449,15 +1490,15 @@ Train                   NaN              NaN
 <div class="highlight"><pre>
 The model with the best parameters was:
 BradleyTerry(alpha=100, method='BFGS')
-With a score of -0.5356138170005121
+With a score of -0.5345453019698206
 All the trials results summarised in descending score
    alpha method  mean_test_score
-0    100   BFGS        -0.535614
-1   1000   BFGS        -0.545660
+0    100   BFGS        -0.534545
+1   1000   BFGS        -0.546477
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nice_print_results</span><span class="p">(</span><span class="n">gs_bt</span><span class="o">.</span><span class="n">predict_proba_task</span><span class="p">(</span>
@@ -1471,49 +1512,68 @@ All the trials results summarised in descending score
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Swiss Metro  [0.63 0.74 0.75 ... 0.42 0.38 0.78]
-Train        [0.07 0.26 0.04 ... 0.08 0.09 0.06]
-Car          [0.3  0.   0.22 ... 0.5  0.53 0.17]
+Swiss Metro  [0.63 0.75 0.74 ... 0.44 0.4  0.77]
+Train        [0.06 0.25 0.04 ... 0.07 0.09 0.05]
+Car          [0.31 0.   0.22 ... 0.49 0.51 0.18]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gs_bt</span><span class="o">.</span><span class="n">best_estimator_</span><span class="o">.</span><span class="n">bt_with_feats</span><span class="o">.</span><span class="n">print_summaries</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gs_bt</span><span class="o">.</span><span class="n">best_estimator_</span><span class="o">.</span><span class="n">bt_with_feats</span><span class="o">.</span><span class="n">get_statsmodels_summary</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
 </div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-
-
-Number of Parameters                                                      5
-Number of Observations                                                 8874
-Null Log-Likelihood                                             -6150.98808
-Fitted Log-Likelihood                                          -4765.068522
-Rho-Squared                                                        0.225317
-Rho-Bar-Squared                                                    0.224504
-Estimation Message        Desired error not necessarily achieved due to ...
-dtype: object
-==============================
-             parameters   std_err    t_stats       p_values  robust_std_err  \
-Cost           0.000234  0.000030   7.813176   5.576466e-15        0.000030
-Travel Time   -0.012479  0.000513 -24.303950  1.780605e-130        0.000912
-Car            0.302333  0.045697   6.616091   3.688214e-11             NaN
-Swiss Metro    0.090960  0.047996   1.895185   5.806786e-02             NaN
-Train         -0.393294  0.048153  -8.167619   3.145352e-16             NaN
-
-             robust_t_stats  robust_p_values
-Cost               7.711453     1.243931e-14
-Travel Time      -13.690371     1.159165e-42
-Car                     NaN              NaN
-Swiss Metro             NaN              NaN
-Train                   NaN              NaN
-</pre></div></div>
+<div class="output_area rendered_html docutils container">
+<div class="table-wrapper"><table class="simpletable">
+<caption>Multinomial Logit Model Regression Results</caption>
+<tr>
+<th>Dep. Variable:</th> <td>CHOICE</td> <th>  No. Observations:  </th> <td>8,878</td>
+</tr>
+<tr>
+<th>Model:</th> <td>Multinomial Logit Model</td> <th>  Df Residuals:      </th> <td>8,873</td>
+</tr>
+<tr>
+<th>Method:</th> <td>MLE</td> <th>  Df Model:          </th> <td>5</td>
+</tr>
+<tr>
+<th>Date:</th> <td>Wed, 01 Mar 2023</td> <th>  Pseudo R-squ.:     </th> <td>0.226</td>
+</tr>
+<tr>
+<th>Time:</th> <td>16:11:38</td> <th>  Pseudo R-bar-squ.: </th> <td>0.225</td>
+</tr>
+<tr>
+<th>AIC:</th> <td>9,534.703</td> <th>  Log-Likelihood:    </th> <td>-4,762.351</td>
+</tr>
+<tr>
+<th>BIC:</th> <td>9,570.159</td> <th>  LL-Null:           </th> <td>-6,153.761</td>
+</tr>
+</table></div>
+<div class="table-wrapper"><table class="simpletable">
+<tr>
+<td></td> <th>coef</th> <th>std err</th> <th>z</th> <th>P&gt;|z|</th> <th>[0.025</th> <th>0.975]</th>
+</tr>
+<tr>
+<th>Cost</th> <td>    0.0003</td> <td> 3.11e-05</td> <td>    8.763</td> <td> 0.000</td> <td>    0.000</td> <td>    0.000</td>
+</tr>
+<tr>
+<th>Travel Time</th> <td>   -0.0116</td> <td>    0.001</td> <td>  -22.819</td> <td> 0.000</td> <td>   -0.013</td> <td>   -0.011</td>
+</tr>
+<tr>
+<th>Car</th> <td>    0.3031</td> <td>    0.046</td> <td>    6.635</td> <td> 0.000</td> <td>    0.214</td> <td>    0.393</td>
+</tr>
+<tr>
+<th>Swiss Metro</th> <td>    0.1378</td> <td>    0.048</td> <td>    2.870</td> <td> 0.004</td> <td>    0.044</td> <td>    0.232</td>
+</tr>
+<tr>
+<th>Train</th> <td>   -0.4409</td> <td>    0.048</td> <td>   -9.159</td> <td> 0.000</td> <td>   -0.535</td> <td>   -0.347</td>
+</tr>
+</table></div></div>
 </div>
 </div>
 </div>
@@ -1521,7 +1581,7 @@ Train                   NaN              NaN
 <h1>Evaluation methods<a class="headerlink" href="#Evaluation-methods" title="Permalink to this headline">¶</a></h1>
 <p>In this section we show some of the evaluation methods available in skpref, specifically how to use <code class="docutils literal notranslate"><span class="pre">log_loss</span></code> and <code class="docutils literal notranslate"><span class="pre">log_loss_compare_with_t_test</span></code>. Please see the documentation for more details on how these work.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The F1 score of the Luce aggregation was </span><span class="se">\</span>
@@ -1536,12 +1596,12 @@ Train                   NaN              NaN
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The F1 score of the Luce aggregation was  0.595
-The F1 score of the generic aggregation was 0.595
+The F1 score of the Luce aggregation was  0.598
+The F1 score of the generic aggregation was 0.598
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">random_probs</span> <span class="o">=</span> <span class="p">{</span>
@@ -1571,13 +1631,13 @@ The log loss for each alternative in the Logistic Regression reduction was
 The log loss for each alternative in the Luce aggregation was
  {'Swiss Metro_log_loss': 0.7, 'Train_log_loss': 0.38, 'Car_log_loss': 0.52}
 The log loss for each alternative in the generic aggregation was
- {'Swiss Metro_log_loss': 0.71, 'Train_log_loss': 0.39, 'Car_log_loss': 0.52}
+ {'Swiss Metro_log_loss': 0.71, 'Train_log_loss': 0.38, 'Car_log_loss': 0.52}
 The log loss for each alternative assigning random probability was
  {'Swiss Metro_log_loss': 0.8, 'Train_log_loss': 0.5, 'Car_log_loss': 0.61}
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"The t-test for H0: Luce aggregation = Generic aggregation </span><span class="se">\</span>
@@ -1596,9 +1656,9 @@ The log loss for each alternative assigning random probability was
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-The t-test for H0: Luce aggregation = Generic aggregation {'Swiss Metro': 0.05, 'Train': 0.28, 'Car': 0.22}
+The t-test for H0: Luce aggregation = Generic aggregation {'Swiss Metro': 0.02, 'Train': 0.74, 'Car': 0.27}
 The t-test for H0: Generic aggregation = random probability {'Swiss Metro': 0.0, 'Train': 0.0, 'Car': 0.0}
-The t-test for H0: Generic aggregation = Logistic Regression {'Swiss Metro': 0.14, 'Train': 0.0, 'Car': 0.0}
+The t-test for H0: Generic aggregation = Logistic Regression {'Swiss Metro': 0.18, 'Train': 0.0, 'Car': 0.0}
 The t-test for H0: Generic aggregation = random probability {'Swiss Metro': 0.0, 'Train': 0.0, 'Car': 0.0}
 </pre></div></div>
 </div>

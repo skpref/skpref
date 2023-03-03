@@ -1810,12 +1810,148 @@ array(['Atlanta Hawks', 'Charlotte Hornets', 'Atlanta Hawks', ...,
       dtype=object)
 </pre></div></div>
 </div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mybt</span><span class="o">.</span><span class="n">bt_with_feats</span><span class="o">.</span><span class="n">get_statsmodels_summary</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<div class="table-wrapper"><table class="simpletable">
+<caption>Multinomial Logit Model Regression Results</caption>
+<tr>
+<th>Dep. Variable:</th> <td>CHOICE</td> <th>  No. Observations:  </th> <td>2,460</td>
+</tr>
+<tr>
+<th>Model:</th> <td>Multinomial Logit Model</td> <th>  Df Residuals:      </th> <td>2,429</td>
+</tr>
+<tr>
+<th>Method:</th> <td>MLE</td> <th>  Df Model:          </th> <td>31</td>
+</tr>
+<tr>
+<th>Date:</th> <td>Wed, 01 Mar 2023</td> <th>  Pseudo R-squ.:     </th> <td>0.107</td>
+</tr>
+<tr>
+<th>Time:</th> <td>16:10:40</td> <th>  Pseudo R-bar-squ.: </th> <td>0.089</td>
+</tr>
+<tr>
+<th>AIC:</th> <td>3,107.966</td> <th>  Log-Likelihood:    </th> <td>-1,522.983</td>
+</tr>
+<tr>
+<th>BIC:</th> <td>3,288.012</td> <th>  LL-Null:           </th> <td>-1,705.142</td>
+</tr>
+</table></div>
+<div class="table-wrapper"><table class="simpletable">
+<tr>
+<td></td> <th>coef</th> <th>std err</th> <th>z</th> <th>P&gt;|z|</th> <th>[0.025</th> <th>0.975]</th>
+</tr>
+<tr>
+<th>salary</th> <td> 1.717e-08</td> <td> 3.65e-06</td> <td>    0.005</td> <td> 0.996</td> <td>-7.13e-06</td> <td> 7.17e-06</td>
+</tr>
+<tr>
+<th>Atlanta Hawks</th> <td>    0.0810</td> <td>   41.439</td> <td>    0.002</td> <td> 0.998</td> <td>  -81.138</td> <td>   81.300</td>
+</tr>
+<tr>
+<th>Boston Celtics</th> <td>    0.7344</td> <td>   52.254</td> <td>    0.014</td> <td> 0.989</td> <td> -101.682</td> <td>  103.151</td>
+</tr>
+<tr>
+<th>Brooklyn Nets</th> <td>   -0.9380</td> <td>   65.383</td> <td>   -0.014</td> <td> 0.989</td> <td> -129.086</td> <td>  127.210</td>
+</tr>
+<tr>
+<th>Charlotte Hornets</th> <td>   -0.1415</td> <td>   50.101</td> <td>   -0.003</td> <td> 0.998</td> <td>  -98.339</td> <td>   98.056</td>
+</tr>
+<tr>
+<th>Chicago Bulls</th> <td>    0.0621</td> <td>   46.030</td> <td>    0.001</td> <td> 0.999</td> <td>  -90.156</td> <td>   90.280</td>
+</tr>
+<tr>
+<th>Cleveland Cavaliers</th> <td>   -0.0049</td> <td>  112.740</td> <td>-4.33e-05</td> <td> 1.000</td> <td> -220.970</td> <td>  220.960</td>
+</tr>
+<tr>
+<th>Dallas Mavericks</th> <td>   -0.4891</td> <td>   46.300</td> <td>   -0.011</td> <td> 0.992</td> <td>  -91.236</td> <td>   90.258</td>
+</tr>
+<tr>
+<th>Denver Nuggets</th> <td>    0.2237</td> <td>   69.393</td> <td>    0.003</td> <td> 0.997</td> <td> -135.784</td> <td>  136.232</td>
+</tr>
+<tr>
+<th>Detroit Pistons</th> <td>   -0.4001</td> <td>   55.137</td> <td>   -0.007</td> <td> 0.994</td> <td> -108.468</td> <td>  107.667</td>
+</tr>
+<tr>
+<th>Golden State Warriors</th> <td>    1.4940</td> <td>   41.902</td> <td>    0.036</td> <td> 0.972</td> <td>  -80.632</td> <td>   83.620</td>
+</tr>
+<tr>
+<th>Houston Rockets</th> <td>    0.9021</td> <td>   50.079</td> <td>    0.018</td> <td> 0.986</td> <td>  -97.252</td> <td>   99.056</td>
+</tr>
+<tr>
+<th>Indiana Pacers</th> <td>    0.0727</td> <td>   44.101</td> <td>    0.002</td> <td> 0.999</td> <td>  -86.363</td> <td>   86.508</td>
+</tr>
+<tr>
+<th>Los Angeles Clippers</th> <td>    0.2355</td> <td>   78.355</td> <td>    0.003</td> <td> 0.998</td> <td> -153.337</td> <td>  153.808</td>
+</tr>
+<tr>
+<th>Los Angeles Lakers</th> <td>   -0.7116</td> <td>   42.901</td> <td>   -0.017</td> <td> 0.987</td> <td>  -84.796</td> <td>   83.373</td>
+</tr>
+<tr>
+<th>Memphis Grizzlies</th> <td>   -0.0434</td> <td>   58.483</td> <td>   -0.001</td> <td> 0.999</td> <td> -114.668</td> <td>  114.581</td>
+</tr>
+<tr>
+<th>Miami Heat</th> <td>   -0.0820</td> <td>   42.759</td> <td>   -0.002</td> <td> 0.998</td> <td>  -83.888</td> <td>   83.724</td>
+</tr>
+<tr>
+<th>Milwaukee Bucks</th> <td>   -0.1289</td> <td>   51.425</td> <td>   -0.003</td> <td> 0.998</td> <td> -100.920</td> <td>  100.663</td>
+</tr>
+<tr>
+<th>Minnesota Timberwolves</th> <td>   -0.1561</td> <td>   78.274</td> <td>   -0.002</td> <td> 0.998</td> <td> -153.569</td> <td>  153.257</td>
+</tr>
+<tr>
+<th>New Orleans Pelicans</th> <td>   -0.3903</td> <td>   42.901</td> <td>   -0.009</td> <td> 0.993</td> <td>  -84.476</td> <td>   83.695</td>
+</tr>
+<tr>
+<th>New York Knicks</th> <td>   -0.6348</td> <td>   44.785</td> <td>   -0.014</td> <td> 0.989</td> <td>  -88.412</td> <td>   87.143</td>
+</tr>
+<tr>
+<th>Oklahoma City Thunder</th> <td>    0.4593</td> <td>   47.565</td> <td>    0.010</td> <td> 0.992</td> <td>  -92.766</td> <td>   93.685</td>
+</tr>
+<tr>
+<th>Orlando Magic</th> <td>   -0.7402</td> <td>   44.632</td> <td>   -0.017</td> <td> 0.987</td> <td>  -88.217</td> <td>   86.736</td>
+</tr>
+<tr>
+<th>Philadelphia 76ers</th> <td>   -0.5043</td> <td>   60.789</td> <td>   -0.008</td> <td> 0.993</td> <td> -119.649</td> <td>  118.640</td>
+</tr>
+<tr>
+<th>Phoenix Suns</th> <td>   -0.6594</td> <td>   63.503</td> <td>   -0.010</td> <td> 0.992</td> <td> -125.123</td> <td>  123.804</td>
+</tr>
+<tr>
+<th>Portland Trail Blazers</th> <td>   -0.2206</td> <td>   65.293</td> <td>   -0.003</td> <td> 0.997</td> <td> -128.192</td> <td>  127.751</td>
+</tr>
+<tr>
+<th>Sacramento Kings</th> <td>   -0.3933</td> <td>   41.448</td> <td>   -0.009</td> <td> 0.992</td> <td>  -81.630</td> <td>   80.843</td>
+</tr>
+<tr>
+<th>San Antonio Spurs</th> <td>    0.9525</td> <td>   53.485</td> <td>    0.018</td> <td> 0.986</td> <td> -103.876</td> <td>  105.781</td>
+</tr>
+<tr>
+<th>Toronto Raptors</th> <td>    0.2806</td> <td>   56.240</td> <td>    0.005</td> <td> 0.996</td> <td> -109.949</td> <td>  110.510</td>
+</tr>
+<tr>
+<th>Utah Jazz</th> <td>    0.8459</td> <td>   77.655</td> <td>    0.011</td> <td> 0.991</td> <td> -151.355</td> <td>  153.047</td>
+</tr>
+<tr>
+<th>Washington Wizards</th> <td>    0.2946</td> <td>   43.216</td> <td>    0.007</td> <td> 0.995</td> <td>  -84.407</td> <td>   84.997</td>
+</tr>
+</table></div></div>
+</div>
 </div>
 <div class="section" id="Example-using-GridSearchCV()">
 <h1>Example using GridSearchCV()<a class="headerlink" href="#Example-using-GridSearchCV()" title="Permalink to this headline">¶</a></h1>
 <p>The models we have fitted above also have hyperparameters, such as the method of gradient descent or regularisation. To optimise the hyperparameter selection, we can use <code class="docutils literal notranslate"><span class="pre">GridSearchCV()</span></code>. <code class="docutils literal notranslate"><span class="pre">GridSearchCV()</span></code> tries out a series of hyperparameter combinations and runs a k-fold cross-validation on an accuracy metric determined by the user to check which ones have performed best.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[36]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">to_tune</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'alpha'</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span> <span class="s1">'method'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'BFGS'</span><span class="p">]}</span>
@@ -1841,7 +1977,7 @@ All the trials results summarised in descending score
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[37]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Showing that sklearn.metrics works also</span>
@@ -1868,7 +2004,7 @@ All the trials results summarised in descending score
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[38]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">to_tune</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'C'</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="s1">'solver'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'saga'</span><span class="p">],</span> <span class="s1">'penalty'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'l1'</span><span class="p">,</span><span class="s1">'l2'</span><span class="p">],</span>
@@ -1886,57 +2022,57 @@ All the trials results summarised in descending score
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 The model with the best parameters was:
-ClassificationReducer(model=LogisticRegression(C=2, fit_intercept=False,
+ClassificationReducer(model=LogisticRegression(C=0.5, penalty='l1',
                                                solver='saga'))
-With a score of -0.6865144370366499
+With a score of -0.6865126660183437
 All the trials results summarised in descending score
     model__C  model__fit_intercept model__penalty model__solver  \
-11       2.0                 False             l2          saga
-2        0.5                 False             l1          saga
-9        2.0                  True             l2          saga
-16       8.0                  True             l1          saga
-15       4.0                 False             l2          saga
-18       8.0                 False             l1          saga
-5        1.0                  True             l2          saga
-14       4.0                 False             l1          saga
-3        0.5                 False             l2          saga
-17       8.0                  True             l2          saga
-1        0.5                  True             l2          saga
-8        2.0                  True             l1          saga
-10       2.0                 False             l1          saga
-12       4.0                  True             l1          saga
-13       4.0                  True             l2          saga
-19       8.0                 False             l2          saga
-6        1.0                 False             l1          saga
 0        0.5                  True             l1          saga
+13       4.0                  True             l2          saga
+6        1.0                 False             l1          saga
+2        0.5                 False             l1          saga
+5        1.0                  True             l2          saga
+16       8.0                  True             l1          saga
+10       2.0                 False             l1          saga
+19       8.0                 False             l2          saga
+9        2.0                  True             l2          saga
+14       4.0                 False             l1          saga
+18       8.0                 False             l1          saga
 4        1.0                  True             l1          saga
+11       2.0                 False             l2          saga
+1        0.5                  True             l2          saga
+17       8.0                  True             l2          saga
+15       4.0                 False             l2          saga
 7        1.0                 False             l2          saga
+8        2.0                  True             l1          saga
+3        0.5                 False             l2          saga
+12       4.0                  True             l1          saga
 
     mean_test_score
-11        -0.686514
-2         -0.686515
-9         -0.686515
-16        -0.686517
-15        -0.686517
-18        -0.686517
+0         -0.686513
+13        -0.686516
+6         -0.686516
+2         -0.686517
 5         -0.686517
-14        -0.686517
-3         -0.686518
-17        -0.686518
-1         -0.686518
-8         -0.686518
-10        -0.686519
-12        -0.686519
-13        -0.686519
-19        -0.686519
-6         -0.686519
-0         -0.686520
-4         -0.686520
-7         -0.686521
+16        -0.686517
+10        -0.686518
+19        -0.686518
+9         -0.686518
+14        -0.686518
+18        -0.686518
+4         -0.686518
+11        -0.686519
+1         -0.686519
+17        -0.686519
+15        -0.686520
+7         -0.686520
+8         -0.686520
+3         -0.686521
+12        -0.686522
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gs_lr</span><span class="o">.</span><span class="n">predict_task</span><span class="p">(</span><span class="n">NBA_results_task_predict</span><span class="p">)</span><span class="o">.</span><span class="n">top_input_data</span>
@@ -1944,7 +2080,7 @@ All the trials results summarised in descending score
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -1955,7 +2091,7 @@ array(['Atlanta Hawks', 'Charlotte Hornets', 'Atlanta Hawks', ...,
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[40]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nice_print_results</span><span class="p">(</span><span class="n">gs_lr</span><span class="o">.</span><span class="n">predict_proba_task</span><span class="p">(</span><span class="n">NBA_results_task_predict</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s1">'team1'</span><span class="p">))</span>
@@ -1971,7 +2107,7 @@ team1 is preferred  [0.55 0.43 0.51 ... 0.59 0.53 0.61]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[41]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">nice_print_results</span><span class="p">(</span><span class="n">gs_bt</span><span class="o">.</span><span class="n">predict_proba_task</span><span class="p">(</span><span class="n">NBA_results_task_predict</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="s1">'team1'</span><span class="p">))</span>
@@ -1987,7 +2123,7 @@ team1 is preferred  [0.67 0.47 0.7  ... 0.64 0.45 0.79]
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">gs_bt</span><span class="o">.</span><span class="n">rank_entities</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -1995,7 +2131,7 @@ team1 is preferred  [0.67 0.47 0.7  ... 0.64 0.45 0.79]
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
