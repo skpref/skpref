@@ -369,10 +369,11 @@ class SubsetPosetVec(PosetVector):
         )))
         choice_in = np.hstack(choice)
 
-        return (pd.DataFrame({
+        _df = pd.DataFrame({
             'observation': obs_in,
             'alternative': alts_in,
             chosen_name: choice_in,
-        }).drop_duplicates(subset=['observation', 'alternative'])\
-            .drop(['observation'], axis=1).reset_index(drop=True),
-            obs_in, alts_in)
+        }).drop_duplicates(subset=['observation', 'alternative'])
+
+        return (_df.drop(['observation'], axis=1).reset_index(drop=True),
+                _df.observation.values, _df.alternative.values)
